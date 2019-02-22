@@ -1,0 +1,83 @@
+{
+  "editor.fontFamily": "FiraCode-Retina",
+  "editor.fontSize": 13,
+  "editor.fontLigatures": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": false,
+  "explorer.openEditors.visible": 0,
+  "breadcrumbs.enabled": true,
+  "terminal.explorerKind": "external",
+  "terminal.external.linuxExec": "hyper",
+  "terminal.external.osxExec": "Hyper.app",
+  "json.format.enable": false,
+  "files.autoSave": "off",
+  "vim.leader": " ",
+  "vim.easymotion": true,
+  "vim.useSystemClipboard": true,
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["k", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // {
+    //   "before": ["leader "],
+    //   "after": ["leader", "leader", "leader", "b", "d", "w"]
+    // },
+    // {
+    //   "before": [":"],
+    //   "commands": [
+    //     "workbench.action.showCommands",
+    //   ]
+    // },
+    // {
+    //   "before": ["<leader>", "m"],
+    //   "commands": [
+    //     "bookmarks.toggle"
+    //   ]
+    // }
+    // {
+    //   "before": ["<leader>", "b"],
+    //   "commands": [
+    //     "bookmarks.list"
+    //   ]
+    // }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": [">"],
+      "commands": ["editor.action.indentLines"]
+    },
+    {
+      "before": ["<"],
+      "commands": ["editor.action.outdentLines"]
+    }
+  ],
+  "vim.camelCaseMotion.enable": true,
+  "html.format.wrapLineLength": 140,
+  "html.autoClosingTags": false,
+  "html.mirrorCursorOnMatchingTag": false,
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "javascript.updateImportsOnFileMove.enabled": "never",
+  "editor.lineNumbers": "relative",
+  "editor.suggestSelection": "first",
+  "window.zoomLevel": 1,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
