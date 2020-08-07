@@ -3,7 +3,7 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 
 " gi - go to implementation
-nmap <silent> gi <Plug>(coc-implementation)
+"nmap <silent> gi <Plug>(coc-implementation)
 
 " gr - find references
 nmap <silent> gr <Plug>(coc-references)
