@@ -6,7 +6,6 @@ call plug#begin('~/.vim/vendor')
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'scrooloose/nerdtree'
   Plug 'easymotion/vim-easymotion'
-  "Plug '/usr/local/opt/fzf'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
   Plug 'antoinemadec/coc-fzf'
@@ -25,6 +24,9 @@ call plug#begin('~/.vim/vendor')
   Plug 'liuchengxu/vim-which-key'
   Plug 'honza/vim-snippets'
   Plug 'jtmkrueger/vim-c-cr' " expand {} [] () with <c-cr>
+  Plug 'stsewd/fzf-checkout.vim' " git checkout branch window
+
+  " Experimentory
   "Plug 'justinmk/vim-sneak'
   "Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' } " Fuzzy finding, buffer management
 call plug#end()
@@ -84,10 +86,10 @@ vnoremap < <gv
 vnoremap > >gv
 
 " Split panes 
-nnoremap <c-j> <c-w><c-j>
-nnoremap <c-k> <c-w><c-k>
-nnoremap <c-l> <c-w><c-l>
-nnoremap <c-h> <c-w><c-h>
+"nnoremap <c-j> <c-w><c-j>
+"nnoremap <c-k> <c-w><c-k>
+"nnoremap <c-l> <c-w><c-l>
+"nnoremap <c-h> <c-w><c-h>
 
 " Use alt + hjkl to resize windows
 nnoremap <silent> ∆    :resize -2<CR>
@@ -104,8 +106,8 @@ vnoremap K :m '<-2<CR>gv=gv
 "nnoremap <leader>O <Esc>O<Esc>j$
 
 " Next/previous buffer in list
-nnoremap <silent> <c-w> :bn<CR>
-nnoremap <silent> <c-q> :bp<CR>
+nnoremap <silent> <C-h> :bp<CR>
+nnoremap <silent> <C-l> :bn<CR>
 
 " Toggle selection comment
 vmap / <Plug>NERDCommenterToggle
@@ -129,7 +131,7 @@ nmap <leader>ff  :CocCommand prettier.formatFile<CR>
 " Toggle NERDTree on/off
 nmap <silent> <leader>n :NERDTreeToggle<CR>
 " Opens current file location in NERDTree
-nmap <silent> <leader>c :NERDTreeFind<CR>
+nmap <silent> <leader>N :NERDTreeFind<CR>
 
 " FZF
 "nmap <silent> <leader>p :FZF<CR>
@@ -148,10 +150,6 @@ nmap <leader>e <Plug>(easymotion-overwin-w)
 "nmap <Leader>l <Plug>(easymotion-overwin-line)
 " Easy-motion to word
 "nmap <Leader>w <Plug>(easymotion-overwin-w)
-
-" Fix autofix problem of current line
-"nmap <leader>qf <Plug>(coc-fix-current)
-"let g:which_key_map.g.r = 'find references'
 
 " Use <C-l> for trigger snippet expand.
 imap <C-l> <Plug>(coc-snippets-expand)
@@ -219,14 +217,14 @@ let g:which_key_map.g = {
       \ 'a' : [':Git add .'                        , 'add all'],
       \ 'A' : [':Git add %'                        , 'add current'],
       \ 'b' : [':Git blame'                        , 'blame'],
-      \ 'c' : [':Git commit'                       , 'commit'],
+      \ 'c' : [':GBranches'                        , 'checkout'],
       \ 'd' : [':Git diff'                         , 'diff'],
       \ 'D' : [':Gdiffsplit'                       , 'diff split'],
       \ 'g' : [':GGrep'                            , 'git grep'],
       \ 's' : [':Gstatus'                          , 'status'],
       \ 'l' : [':Git log'                          , 'log'],
-      \ 'p' : [':Git push'                         , 'push'],
-      \ 'P' : [':Git pull'                         , 'pull'],
+      \ 'P' : [':Git push'                         , 'push'],
+      \ 'p' : [':Git pull'                         , 'pull'],
       \ 'r' : [':GRemove'                          , 'remove'],
       \ }
 
@@ -235,27 +233,6 @@ let g:which_key_map.g = {
 
 " Terminal
 tnoremap <Leader>` <C-\><C-n>
-
-
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
-
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
-
-" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
@@ -281,6 +258,12 @@ endif
 " Register which key map
 call which_key#register('<Space>', "g:which_key_map")
 
+" With '@' modify only lines that matches
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+function! ExecuteMacroOverVisualRange()
+  echo "@".getcmdline()
+  execute ":'<,'>normal @".nr2char(getchar())
+endfunction
 
 " ============================================================================ "
 " ===                             LOAD PLUGINS                             === "

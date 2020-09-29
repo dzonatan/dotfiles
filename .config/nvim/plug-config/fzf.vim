@@ -30,7 +30,7 @@ let $FZF_DEFAULT_OPTS = '--layout=reverse --inline-info'
 
 " Ripgrep advanced
 function! RipgrepFzf(query, fullscreen)
-  let command_fmt = 'rg --column --line-number --no-heading --color=always --smart-case %s || true'
+  let command_fmt = 'rg --column --line-number --no-heading --hidden --color=always --smart-case %s || true'
   let initial_command = printf(command_fmt, shellescape(a:query))
   let reload_command = printf(command_fmt, '{q}')
   let spec = {'options': ['--phony', '--query', a:query, '--bind', 'change:reload:'.reload_command]}
@@ -42,7 +42,7 @@ command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 " Neighbouring files
 function! s:fzf_neighbouring_files()
   let cwd = expand("%:~:.:h")
-  let command = 'rg --files -g "'.cwd.'/*"'
+  let command = 'rg --files --hidden -g "'.cwd.'/*"'
   echo command
 
   call fzf#run(fzf#wrap({ 'source': command, 'sink': 'e' }))

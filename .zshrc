@@ -93,7 +93,7 @@ export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:+TieredCompilation -XX:TieredStopAtLe
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim="nvim"
 alias zshrc="vim ~/.zshrc"
-alias conf="cd ~/dotfiles/"
+alias conf="vim ~/dotfiles/"
 
 # count lines of code (.ts, .js, .html, .css, .scss, .less, .md)
 alias linesofcode="rg --files | xargs wc -l"
