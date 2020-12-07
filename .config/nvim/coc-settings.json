@@ -7,7 +7,7 @@
     "javascript",
     "javascriptreact"
   ],
-  
+
   "snippets.userSnippetsDirectory": "~/.config/nvim/snips",
 
   "coc.preferences.formatOnSaveFiletypes": [

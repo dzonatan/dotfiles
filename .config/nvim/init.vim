@@ -13,7 +13,6 @@ call plug#begin('~/.vim/vendor')
   Plug 'vim-airline/vim-airline-themes'
   Plug 'tpope/vim-surround'
   Plug 'scrooloose/nerdcommenter'
-  Plug 'mhartington/oceanic-next'
   Plug 'morhetz/gruvbox' " theme
   Plug 'sheerun/vim-polyglot'
   Plug 'leafgarland/typescript-vim'
@@ -25,6 +24,7 @@ call plug#begin('~/.vim/vendor')
   Plug 'honza/vim-snippets'
   Plug 'jtmkrueger/vim-c-cr' " expand {} [] () with <c-cr>
   Plug 'stsewd/fzf-checkout.vim' " git checkout branch window
+  Plug 'mhinz/vim-startify' " nice startup screen
 
   " Experimentory
   "Plug 'justinmk/vim-sneak'
@@ -41,7 +41,7 @@ set relativenumber " Show relative lie numbers
 set laststatus=2 " Show the status line all the time
 set showcmd " Show incomplete commands
 set noshowmode " Don't show which mode disabled for PowerLine
-set cmdheight=1 " Command bar height
+set cmdheight=2 " Command bar height
 set showmatch " Show matching braces
 set autoread " Auto read file if file was changed outside of vim
 set ignorecase " Case insensitive searching
@@ -61,7 +61,7 @@ set splitright " Vertical splits will automatically be to the right
 set showbreak=↪ " Change break lines symbol
 set termguicolors
 set background=dark
-"colorscheme OceanicNext
+
 colorscheme gruvbox
 
 " ============================================================================ "
@@ -109,6 +109,9 @@ vnoremap K :m '<-2<CR>gv=gv
 nnoremap <silent> <C-h> :bp<CR>
 nnoremap <silent> <C-l> :bn<CR>
 
+" Use // to search for visually selected text
+vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
+
 " Toggle selection comment
 vmap / <Plug>NERDCommenterToggle
 
@@ -118,7 +121,10 @@ let g:which_key_map['q'] = [ 'q', 'quit' ]
 let g:which_key_map[';'] = [ ':Commands', 'commands' ]
 "let g:which_key_map['d'] = [ ':bd', 'delete buffer' ]
 let g:which_key_map['p'] = [ ':FZF', 'open file' ]
+let g:which_key_map['d'] = [ ':Bdelete', 'delete buffer' ]
 let g:which_key_map['b'] = [ ':Buffers', 'open buffer' ]
+let g:which_key_map['n'] = [ ':NERDTreeToggle', 'toggle file explorer' ]
+let g:which_key_map['N'] = [ ':NERDTreeFind', 'open current file explorer' ]
 let g:which_key_map['F'] = [ ':RG', 'search text' ]
 let g:which_key_map['R'] = [ '<Plug>(coc-references)', 'show references' ]
 let g:which_key_map['r'] = [ '<Plug>(coc-rename)', 'rename' ]
@@ -127,11 +133,6 @@ let g:which_key_map['/'] = [ '<Plug>NERDCommenterToggle', 'comment/uncomment' ]
 let g:which_key_map['P'] = [ ':FZFNeigh', 'neighbour files' ]
 
 nmap <leader>ff  :CocCommand prettier.formatFile<CR>
-
-" Toggle NERDTree on/off
-nmap <silent> <leader>n :NERDTreeToggle<CR>
-" Opens current file location in NERDTree
-nmap <silent> <leader>N :NERDTreeFind<CR>
 
 " FZF
 "nmap <silent> <leader>p :FZF<CR>
