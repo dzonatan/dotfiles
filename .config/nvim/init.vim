@@ -61,6 +61,7 @@ set splitright " Vertical splits will automatically be to the right
 set showbreak=↪ " Change break lines symbol
 set termguicolors
 set background=dark
+set backupcopy=yes " do not delete file when saving (storybook looses pointer)
 
 colorscheme gruvbox
 
@@ -131,6 +132,8 @@ let g:which_key_map['r'] = [ '<Plug>(coc-rename)', 'rename' ]
 let g:which_key_map['='] = [ '<C-W>=', 'balance windows' ]
 let g:which_key_map['/'] = [ '<Plug>NERDCommenterToggle', 'comment/uncomment' ]
 let g:which_key_map['P'] = [ ':FZFNeigh', 'neighbour files' ]
+let g:which_key_map['j'] = [ ':cnext', 'next quickfix' ]
+let g:which_key_map['k'] = [ ':cprevious', 'previous quickfix' ]
 
 nmap <leader>ff  :CocCommand prettier.formatFile<CR>
 
