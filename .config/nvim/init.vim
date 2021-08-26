@@ -25,6 +25,7 @@ call plug#begin('~/.vim/vendor')
   Plug 'jtmkrueger/vim-c-cr' " expand {} [] () with <c-cr>
   Plug 'stsewd/fzf-checkout.vim' " git checkout branch window
   Plug 'mhinz/vim-startify' " nice startup screen
+  Plug 'jxnblk/vim-mdx-js' " Markdown MDX syntax support
 
   " Experimentory
   "Plug 'justinmk/vim-sneak'
@@ -99,8 +100,8 @@ nnoremap <silent> ˙    :vertical resize -2<CR>
 nnoremap <silent> ¬    :vertical resize +2<CR>
 
 " Move lines up down with J and K in visual
-vnoremap J :m '>+1<CR>gv=gv
-vnoremap K :m '<-2<CR>gv=gv
+"vnoremap J :m '>+1<CR>gv=gv
+"vnoremap K :m '<-2<CR>gv=gv
 
 " Insert line above but keep in normal mode
 "nnoremap <leader>o <Esc>o<Esc>k$

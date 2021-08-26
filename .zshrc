@@ -92,6 +92,7 @@ export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:+TieredCompilation -XX:TieredStopAtLe
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim="nvim"
+alias vi="nvim"
 alias zshrc="vim ~/.zshrc"
 alias conf="cd ~/dotfiles && vim ./"
 

@@ -1,12 +1,11 @@
 {
   "suggest.enablePreview": true,
   "prettier.requireConfig": true,
-  "tslint.autoFixOnSave": true,
 
-  "eslint.filetypes":[
-    "javascript",
-    "javascriptreact"
-  ],
+  "angular.experimental-ivy": true,
+
+  "tslint.autoFixOnSave": false,
+  "eslint.autoFixOnSave": false,
 
   "snippets.userSnippetsDirectory": "~/.config/nvim/snips",
 
