@@ -21,6 +21,12 @@ set -g status-left-length 32
 set -g status-right-length 150
 set -g status-interval 10
 
+# Inactive/active window styles
+#set-option -g window-style fg=$base07,bg=$base03
+#set-option -g window-active-style fg=default,bg=default
+set -g window-style 'fg=colour247,bg=colour237'
+set -g window-active-style 'fg=colour250,bg=black'
+
 # default statusbar colors
 set-option -g status-style fg=$base02,bg=$base00,default
 
@@ -49,5 +55,5 @@ tm_session_name="#[default,bg=$base00,fg=$base0E] #S "
 set -g status-left "$tm_session_name"
 
 tm_date="#[default,bg=$base00,fg=$base0C] %R"
-tm_host="#[fg=$base0E,bg=$base00] #h 1"
+tm_host="#[fg=$base0E,bg=$base00] #h "
 set -g status-right "$tm_date $tm_host"
