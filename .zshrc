@@ -95,6 +95,7 @@ alias vim="nvim"
 alias vi="nvim"
 alias zshrc="vim ~/.zshrc"
 alias conf="cd ~/dotfiles && vim ./"
+alias lg="lazygit"
 
 # count lines of code (.ts, .js, .html, .css, .scss, .less, .md)
 alias linesofcode="rg --files | xargs wc -l"
