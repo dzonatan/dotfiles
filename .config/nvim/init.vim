@@ -5,7 +5,7 @@
 call plug#begin('~/.vim/vendor')
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'scrooloose/nerdtree'
-  Plug 'easymotion/vim-easymotion'
+  " Plug 'easymotion/vim-easymotion'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
   Plug 'antoinemadec/coc-fzf'
@@ -26,72 +26,16 @@ call plug#begin('~/.vim/vendor')
   Plug 'stsewd/fzf-checkout.vim' " git checkout branch window
   Plug 'mhinz/vim-startify' " nice startup screen
   Plug 'jxnblk/vim-mdx-js' " Markdown MDX syntax support
-
-  " Experimentory
-  "Plug 'justinmk/vim-sneak'
-  "Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' } " Fuzzy finding, buffer management
 call plug#end()
 
-" ============================================================================ "
-" ===                           GENERAL OPTIONS                            === "
-" ============================================================================ "
+:lua require('plugins')
+:lua require('new-init')
 
-set clipboard=unnamed " Yank and paste with the system clipboard
-set number " Show line numbers
-set relativenumber " Show relative lie numbers
-set laststatus=2 " Show the status line all the time
-set showcmd " Show incomplete commands
-set noshowmode " Don't show which mode disabled for PowerLine
-set cmdheight=2 " Command bar height
-set showmatch " Show matching braces
-set autoread " Auto read file if file was changed outside of vim
-set ignorecase " Case insensitive searching
-set smartcase " Case-sensitive if expresson contains a capital letter
-set hlsearch " Highlight search results
-set incsearch " Set incremental search, like modern browsers
-set expandtab " Insert spaces when TAB is pressed.
-set softtabstop=2 " Change number of spaces that a <Tab> counts for during editing ops
-set shiftwidth=2 " Indentation amount for < and > commands.
-set hidden " Current buffer can be put into background
-set list " Toggle invisible characters
-set listchars=tab:→\ ,trail:⋅,nbsp:·,extends:❯,precedes:❮
-set shortmess+=c " Don't pass messages to |ins-completion-menu|
-set laststatus=2 " Show the status line all the time
-set splitbelow " Horizontal splits will automatically be below
-set splitright " Vertical splits will automatically be to the right
-set showbreak=↪ " Change break lines symbol
-set termguicolors
-set background=dark
-set backupcopy=yes " do not delete file when saving (storybook looses pointer)
-
-colorscheme gruvbox
 
 " ============================================================================ "
 " ===                             KEY MAPPINGS                             === "
 " ============================================================================ "
 
-" Remap leader key to <Space>
-nnoremap <Space> <Nop>
-let g:mapleader="\<Space>"
-"
-" Define prefix dictionary
-let g:which_key_map =  {} 
-
-" Better escape
-inoremap kj <esc>
-inoremap jk <esc>
-cnoremap kj <esc>
-cnoremap jk <esc>
-
-" Better indenting
-vnoremap < <gv
-vnoremap > >gv
-
-" Split panes 
-"nnoremap <c-j> <c-w><c-j>
-"nnoremap <c-k> <c-w><c-k>
-"nnoremap <c-l> <c-w><c-l>
-"nnoremap <c-h> <c-w><c-h>
 
 " Use alt + hjkl to resize windows
 nnoremap <silent> ∆    :resize -2<CR>
@@ -99,23 +43,11 @@ nnoremap <silent> ˚    :resize +2<CR>
 nnoremap <silent> ˙    :vertical resize -2<CR>
 nnoremap <silent> ¬    :vertical resize +2<CR>
 
-" Move lines up down with J and K in visual
-"vnoremap J :m '>+1<CR>gv=gv
-"vnoremap K :m '<-2<CR>gv=gv
-
-" Insert line above but keep in normal mode
-"nnoremap <leader>o <Esc>o<Esc>k$
-"nnoremap <leader>O <Esc>O<Esc>j$
-
-" Next/previous buffer in list
-nnoremap <silent> <C-h> :bp<CR>
-nnoremap <silent> <C-l> :bn<CR>
-
-" Use // to search for visually selected text
-vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
-
 " Toggle selection comment
 vmap / <Plug>NERDCommenterToggle
+
+" Define prefix dictionary
+let g:which_key_map =  {} 
 
 " Single mappings
 let g:which_key_map['w'] = [ 'w', 'write' ]
@@ -150,7 +82,7 @@ map <leader>h :%s///<left><left>
 "nmap <silent> <leader>/ :nohlsearch<CR>
 
 " Easy-motion highlights first word letters bi-directionally
-nmap <leader>e <Plug>(easymotion-overwin-w)
+"nmap <leader>e <Plug>(easymotion-overwin-w)
 " Easy-motion to line
 "nmap <Leader>l <Plug>(easymotion-overwin-line)
 " Easy-motion to word
@@ -217,20 +149,20 @@ let g:which_key_map.s = {
       \ }
 
 " g is for git
+      "\ 'a' : [':Git add .'                        , 'add all'],
+      "\ 'A' : [':Git add %'                        , 'add current'],
+      "\ 'c' : [':GBranches'                        , 'checkout'],
+      "\ 'P' : [':Git push'                         , 'push'],
+      "\ 'p' : [':Git pull'                         , 'pull'],
+      "\ 'r' : [':GRemove'                          , 'remove'],
 let g:which_key_map.g = {
       \ 'name' : '+git' ,
-      \ 'a' : [':Git add .'                        , 'add all'],
-      \ 'A' : [':Git add %'                        , 'add current'],
       \ 'b' : [':Git blame'                        , 'blame'],
-      \ 'c' : [':GBranches'                        , 'checkout'],
       \ 'd' : [':Git diff'                         , 'diff'],
       \ 'D' : [':Gdiffsplit'                       , 'diff split'],
       \ 'g' : [':GGrep'                            , 'git grep'],
       \ 's' : [':Gstatus'                          , 'status'],
       \ 'l' : [':Git log'                          , 'log'],
-      \ 'P' : [':Git push'                         , 'push'],
-      \ 'p' : [':Git pull'                         , 'pull'],
-      \ 'r' : [':GRemove'                          , 'remove'],
       \ }
 
 "nmap <leader>df :diffget //2<CR>
@@ -241,24 +173,11 @@ tnoremap <Leader>` <C-\><C-n>
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
-" Browser currently open buffers
-"nmap <leader>; :Denite buffer<CR>
-" Browse list of files in current directory
-"nmap <leader>t :DeniteProjectDir file/rec<CR>
-" Search current directory for occurences of given term and close window if no results
-"nnoremap <leader>fa :<C-u>Denite grep:. -no-empty<CR>
-" Search current directory for occurences of word under cursor
-"nnoremap <leader>j :<C-u>DeniteCursorWord grep:.<CR>
-" Search next occurance
-"nnoremap <leader>fn :<C-u>Denite -resume -cursor-pos=-1 -immediately<CR>
-" Search previous occurance
-"nnoremap <leader>fp :<C-u>Denite -resume -cursor-pos=+1 -immediately<CR>
-
 " Remember cursor position when switching buffers
-if v:version >= 700
-  au BufLeave * let b:winview = winsaveview()
-  au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
-endif
+"if v:version >= 700
+  "au BufLeave * let b:winview = winsaveview()
+  "au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
+"endif
 
 " Register which key map
 call which_key#register('<Space>', "g:which_key_map")
