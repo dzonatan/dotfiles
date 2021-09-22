@@ -77,8 +77,15 @@ require'hop'.setup()
 
 -- treesitter
 require "nvim-treesitter.configs".setup {
-  ensure_installed = {"typescript", "javascript", "html", "lua", "regex", "scss", "bash", "yaml", "vue", "tsx"}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = {"typescript", "javascript", "html", "lua", "regex", "scss", "bash", "yaml", "vue", "tsx"},
   highlight = {
     enable = true
+  }
+}
+
+require('telescope').setup{
+  defaults = {
+    -- Temporal fix for https://github.com/nvim-telescope/telescope.nvim/issues/1251
+    prompt_prefix = ''
   }
 }
