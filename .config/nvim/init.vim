@@ -65,8 +65,6 @@ let g:which_key_map['r'] = [ '<Plug>(coc-rename)', 'rename' ]
 let g:which_key_map['='] = [ '<C-W>=', 'balance windows' ]
 let g:which_key_map['/'] = [ '<Plug>NERDCommenterToggle', 'comment/uncomment' ]
 let g:which_key_map['P'] = [ ':FZFNeigh', 'neighbour files' ]
-let g:which_key_map['j'] = [ ':cnext', 'next quickfix' ]
-let g:which_key_map['k'] = [ ':cprevious', 'previous quickfix' ]
 
 nmap <leader>ff  :CocCommand prettier.formatFile<CR>
 

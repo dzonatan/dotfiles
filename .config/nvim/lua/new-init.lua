@@ -52,6 +52,10 @@ map('c', 'jk', '<Esc>', { noremap = true })
 map('n', '<C-h>', ':bp<CR>', { noremap = true, silent = true })
 map('n', '<C-l>', ':bn<CR>', { noremap = true, silent = true })
 
+-- Next/previous in quickfix list
+map('n', '<C-j>', ':cnext<CR>zz', { noremap = true })
+map('n', '<C-k>', ':cprevious<CR>zz', { noremap = true })
+
 -- Remember selection after indentation
 map('v', '<', '<gv', { noremap = true })
 map('v', '>', '>gv', { noremap = true })
