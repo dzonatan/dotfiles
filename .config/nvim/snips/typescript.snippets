@@ -24,3 +24,34 @@
 #
 # Online reference: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 
+snippet setup "test setup"
+import { render, screen } from '@testing-library/angular';
+
+async function setup() {
+  const utils = await render(${1:Component}, {
+    imports: [],
+  });
+
+  return utils;
+}
+endsnippet
+
+snippet test "test case"
+test('${1}', async () => {
+  $2
+});
+endsnippet
+
+snippet store "ngrx component store"
+import { Injectable } from '@angular/core';
+import { ComponentStore } from '@ngrx/component-store';
+
+export interface ${1:ComponentName}State {
+  $2
+}
+
+@Injectable()
+export class ${1}Store extends ComponentStore<${1}State> {
+  
+}
+endsnippet

@@ -15,4 +15,12 @@ require('packer').startup(function()
     'nvim-telescope/telescope.nvim',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
+
+  use {
+    'ThePrimeagen/refactoring.nvim',
+    requires = {
+      {'nvim-lua/plenary.nvim'},
+      {'nvim-treesitter/nvim-treesitter'}
+    }
+  }
 end)

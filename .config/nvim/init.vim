@@ -1,10 +1,27 @@
+let g:polyglot_disabled = ['jsx']
+
+" attempt to speed-up vim
+set ttyfast
+set lazyredraw
+
 " ============================================================================ "
 " ===                           PLUGIN SETUP                               === "
 " ============================================================================ "
 
 call plug#begin('~/.vim/vendor')
+  Plug 'glepnir/dashboard-nvim' " dashboard
+  "Plug 'mhinz/vim-startify' " nice startup screen
+  
+  " LSP
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
+  Plug 'sheerun/vim-polyglot'
+  Plug 'leafgarland/typescript-vim'
+  Plug 'maxmellon/vim-jsx-pretty'
+  Plug 'jxnblk/vim-mdx-js' " Markdown MDX syntax support
+
+  " Source trees
   Plug 'scrooloose/nerdtree'
+
   " Plug 'easymotion/vim-easymotion'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
@@ -14,8 +31,6 @@ call plug#begin('~/.vim/vendor')
   Plug 'tpope/vim-surround'
   Plug 'scrooloose/nerdcommenter'
   Plug 'morhetz/gruvbox' " theme
-  Plug 'sheerun/vim-polyglot'
-  Plug 'leafgarland/typescript-vim'
   Plug 'mattn/emmet-vim'
   Plug 'unblevable/quick-scope' " Highlight f, F jumps.
   Plug 'jremmen/vim-ripgrep'
@@ -24,8 +39,7 @@ call plug#begin('~/.vim/vendor')
   Plug 'honza/vim-snippets'
   Plug 'jtmkrueger/vim-c-cr' " expand {} [] () with <c-cr>
   Plug 'stsewd/fzf-checkout.vim' " git checkout branch window
-  Plug 'mhinz/vim-startify' " nice startup screen
-  Plug 'jxnblk/vim-mdx-js' " Markdown MDX syntax support
+  Plug 'puremourning/vimspector' " Debugging
 call plug#end()
 
 :lua require('plugins')
@@ -53,9 +67,8 @@ let g:which_key_map =  {}
 let g:which_key_map['w'] = [ 'w', 'write' ]
 let g:which_key_map['q'] = [ 'q', 'quit' ]
 let g:which_key_map[';'] = [ ':Commands', 'commands' ]
-"let g:which_key_map['d'] = [ ':bd', 'delete buffer' ]
 let g:which_key_map['p'] = [ ':FZF', 'open file' ]
-let g:which_key_map['d'] = [ ':Bdelete', 'delete buffer' ]
+"let g:which_key_map['d'] = [ ':Bdelete', 'delete buffer' ]
 let g:which_key_map['b'] = [ ':Buffers', 'open buffer' ]
 let g:which_key_map['n'] = [ ':NERDTreeToggle', 'toggle file explorer' ]
 let g:which_key_map['N'] = [ ':NERDTreeFind', 'open current file explorer' ]
@@ -186,6 +199,11 @@ function! ExecuteMacroOverVisualRange()
   echo "@".getcmdline()
   execute ":'<,'>normal @".nr2char(getchar())
 endfunction
+
+" Enable the default set of mappings for vim-spector debugger
+"let g:vimspector_enable_mappings = 'HUMAN'
+
+autocmd BufNewFile,BufRead *.tsx set filetype=typescript.tsx
 
 " ============================================================================ "
 " ===                             LOAD PLUGINS                             === "

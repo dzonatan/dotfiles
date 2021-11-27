@@ -49,12 +49,18 @@ map('c', 'kj', '<Esc>', { noremap = true })
 map('c', 'jk', '<Esc>', { noremap = true })
 
 -- Next/previous buffer in list
-map('n', '<C-h>', ':bp<CR>', { noremap = true, silent = true })
-map('n', '<C-l>', ':bn<CR>', { noremap = true, silent = true })
+map('n', '<S-h>', ':bp<CR>', { noremap = true, silent = true })
+map('n', '<S-l>', ':bn<CR>', { noremap = true, silent = true })
+
+-- Next/previous buffer in list
+--map('n', '<C-h>', ':bp<CR>', { noremap = true, silent = true })
+--map('n', '<C-l>', ':bn<CR>', { noremap = true, silent = true })
+--map('n', '<C-j>', ':bp<CR>', { noremap = true, silent = true })
+--map('n', '<C-k>', ':bn<CR>', { noremap = true, silent = true })
 
 -- Next/previous in quickfix list
-map('n', '<C-j>', ':cnext<CR>zz', { noremap = true })
-map('n', '<C-k>', ':cprevious<CR>zz', { noremap = true })
+--map('n', '<C-j>', ':cnext<CR>zz', { noremap = true })
+--map('n', '<C-k>', ':cprevious<CR>zz', { noremap = true })
 
 -- Remember selection after indentation
 map('v', '<', '<gv', { noremap = true })
@@ -69,23 +75,36 @@ map('n', '<Leader>e', "<cmd>lua require'hop'.hint_words()<CR>", {})
 -- Use // to search for visually selected text
 --map('v', '//', 'y/V<C-R>=escape(@",\'/\')<CR><CR>', { noremap = true })
 
+-- Switch between the last two files
+map('n', '<C-p>', '<C-^>', { noremap = true })
+
+-- refactors: console logs
+map('n', '<Leader>dc', "<cmd>lua require'refactoring'.debug.printf({below = true})<CR>", {})
+
 -------------------------------------------------------
 ------------------- PLUGIN SETTINGS -------------------
 -------------------------------------------------------
 -- hop
 require'hop'.setup()
 
--- treesitter
-require "nvim-treesitter.configs".setup {
-  ensure_installed = {"typescript", "javascript", "html", "lua", "regex", "scss", "bash", "yaml", "vue", "tsx"},
-  highlight = {
-    enable = true
-  }
-}
+ --treesitter
+--require "nvim-treesitter.configs".setup {
+  --ensure_installed = {"typescript", "javascript", "html", "lua", "regex", "scss", "bash", "yaml", "vue", "tsx"},
+  --highlight = {
+    --enable = true
+  --}
+--}
 
+local actions = require("telescope.actions")
 require('telescope').setup{
   defaults = {
     -- Temporal fix for https://github.com/nvim-telescope/telescope.nvim/issues/1251
-    prompt_prefix = ''
+    prompt_prefix = '',
+    mappings = {
+      i = {
+        ["<C-j>"] = actions.move_selection_next,
+        ["<C-k>"] = actions.move_selection_previous
+      }
+    }
   }
 }
