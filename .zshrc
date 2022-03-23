@@ -91,10 +91,10 @@ export MAVEN_OPTS="-Xms2048m -Xmx2048m -XX:+TieredCompilation -XX:TieredStopAtLe
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias vim="nvim"
-alias vi="nvim"
-alias zshrc="vim ~/.zshrc"
-alias conf="cd ~/dotfiles && vim ./"
+alias vim="lvim"
+alias vi="lvim"
+alias zshrc="lvim ~/.zshrc"
+alias conf="cd ~/dotfiles && lvim ./"
 alias lg="lazygit"
 
 # count lines of code (.ts, .js, .html, .css, .scss, .less, .md)
