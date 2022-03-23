@@ -1,4 +1,4 @@
-lvim.lsp.automatic_servers_installation = false
+lvim.lsp.automatic_servers_installation = true
 lvim.lsp.diagnostics.virtual_text = false
 
 --
@@ -10,7 +10,10 @@ local utils = require "my.utils"
 -- if project seems to have a tailwindcss dependency
 if (vim.fn.glob "angular*" ~= "" or utils.is_in_package_json "angular") then
   -- we don't want to pollute every project with angular language service dependencies, take it from the global
-  local global_node_modules = "/usr/local/lib/node_modules/@angular/language-service"
+  local handle = io.popen('npm root -g')
+  local global_node_modules = handle:read("*a")
+  handle:close()
+  -- local global_node_modules = "/usr/local/lib/node_modules/@angular/language-service"
   local cmd = {"ngserver", "--stdio", "--tsProbeLocations", global_node_modules , "--ngProbeLocations", global_node_modules}
   require("lvim.lsp.manager").setup("angularls", {
     cmd = cmd,

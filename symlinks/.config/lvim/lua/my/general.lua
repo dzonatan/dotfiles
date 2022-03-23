@@ -4,6 +4,6 @@ lvim.colorscheme = "gruvbox-material"
 
 vim.opt.relativenumber = true
 
-
 lvim.builtin.dashboard.active = true
 lvim.builtin.terminal.active = true
+lvim.builtin.notify.active = true
