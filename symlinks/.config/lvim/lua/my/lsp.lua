@@ -30,9 +30,6 @@ if (vim.fn.glob "tailwind*" ~= "" or utils.is_in_package_json "tailwindcss") the
 end
 
 
--- require("lvim.lsp.manager").setup "emmet_ls"
-
-
 --
 -- formatters
 --
@@ -67,8 +64,24 @@ else
     },
   })
 end
-
 formatters.setup(formatters_table)
+
+-- local null_ls = require("null-ls")
+-- null_ls.setup({
+--   sources = {
+--     null_ls.builtins.code_actions.eslint.with({
+--       command = "eslint",
+--       extra_args = { "--fix" },
+--       filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+--     }),
+--     null_ls.builtins.diagnostics.eslint.with({
+--       prefer_local = "node_modules/.bin",
+--     }),
+--     null_ls.builtins.formatting.prettier.with({
+--       prefer_local = "node_modules/.bin",
+--     }),
+--   },
+-- })
 
 -- ---@usage Select which servers should be configured manually. Requires `:LvimCacheRest` to take effect.
 -- See the full default list `:lua print(vim.inspect(lvim.lsp.override))`
@@ -115,8 +128,9 @@ formatters.setup(formatters_table)
 -- }
 
 -- -- set additional linters
--- local linters = require "lvim.lsp.null-ls.linters"
--- linters.setup {
+local linters = require "lvim.lsp.null-ls.linters"
+linters.setup {
+  { exe = "eslint", filetypes = { "typescript", "javascript"} }
 --   { exe = "flake8", filetypes = { "python" } },
 --   {
 --     exe = "shellcheck",
@@ -128,6 +142,15 @@ formatters.setup(formatters_table)
 --     exe = "codespell",
 --     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
 --     filetypes = { "javascript", "python" },
+--   },
+}
+
+-- linters.setup {
+--   { command = "black" },
+--   {
+--     command = "eslint_d",
+--     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
+--     filetypes = { "javascript", "javascriptreact" },
 --   },
 -- }
 

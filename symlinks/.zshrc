@@ -100,6 +100,7 @@ alias vim="lvim"
 alias vi="lvim"
 alias conf="cd ~/dotfiles && lvim ./"
 alias lg="lazygit"
+alias ls="nnn -de"
 
 # Custom PATHS
 
@@ -117,3 +118,5 @@ fpath=( "$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath )
 autoload -U promptinit; promptinit
 prompt spaceship
 
+# Integrate https://github.com/gsamokovarov/jump 
+eval "$(jump shell)"
