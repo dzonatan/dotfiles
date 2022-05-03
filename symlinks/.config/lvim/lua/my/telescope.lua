@@ -13,7 +13,7 @@ lvim.builtin.telescope.vimgrep_arguments = {
 
 -- Telescope
 lvim.builtin.telescope.pickers = { find_files = { hidden = true } }
-lvim.builtin.telescope.defaults.file_ignore_patterns = { ".git", "node_modules" }
+lvim.builtin.telescope.defaults.file_ignore_patterns = { ".git/", "node_modules" }
 lvim.builtin.telescope.defaults.path_display = { shorten = 3 }
 
 -- Change Telescope navigation to use j and k for navigation and n and p for history in both input and normal mode.
