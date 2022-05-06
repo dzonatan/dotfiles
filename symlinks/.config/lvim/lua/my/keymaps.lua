@@ -30,6 +30,9 @@ lvim.builtin.which_key.mappings.r = {
   f = { "<cmd>lua require('spectre').open_file_search()<cr>", "Replace Buffer" },
 }
 
+-- TEMPORAL (remove this after updating LunarVim)
+lvim.builtin.which_key.mappings.l.a = { "<cmd>lua vim.lsp.buf.code_action()<cr>", "Code Action" }
+
 -- lvim.builtin.which_key.mappings["t"] = {
 --   name = "+Trouble",
 --   r = { "<cmd>Trouble lsp_references<cr>", "References" },
