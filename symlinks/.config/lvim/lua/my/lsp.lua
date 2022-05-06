@@ -50,6 +50,7 @@ if (vim.fn.glob ".prettierrc*" ~= "" or utils.is_in_package_json "prettier") the
       "typescriptreact",
       "vue",
       "yaml",
+      "scss"
     },
   })
 else
