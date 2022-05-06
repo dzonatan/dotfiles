@@ -5,4 +5,4 @@ require 'my.plugins'
 require 'my.lsp'
 require 'my.treesitter'
 require 'my.telescope'
-
+require 'my.dashboard'
