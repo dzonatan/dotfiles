@@ -10,7 +10,6 @@ lvim.leader = "space"
 vim.api.nvim_set_keymap("n", "Y", "y$", { noremap = true, silent = true })
 
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
-lvim.keys.normal_mode["<esc><esc>"] = "<cmd>nohlsearch<cr>"
 lvim.keys.visual_mode["<leader>F"] = "<cmd>lua require('utils.telescope').live_grep_visual()<cr>"
 -- Move text up or down
 lvim.keys.visual_mode["<A-j>"] = ":m .+1<CR>=="
