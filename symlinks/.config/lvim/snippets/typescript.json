@@ -1,0 +1,45 @@
+{
+  "Test setup function": {
+    "prefix": "tsetup",
+    "body": [
+      "async function setup() {",
+      "\tconst utils = await render(${1:compname}, {",
+      "\t\texcludeComponentDeclaration: true,",
+      "\t\timports: [$0],",
+      "\t});",
+      "\treturn utils;",
+      "}"
+    ]
+  },
+  "Test case function": {
+    "prefix": "tcase",
+    "body": [
+      "test('${1}', async () => {",
+      "\t$0",
+      "});"
+    ]
+  },
+  "Import external module": {
+    "prefix": "imp",
+    "body": ["import { $0 } from '${1:module}';"],
+    "description": "Import external module."
+  },
+  "Export all from": {
+    "prefix": "expa",
+    "body": ["export * from '$1';"],
+    "description": "Export everything from."
+  },
+  "Angular module": {
+    "prefix": "ngmodule",
+    "body": [
+      "import { NgModule } from '@angular/core';",
+      "",
+      "@NgModule({",
+        "\timports: [$0],",
+        "\tdeclarations: [${1:Name}Component],",
+      "})",
+      "export class $1Module {}"
+    ],
+    "description": "Angular module definition"
+  }
+}
