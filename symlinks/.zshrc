@@ -98,6 +98,7 @@ source $ZSH/oh-my-zsh.sh
 
 alias vim="lvim"
 alias vi="lvim"
+alias v="lvim"
 alias conf="cd ~/dotfiles && lvim ./"
 alias lg="lazygit"
 alias ls="nnn -de"
