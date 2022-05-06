@@ -7,7 +7,7 @@ lvim.lsp.diagnostics.virtual_text = false
 local utils = require "my.utils"
 
 -- Activate LunarVim angular lsp configuration only
--- if project seems to have a tailwindcss dependency
+-- if project seems to have a angular dependency
 if (vim.fn.glob "angular*" ~= "" or utils.is_in_package_json "angular") then
   -- we don't want to pollute every project with angular language service dependencies, take it from the global
   local handle = io.popen('npm root -g')
@@ -21,14 +21,21 @@ if (vim.fn.glob "angular*" ~= "" or utils.is_in_package_json "angular") then
       new_config.cmd = cmd
     end,
   })
+
+  -- turn off rename for tsserver as it conflicts with angularls
+  lvim.lsp.on_attach_callback = function(client)
+    if client.name == 'tsserver' then
+      client.resolved_capabilities.rename = false
+    end
+  end
 end
+
 
 -- Activate LunarVim tailwindcss lsp configuration only
 -- if project seems to have a tailwindcss dependency
 if (vim.fn.glob "tailwind*" ~= "" or utils.is_in_package_json "tailwindcss") then
   require("lvim.lsp.manager").setup "tailwindcss"
 end
-
 
 --
 -- formatters
