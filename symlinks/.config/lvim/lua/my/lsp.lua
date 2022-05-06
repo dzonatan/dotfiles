@@ -14,7 +14,7 @@ if (vim.fn.glob "angular*" ~= "" or utils.is_in_package_json "angular") then
   local global_node_modules = handle:read("*a")
   handle:close()
   -- local global_node_modules = "/usr/local/lib/node_modules/@angular/language-service"
-  local cmd = {"ngserver", "--stdio", "--tsProbeLocations", global_node_modules , "--ngProbeLocations", global_node_modules}
+  local cmd = { "ngserver", "--stdio", "--tsProbeLocations", global_node_modules, "--ngProbeLocations", global_node_modules }
   require("lvim.lsp.manager").setup("angularls", {
     cmd = cmd,
     on_new_config = function(new_config)
@@ -41,11 +41,11 @@ end
 ----------------
 local formatters = require "lvim.lsp.null-ls.formatters"
 local formatters_table = {
-  { command = "eslint_d", filetypes = { "typescript", "javascript"} }
+  { command = "eslint_d", filetypes = { "typescript", "javascript" } }
 }
 if (vim.fn.glob ".prettierrc*" ~= "" or utils.is_in_package_json "prettier") then
   table.insert(formatters_table, {
-    exe = "prettierd",
+    exe = "prettier_d_slim",
     args = { "--end-of-line", "lf" },
     filetypes = {
       "html",
@@ -63,7 +63,7 @@ if (vim.fn.glob ".prettierrc*" ~= "" or utils.is_in_package_json "prettier") the
   })
 else
   table.insert(formatters_table, {
-    exe = "prettierd",
+    exe = "prettier_d_slim",
     args = { "--end-of-line", "lf" },
     filetypes = {
       "html",
@@ -80,5 +80,5 @@ formatters.setup(formatters_table)
 -------------
 local linters = require "lvim.lsp.null-ls.linters"
 linters.setup {
-  { exe = "eslint_d", filetypes = { "typescript", "javascript"} }
+  { exe = "eslint_d", filetypes = { "typescript", "javascript" } }
 }
