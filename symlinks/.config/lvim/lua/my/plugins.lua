@@ -4,7 +4,7 @@ lvim.plugins = {
   { "sainnhe/gruvbox-material" },
 
   -- surround
-  { "tpope/vim-surround", keys = {"c", "d", "y"} },
+  { "tpope/vim-surround", keys = { "c", "d", "y" } },
 
   -- MDX support
   { "jxnblk/vim-mdx-js" },

@@ -1,9 +1,11 @@
 lvim.builtin.nvimtree.setup.view.side = "left"
-lvim.builtin.nvimtree.show_icons.git = 0
-lvim.builtin.nvimtree.filters = {
-  dotfiles = false
+lvim.builtin.nvimtree.setup.filters = {
+  dotfiles = false,
+  custom = { '.git', '.DS_Store' },
 }
+lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
 lvim.builtin.nvimtree.setup.view.width = 40
+
 local tree_cb = require 'nvim-tree.config'.nvim_tree_callback
 lvim.builtin.nvimtree.setup.view.mappings.list = {
   { key = { "l", "<CR>", "o" }, cb = tree_cb "edit" },
