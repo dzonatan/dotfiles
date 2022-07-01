@@ -14,6 +14,7 @@ lvim.keys.visual_mode["<leader>F"] = "<cmd>lua require('utils.telescope').live_g
 -- Move text up or down
 lvim.keys.visual_mode["<A-j>"] = ":m .+1<CR>=="
 lvim.keys.visual_mode["<A-k>"] = ":m .-2<CR>=="
+-- Preserve clipboard when pasting
 lvim.keys.visual_mode["p"] = '"_dP'
 
 -- Whichkey
@@ -29,9 +30,6 @@ lvim.builtin.which_key.mappings.r = {
   w = { "<cmd>lua require('spectre').open_visual({select_word=true})<cr>", "Replace Word" },
   f = { "<cmd>lua require('spectre').open_file_search()<cr>", "Replace Buffer" },
 }
-
--- TEMPORAL (remove this after updating LunarVim)
-lvim.builtin.which_key.mappings.l.a = { "<cmd>lua vim.lsp.buf.code_action()<cr>", "Code Action" }
 
 -- lvim.builtin.which_key.mappings["t"] = {
 --   name = "+Trouble",
