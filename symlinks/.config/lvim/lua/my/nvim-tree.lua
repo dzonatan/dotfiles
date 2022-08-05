@@ -16,5 +16,5 @@ lvim.builtin.nvimtree.setup.view.mappings.list = {
   { key = "F", cb = "<cmd>lua require'lvim.core.nvimtree'.start_telescope('live_grep')<cr>" },
 
   { key = "A", cb = "<cmd>lua require('utils.toggle-nvim-tree').toggle_full_width()<cr>" },
-  { key = "g", cb = "<cmd>lua require('utils.angular-schematics').run()<cr>" },
+  { key = "<C-g>", cb = "<cmd>lua require('utils.angular-schematics').run()<cr>" },
 }
