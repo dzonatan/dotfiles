@@ -43,9 +43,16 @@ local formatters = require "lvim.lsp.null-ls.formatters"
 local formatters_table = {}
 
 if (vim.fn.glob ".prettierrc*" ~= "" or utils.is_in_package_json "prettier") then
+  local prettierArgs = {}
+
+  if (utils.is_in_package_json "prettier") then
+    local prettierPath = vim.fn.getcwd() .. "/node_modules/.bin/prettier"
+    prettierArgs = { "--pretier-path", prettierPath }
+  end
+
   table.insert(formatters_table, {
     exe = "prettier_d_slim",
-    args = { "--end-of-line", "lf" },
+    args = prettierArgs,
     filetypes = {
       "html",
       "javascript",
