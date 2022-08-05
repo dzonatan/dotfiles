@@ -97,3 +97,15 @@ if (vim.fn.glob ".eslintrc.json" ~= "") then
 end
 
 linters.setup(linters_table)
+
+------------------
+-- code actions --
+------------------
+local code_actions = require "lvim.lsp.null-ls.code_actions"
+local code_actions_table = {}
+
+if (vim.fn.glob ".eslintrc.json" ~= "") then
+  table.insert(code_actions_table, { exe = "eslint_d", filetypes = { "typescript", "javascript" } })
+end
+
+code_actions.setup(code_actions_table)
