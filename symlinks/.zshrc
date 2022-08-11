@@ -102,6 +102,8 @@ alias v="lvim"
 alias conf="cd ~/dotfiles && lvim ./"
 alias lg="lazygit"
 
+bindkey '^ ' autosuggest-accept
+
 # Custom PATHS
 
 export PATH=$HOME/.local/bin:$PATH
