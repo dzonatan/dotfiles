@@ -5,6 +5,9 @@ lvim.colorscheme = "gruvbox-material"
 vim.opt.relativenumber = true
 vim.opt.wrap = true
 
+vim.opt.list = true
+vim.opt.listchars:append("trail:•")
+
 lvim.builtin.terminal.active = true
 lvim.builtin.notify.active = true
 
