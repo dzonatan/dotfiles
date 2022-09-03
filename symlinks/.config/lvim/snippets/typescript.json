@@ -19,14 +19,27 @@
       "});"
     ]
   },
+  "ZOD schema": {
+    "prefix": "zod",
+    "body": [
+      "export const ${1}Schema = z.object({",
+      "\t$0",
+      "});",
+      "export type ${1} = z.infer<typeof ${1}Schema>;"
+    ]
+  },
   "Import external module": {
     "prefix": "imp",
-    "body": ["import { $0 } from '${1:module}';"],
+    "body": [
+      "import { $0 } from '${1:module}';"
+    ],
     "description": "Import external module."
   },
   "Export all from": {
     "prefix": "expa",
-    "body": ["export * from '$1';"],
+    "body": [
+      "export * from '$1';"
+    ],
     "description": "Export everything from."
   },
   "Angular module": {
@@ -35,8 +48,8 @@
       "import { NgModule } from '@angular/core';",
       "",
       "@NgModule({",
-        "\timports: [$0],",
-        "\tdeclarations: [${1:Name}Component],",
+      "\timports: [$0],",
+      "\tdeclarations: [${1:Name}Component],",
       "})",
       "export class $1Module {}"
     ],
