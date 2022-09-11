@@ -33,11 +33,14 @@ export PATH=$N_PREFIX/bin:$PATH
 # Load custom prompt
 # fpath=( "$HOMEBecho $ZSH_VERSIONREW_PREFIX/share/zsh/site-functions" $fpath )
 
-## Spaceship prompt
-source /opt/homebrew/opt/spaceship/spaceship.zsh
-
 ## Jump https://github.com/gsamokovarov/jump
 eval "$(jump shell)"
+
+## Spaceship prompt
+# source /opt/homebrew/opt/spaceship/spaceship.zsh
+
+## Starship prompt
+eval "$(starship init zsh)"
 
 ## Syntax highlighting
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
