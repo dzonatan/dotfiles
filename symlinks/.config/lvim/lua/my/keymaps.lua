@@ -9,6 +9,13 @@ lvim.leader = "space"
 -- Yank to line end
 vim.api.nvim_set_keymap("n", "Y", "y$", { noremap = true, silent = true })
 
+-- Close current notification with ESC
+vim.api.nvim_set_keymap("n", "<esc>", "<cmd>lua require'notify'.dismiss()<cr>", {})
+
+-- Previous/next buffer
+lvim.keys.normal_mode["<S-h>"] = ":bprevious<cr>"
+lvim.keys.normal_mode["<S-l>"] = ":bnext<cr>"
+
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.keys.visual_mode["<leader>F"] = "<cmd>lua require('utils.telescope').live_grep_visual()<cr>"
 -- Move text up or down
@@ -23,7 +30,8 @@ lvim.builtin.which_key.mappings.f = { "<cmd>Telescope live_grep<CR>", "Find word
 lvim.builtin.which_key.mappings.L.p = lvim.builtin.which_key.mappings.p
 lvim.builtin.which_key.mappings.p = { "<cmd>Telescope find_files<CR>", "Find file" }
 lvim.builtin.which_key.mappings.F = { "<cmd>Telescope resume<CR>", "Resume search" }
-lvim.builtin.which_key.mappings.P = { "<cmd>lua require('telescope.builtin').find_files({ cwd='%:p:h' })<CR>", "Find relative file" }
+lvim.builtin.which_key.mappings.P = { "<cmd>lua require('telescope.builtin').find_files({ cwd='%:p:h' })<CR>",
+  "Find relative file" }
 lvim.builtin.which_key.mappings.r = {
   name = "Replace",
   r = { "<cmd>lua require('spectre').open()<cr>", "Replace" },
