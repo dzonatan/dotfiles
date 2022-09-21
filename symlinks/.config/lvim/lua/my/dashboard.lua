@@ -11,3 +11,12 @@ lvim.builtin.alpha.dashboard.section.buttons.entries = {
     "<CMD>edit " .. require("lvim.config").get_user_config_path() .. " <CR>",
   },
 }
+
+-- smaller graphics to save some screen space
+lvim.builtin.alpha.dashboard.section.header.val = {
+  [[    __                          _    ___         ]],
+  [[   / /   __  ______  ____ _____| |  / (_)___ ___ ]],
+  [[  / /   / / / / __ \/ __ `/ ___/ | / / / __ `__ \]],
+  [[ / /___/ /_/ / / / / /_/ / /   | |/ / / / / / / /]],
+  [[/_____/\__,_/_/ /_/\__,_/_/    |___/_/_/ /_/ /_/ ]],
+}
