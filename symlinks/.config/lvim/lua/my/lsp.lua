@@ -1,3 +1,6 @@
+-- turn off virtual lsp diagnostics
+lvim.lsp.diagnostics.virtual_text = false
+
 -----------------
 -- lsp servers --
 -----------------
