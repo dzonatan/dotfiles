@@ -13,3 +13,8 @@ lvim.builtin.notify.active = true
 
 -- default also includes `package.json` which gives a bad DX for mono-repo projects
 lvim.builtin.project.patterns = { ".git" }
+
+
+-- temporal to remove deprecation message
+lvim.builtin.bufferline.options.indicator_icon = nil
+lvim.builtin.bufferline.options.indicator = { style = "icon", icon = "▎" }
