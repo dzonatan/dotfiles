@@ -18,6 +18,9 @@ lvim.plugins = {
     end,
   },
 
+  -- lsp status
+  { 'j-hui/fidget.nvim' },
+
   -- nicer code actions (telescope no longer support lsp actions)
   -- might not be needed in the future if LunarVim improves this natively
   { 'stevearc/dressing.nvim' },
@@ -33,3 +36,5 @@ lvim.plugins = {
 }
 
 require('lvim.lsp.manager').setup('emmet_ls')
+
+require "fidget".setup {}
