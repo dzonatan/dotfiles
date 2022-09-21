@@ -12,7 +12,6 @@ lvim.builtin.telescope.vimgrep_arguments = {
 }
 
 -- Telescope
-lvim.builtin.telescope.pickers = { find_files = { hidden = true } }
 lvim.builtin.telescope.defaults.file_ignore_patterns = { ".git/", "node_modules" }
 lvim.builtin.telescope.defaults.path_display = { truncate = 0, shorten = 3 }
 

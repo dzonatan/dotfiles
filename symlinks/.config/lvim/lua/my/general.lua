@@ -5,6 +5,7 @@ lvim.colorscheme = "gruvbox-material"
 vim.opt.relativenumber = true
 vim.opt.wrap = true
 
+-- show trailing spaces
 vim.opt.list = true
 vim.opt.listchars:append("trail:•")
 
@@ -13,8 +14,3 @@ lvim.builtin.notify.active = true
 
 -- default also includes `package.json` which gives a bad DX for mono-repo projects
 lvim.builtin.project.patterns = { ".git" }
-
-
--- temporal to remove deprecation message
-lvim.builtin.bufferline.options.indicator_icon = nil
-lvim.builtin.bufferline.options.indicator = { style = "icon", icon = "▎" }

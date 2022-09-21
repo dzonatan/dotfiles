@@ -16,6 +16,10 @@ vim.api.nvim_set_keymap("n", "<esc>", "<cmd>lua require'notify'.dismiss()<cr>", 
 lvim.keys.normal_mode["<S-h>"] = ":bprevious<cr>"
 lvim.keys.normal_mode["<S-l>"] = ":bnext<cr>"
 
+-- escape to normal mode via jk or kj
+lvim.keys.insert_mode["jk"] = "<ESC>"
+lvim.keys.insert_mode["kj"] = "<ESC>"
+
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.keys.visual_mode["<leader>F"] = "<cmd>lua require('utils.telescope').live_grep_visual()<cr>"
 -- Move text up or down

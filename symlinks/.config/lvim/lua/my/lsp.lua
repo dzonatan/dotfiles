@@ -1,6 +1,3 @@
-lvim.lsp.automatic_servers_installation = true
-lvim.lsp.diagnostics.virtual_text = false
-
 -----------------
 -- lsp servers --
 -----------------
