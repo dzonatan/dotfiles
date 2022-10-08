@@ -14,7 +14,8 @@ if (vim.fn.glob "angular*" ~= "" or utils.is_in_package_json "angular") then
   local global_node_modules = handle:read("*a")
   handle:close()
   -- local global_node_modules = "/usr/local/lib/node_modules/@angular/language-service"
-  local cmd = { "ngserver", "--stdio", "--tsProbeLocations", global_node_modules, "--ngProbeLocations", global_node_modules }
+  local cmd = { "ngserver", "--stdio", "--tsProbeLocations", global_node_modules, "--ngProbeLocations",
+    global_node_modules }
   require("lvim.lsp.manager").setup("angularls", {
     cmd = cmd,
     on_new_config = function(new_config)
@@ -25,7 +26,7 @@ if (vim.fn.glob "angular*" ~= "" or utils.is_in_package_json "angular") then
   -- turn off rename for tsserver as it conflicts with angularls
   lvim.lsp.on_attach_callback = function(client)
     if client.name == 'tsserver' then
-      client.resolved_capabilities.rename = false
+      client.server_capabilities.rename = false
     end
   end
 end
@@ -35,6 +36,11 @@ end
 if (vim.fn.glob "tailwind*" ~= "" or utils.is_in_package_json "tailwindcss") then
   require("lvim.lsp.manager").setup "tailwindcss"
 end
+
+
+-- if (vim.fn.glob ".eslintrc.json" ~= "") then
+--   require("lvim.lsp.manager").setup "eslint"
+-- end
 
 ----------------
 -- formatters --
@@ -67,22 +73,28 @@ if (vim.fn.glob ".prettierrc*" ~= "" or utils.is_in_package_json "prettier") the
       "scss"
     },
   })
-else
-  table.insert(formatters_table, {
-    exe = "prettier_d_slim",
-    args = { "--end-of-line", "lf" },
-    filetypes = {
-      "html",
-      "json",
-      "markdown",
-      "yaml",
-    },
-  })
+  -- else
+  --   table.insert(formatters_table, {
+  --     exe = "prettier_d_slim",
+  --     args = { "--end-of-line", "lf" },
+  --     filetypes = {
+  --       "html",
+  --       "json",
+  --       "markdown",
+  --       "yaml",
+  --     },
+  --   })
 end
 
-if (vim.fn.glob ".eslintrc.json" ~= "") then
-  table.insert(formatters_table, { command = "eslint_d", filetypes = { "typescript", "javascript" } })
-end
+
+table.insert(formatters_table, {
+  command = "rustfmt",
+  filetypes = { "rust" },
+})
+
+-- if (vim.fn.glob ".eslintrc.json" ~= "") then
+--   table.insert(formatters_table, { command = "eslint_d", filetypes = { "typescript", "javascript" } })
+-- end
 
 formatters.setup(formatters_table)
 
@@ -92,9 +104,10 @@ formatters.setup(formatters_table)
 local linters = require "lvim.lsp.null-ls.linters"
 local linters_table = {}
 
-if (vim.fn.glob ".eslintrc.json" ~= "") then
-  table.insert(linters_table, { exe = "eslint_d", filetypes = { "typescript", "javascript" } })
-end
+-- if (vim.fn.glob ".eslintrc.json" ~= "") then
+-- vim.fn.setenv('ESLINT_D_LOCAL_ESLINT_ONLY', 1)
+-- table.insert(linters_table, { exe = "eslint_d", filetypes = { "typescript", "javascript" } })
+-- end
 
 linters.setup(linters_table)
 

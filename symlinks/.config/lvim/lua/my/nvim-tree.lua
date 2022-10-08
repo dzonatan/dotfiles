@@ -4,7 +4,7 @@ lvim.builtin.nvimtree.setup.filters = {
   custom = { '.git', '.DS_Store' },
 }
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
-lvim.builtin.nvimtree.setup.view.width = 40
+lvim.builtin.nvimtree.setup.view.width = 50
 
 local tree_cb = require 'nvim-tree.config'.nvim_tree_callback
 lvim.builtin.nvimtree.setup.view.mappings.list = {
