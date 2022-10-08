@@ -24,15 +24,6 @@ lvim.plugins = {
   -- nicer code actions (telescope no longer support lsp actions)
   -- might not be needed in the future if LunarVim improves this natively
   { 'stevearc/dressing.nvim' },
-
-  -- debugger
-  {
-    "rcarriga/nvim-dap-ui",
-    requires = { "mfussenegger/nvim-dap" },
-    config = function()
-      require("dapui").setup()
-    end
-  },
 }
 
 require('lvim.lsp.manager').setup('emmet_ls')
