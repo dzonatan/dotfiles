@@ -29,6 +29,11 @@ lvim.keys.visual_mode["<A-k>"] = ":m .-2<CR>=="
 lvim.keys.visual_mode["p"] = '"_dP'
 
 -- Whichkey
+-- harpoon navigation
+lvim.builtin.which_key.mappings.a = { "<cmd>lua require('harpoon.mark').add_file()<CR>", "Harpoon add file" }
+lvim.builtin.which_key.mappings.m = { "<cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", "Harpoon quick menu" }
+lvim.builtin.which_key.mappings.j = { "<cmd>lua require('harpoon.ui').nav_next()<CR>", "Harpoon next file" }
+lvim.builtin.which_key.mappings.k = { "<cmd>lua require('harpoon.ui').nav_prev()<CR>", "Harpoon previous file" }
 lvim.builtin.which_key.mappings.f = { "<cmd>Telescope live_grep<CR>", "Find word" }
 -- overwrite "p" (default is packer) with find files
 lvim.builtin.which_key.mappings.L.p = lvim.builtin.which_key.mappings.p
