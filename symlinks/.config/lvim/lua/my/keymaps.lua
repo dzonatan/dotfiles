@@ -9,9 +9,6 @@ lvim.leader = "space"
 -- Yank to line end
 vim.api.nvim_set_keymap("n", "Y", "y$", { noremap = true, silent = true })
 
--- Close current notification with ESC
-vim.api.nvim_set_keymap("n", "<esc>", "<cmd>lua require'notify'.dismiss()<cr>", {})
-
 -- Previous/next buffer
 lvim.keys.normal_mode["<S-h>"] = ":bprevious<cr>"
 lvim.keys.normal_mode["<S-l>"] = ":bnext<cr>"
