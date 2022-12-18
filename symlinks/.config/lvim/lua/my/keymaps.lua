@@ -25,6 +25,8 @@ lvim.keys.visual_mode["<A-k>"] = ":m .-2<CR>=="
 -- Preserve clipboard when pasting
 lvim.keys.visual_mode["p"] = '"_dP'
 
+lvim.lsp.buffer_mappings.normal_mode["gr"] = { "<cmd>lua require('telescope.builtin').lsp_references()<cr>", "[G]oto [R]eferences" }
+
 -- Whichkey
 -- harpoon navigation
 lvim.builtin.which_key.mappings.a = { "<cmd>lua require('harpoon.mark').add_file()<CR>", "Harpoon add file" }
