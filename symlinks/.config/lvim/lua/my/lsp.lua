@@ -6,14 +6,11 @@ lvim.lsp.diagnostics.virtual_text = false
 -----------------
 local utils = require "my.utils"
 
--- schedule needed because of https://github.com/LunarVim/LunarVim/issues/3415
-vim.schedule(function()
-  -- enable Angular LSP
-  require("lvim.lsp.manager").setup("angularls")
+-- enable Angular LSP
+require("lvim.lsp.manager").setup("angularls")
 
-  -- enable emmet ls
-  require('lvim.lsp.manager').setup('emmet_ls')
-end)
+-- enable emmet ls
+require('lvim.lsp.manager').setup('emmet_ls')
 
 -- turn off rename for tsserver as it conflicts with angularls
 lvim.lsp.on_attach_callback = function(client)
