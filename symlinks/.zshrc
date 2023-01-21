@@ -12,10 +12,8 @@ source $ZSH/oh-my-zsh.sh
 
 # Aliases
 
-alias vim="lvim"
-alias vi="lvim"
-alias v="lvim"
-alias conf="cd ~/dotfiles && lvim ./"
+alias v="nvim"
+alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
 
 # Custom key bindings
