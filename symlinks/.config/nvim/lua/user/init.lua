@@ -15,6 +15,13 @@ local config = {
     "    ██   ████   ████   ██ ██      ██",
   },
 
+  options = {
+    opt = {
+      wrap = true,
+      list = true,
+    },
+  },
+
   -- set vim options here (vim.<first_key>.<second_key> =  value)
   -- options = {
   --   opt = {
@@ -58,6 +65,11 @@ local config = {
       ["<leader>rw"] = { function() require('spectre').open_visual({ select_word = true }) end,
         desc = "Replace Word" },
       ["<leader>rf"] = { function() require('spectre').open_file_search() end, desc = "Replace Buffer" },
+
+      ["<leader>lj"] = { function() vim.diagnostic.goto_next() end, desc = "Next diagnostic" },
+
+      ["<leader>bh"] = { "<cmd>BufferLineCloseLeft<cr>", desc = "Close buffers on the left" },
+      ["<leader>bl"] = { "<cmd>BufferLineCloseRight<cr>", desc = "Close buffers on the right" },
     },
     i = {
 
@@ -67,7 +79,7 @@ local config = {
       ["<leader>F"] = { function() require('user.telescope').live_grep_visual() end, desc = "Live grep" },
 
       -- don't put the replaced value to clipboard
-      ["p"] = '"_dP',
+      -- ["p"] = '"_dP',
     },
   },
 
@@ -99,6 +111,7 @@ local config = {
       { 'j-hui/fidget.nvim' },
     },
 
+    -- All other entries override the require("<key>").setup({...}) call for default plugins
 
     ["neo-tree"] = {
       window = {
@@ -144,11 +157,33 @@ local config = {
     end,
   },
 
+  ["mason-null-ls"] = {
+    setup_handlers = {
+      prettierd = function()
+        require("null-ls").register(require("null-ls").builtins.formatting.prettierd.with({
+          condition = function(utils)
+            return utils.root_has_file("package.json") or utils.root_has_file(".prettierrc") or
+                utils.root_has_file(".prettierrc.json") or utils.root_has_file(".prettierrc.js")
+          end
+        }))
+      end,
+      -- eslint_d = function()
+      --   require("null-ls").register(require("null-ls").builtins.diagnostics.eslint_d.with({
+      --     condition = function(utils)
+      --       return utils.root_has_file("package.json") or utils.root_has_file(".eslintrc.json") or
+      --           utils.root_has_file(".eslintrc.js")
+      --     end
+      --   }))
+      -- end,
+    }
+  },
+
   -- This function is run last and is a good place to configuring
   -- augroups/autocommands and custom filetypes also this just pure lua so
   -- anything that doesn't fit in the normal config locations above can go here
   polish = function()
     -- ...
+    vim.opt.listchars:append("trail:•")
   end,
 }
 
