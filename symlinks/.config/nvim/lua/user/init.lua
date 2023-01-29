@@ -94,6 +94,13 @@ local config = {
     formatting = {
       format_on_save = false, -- enable or disable automatic formatting on save
     },
+
+    -- add to the global LSP on_attach function
+    on_attach = function(client, bufnr)
+      if client.name == "tsserver" and vim.fn.filereadable(vim.fn.getcwd() .. "/angular.json") then
+        client.server_capabilities.renameProvider = false
+      end
+    end,
   },
 
   plugins = {
