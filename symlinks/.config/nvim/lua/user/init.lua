@@ -46,6 +46,7 @@ local config = {
       ["<leader>fc"] = false,
       ["<leader>fF"] = false,
       ["<leader>fn"] = false,
+      ["<C-q>"] = { function() require("user.utils").toggle_quick_fix() end, desc = "Toggle quick fix" },
 
       ["<leader>f"] = { function() require("telescope.builtin").find_files { hidden = true } end,
         desc = "Find files" },
