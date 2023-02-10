@@ -93,6 +93,10 @@ local config = {
   lsp = {
     formatting = {
       format_on_save = false, -- enable or disable automatic formatting on save
+      filter = function(client)
+        -- allow only `null-ls` to manage formatting
+        return client.name == "null-ls"
+      end
     },
 
     -- add to the global LSP on_attach function
