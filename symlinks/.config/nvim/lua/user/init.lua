@@ -73,7 +73,7 @@ local config = {
       ["<leader>bl"] = { "<cmd>BufferLineCloseRight<cr>", desc = "Close buffers on the right" },
     },
     i = {
-
+      ["<C-CR>"] = { function() require('copilot.suggestion').accept() end, desc = "Accept Copilot suggestion" }
     },
     v = {
       --find by text
@@ -121,7 +121,20 @@ local config = {
 
       -- lsp status
       { 'j-hui/fidget.nvim' },
+
+      -- github copilot
+      {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        event = "InsertEnter",
+        config = function()
+          vim.schedule(function()
+            require("copilot").setup({ suggestion = { auto_trigger = true } })
+          end, 100)
+        end,
+      },
     },
+
 
     -- All other entries override the require("<key>").setup({...}) call for default plugins
 
