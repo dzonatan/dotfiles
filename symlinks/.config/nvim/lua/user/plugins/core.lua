@@ -5,28 +5,31 @@ return {
 
   {
     "jay-babu/mason-null-ls.nvim",
-    config = function(plugin, opts)
-      local mason_null_ls = require("mason-null-ls")
-      local null_ls = require "null-ls"
-
-      mason_null_ls.setup(opts) -- run setup
-      mason_null_ls.setup_handlers { -- setup custom handlers
+    opts = {
+      handlers = {
+        -- for prettierd
         prettierd = function()
-          null_ls.register(null_ls.builtins.formatting.prettierd.with({
+          require("null-ls").register(require("null-ls").builtins.formatting.prettierd.with {
             condition = function(utils)
-              return utils.root_has_file("package.json") or utils.root_has_file(".prettierrc") or utils.root_has_file(".prettierrc.json") or utils.root_has_file(".prettierrc.js")
-            end
-          }))
+              return utils.root_has_file "package.json"
+                or utils.root_has_file ".prettierrc"
+                or utils.root_has_file ".prettierrc.json"
+                or utils.root_has_file ".prettierrc.js"
+            end,
+          })
         end,
+        -- For eslint_d:
         eslint_d = function()
-          null_ls.register(null_ls.builtins.diagnostics.eslint_d.with({
+          require("null-ls").register(require("null-ls").builtins.diagnostics.eslint_d.with {
             condition = function(utils)
-              return utils.root_has_file("package.json") or utils.root_has_file(".eslintrc.json") or utils.root_has_file(".eslintrc.js")
-            end
-          }))
+              return utils.root_has_file "package.json"
+                or utils.root_has_file ".eslintrc.json"
+                or utils.root_has_file ".eslintrc.js"
+            end,
+          })
         end,
-      }
-    end,
+      },
+    },
   },
 
   {
@@ -53,6 +56,16 @@ return {
       return opts
     end,
   },
+
+  {
+    "nvim-telescope/telescope.nvim",
+    config = function(plugin, opts)
+      opts.defaults.file_ignore_patterns = { ".git/" }
+      -- run the core AstroNvim configuration function with the options table
+      require("plugins.configs.telescope")(plugin, opts)
+    end,
+  }
+
   -- You can disable default plugins as follows:
   -- { "max397574/better-escape.nvim", enabled = false },
   --

@@ -9,17 +9,6 @@ local config = {
   -- automatically pick-up stored data by this setting.)
   mappings = {
     n = {
-      ["<leader>fw"] = false,
-      ["<leader>fW"] = false,
-      ["<leader>ff"] = false,
-      ["<leader>fb"] = false,
-      ["<leader>fh"] = false,
-      ["<leader>fm"] = false,
-      ["<leader>fo"] = false,
-      ["<leader>fc"] = false,
-      ["<leader>fF"] = false,
-      ["<leader>fn"] = false,
-
       ["<leader>rr"] = { function() require('spectre').open() end, desc = "Replace" },
       ["<leader>rw"] = { function() require('spectre').open_visual({ select_word = true }) end,
         desc = "Replace Word" },

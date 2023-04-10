@@ -8,6 +8,9 @@ return {
   n = {
     -- second key is the lefthand side of the map
     -- mappings seen under group name "Buffer"
+    -- better buffer navigation
+    ["]b"] = false,
+    ["[b"] = false,
     ["<C-q>"] = { function() require("user.utils").toggle_quick_fix() end, desc = "Toggle quick fix" },
     ["<S-h>"] = { function() require("astronvim.utils.buffer").nav(-(vim.v.count > 0 and vim.v.count or 1)) end, desc =
     "Previous buffer" },
@@ -23,16 +26,23 @@ return {
     ["<leader>j"] = { function() require('harpoon.ui').nav_prev() end, desc = "Harpoon next file" },
     ["<leader>k"] = { function() require('harpoon.ui').nav_next() end, desc = "Harpoon previous file" },
     -- search
-    -- ["<leader>f"] = false,
-    -- ["<leader>fW"] = false,
-    -- ["<leader>ff"] = false,
-    -- ["<leader>fb"] = false,
-    -- ["<leader>fh"] = false,
-    -- ["<leader>fm"] = false,
-    -- ["<leader>fo"] = false,
-    -- ["<leader>fc"] = false,
-    -- ["<leader>fF"] = false,
-    -- ["<leader>fn"] = false,
+    ["<leader>fw"] = false,
+    ["<leader>fW"] = false,
+    ["<leader>ff"] = false,
+    ["<leader>fb"] = false,
+    ["<leader>fh"] = false,
+    ["<leader>fm"] = false,
+    ["<leader>fo"] = false,
+    ["<leader>fc"] = false,
+    ["<leader>fF"] = false,
+    ["<leader>fn"] = false,
+    ["<leader>fk"] = false,
+    ["<leader>fa"] = false,
+    ["<leader>fr"] = false,
+    ["<leader>ft"] = false,
+    ["<leader>fC"] = false,
+    ["<leader>f'"] = false,
+    ["<leader>f<CR>"] = false,
     ["<leader>f"] = { function() require("telescope.builtin").find_files { hidden = true } end,
       desc = "Find files" },
     ["<leader>n"] = { function() require("telescope.builtin").find_files { cwd = '%:p:h', hidden = true } end,
