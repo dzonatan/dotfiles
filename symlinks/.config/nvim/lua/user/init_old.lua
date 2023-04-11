@@ -46,19 +46,6 @@ local config = {
       -- }
     --   return config -- return final config table to use in require("null-ls").setup(config)
     -- end,
-
-    telescope = {
-      defaults = {
-        file_ignore_patterns = { ".git/" },
-      },
-      pickers = {
-        live_grep = {
-          additional_args = function()
-            return { "--hidden" }
-          end
-        },
-      }
-    },
   },
 
   ["which-key"] = {

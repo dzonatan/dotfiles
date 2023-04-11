@@ -61,7 +61,13 @@ return {
     "nvim-telescope/telescope.nvim",
     config = function(plugin, opts)
       opts.defaults.file_ignore_patterns = { ".git/" }
-      -- run the core AstroNvim configuration function with the options table
+      opts.pickers = {
+        live_grep = {
+          additional_args = function()
+            return { "--hidden" }
+          end
+        },
+      }
       require("plugins.configs.telescope")(plugin, opts)
     end,
   }
