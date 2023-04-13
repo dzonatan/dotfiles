@@ -55,7 +55,9 @@ return {
     -- add to the global LSP on_attach function
     on_attach = function(client, bufnr)
       if client.name == "tsserver" and vim.fn.filereadable(vim.fn.getcwd() .. "/angular.json") then
+        -- disable duplicated tsserver capabilities for angular projects
         client.server_capabilities.renameProvider = false
+        client.server_capabilities.referencesProvider = false
       end
     end,
   },
