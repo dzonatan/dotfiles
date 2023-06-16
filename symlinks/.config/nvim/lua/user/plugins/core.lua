@@ -15,6 +15,14 @@ return {
   },
 
   {
+    "nvim-pack/nvim-spectre",
+    cmd = "Spectre",
+    keys = {
+      { '<leader>r', desc = "Search / Replace", function() require("spectre").open() end },
+    },
+  },
+
+  {
     "jay-babu/mason-null-ls.nvim",
     opts = {
       handlers = {
@@ -22,8 +30,7 @@ return {
         prettierd = function()
           require("null-ls").register(require("null-ls").builtins.formatting.prettierd.with {
             condition = function(utils)
-              return utils.root_has_file "package.json"
-                or utils.root_has_file ".prettierrc"
+              return utils.root_has_file ".prettierrc"
                 or utils.root_has_file ".prettierrc.json"
                 or utils.root_has_file ".prettierrc.js"
             end,
@@ -33,8 +40,7 @@ return {
         eslint_d = function()
           require("null-ls").register(require("null-ls").builtins.diagnostics.eslint_d.with {
             condition = function(utils)
-              return utils.root_has_file "package.json"
-                or utils.root_has_file ".eslintrc.json"
+              return utils.root_has_file ".eslintrc.json"
                 or utils.root_has_file ".eslintrc.js"
             end,
           })
