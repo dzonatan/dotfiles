@@ -1,5 +1,6 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+export ANDROID_HOME="/opt/homebrew/share/android-commandlinetools/"
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
@@ -45,3 +46,6 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # Private stuff that shouldn't be public
 source ~/.zshrc_private
+
+# PATH extensions
+export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"

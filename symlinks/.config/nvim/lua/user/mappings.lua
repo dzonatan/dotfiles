@@ -16,8 +16,8 @@ return {
     "Previous buffer" },
     ["<S-l>"] = { function() require("astronvim.utils.buffer").nav(vim.v.count > 0 and vim.v.count or 1) end, desc =
     "Next buffer" },
-    ["<leader>bh"] = { "<cmd>BufferLineCloseLeft<cr>", desc = "Close buffers on the left" },
-    ["<leader>bl"] = { "<cmd>BufferLineCloseRight<cr>", desc = "Close buffers on the right" },
+    -- ["<leader>bh"] = { "<cmd>BufferLineCloseLeft<cr>", desc = "Close buffers on the left" },
+    -- ["<leader>bl"] = { "<cmd>BufferLineCloseRight<cr>", desc = "Close buffers on the right" },
     ["<leader>lj"] = { function() vim.diagnostic.goto_next() end, desc = "Next diagnostic" },
     -- harpoon
     ["<leader>a"] = { function() require('harpoon.mark').add_file() end, desc = "Harpoon add file" },
