@@ -3,7 +3,7 @@
 -- Please use this mappings table to set keyboard mapping since this is the
 -- lower level configuration and more robust one. (which-key will
 -- automatically pick-up stored data by this setting.)
-return {
+local mappings = {
   -- first key is the mode
   n = {
     -- second key is the lefthand side of the map
@@ -26,24 +26,6 @@ return {
     ["<leader>j"] = { function() require('harpoon.ui').nav_prev() end, desc = "Harpoon next file" },
     ["<leader>k"] = { function() require('harpoon.ui').nav_next() end, desc = "Harpoon previous file" },
     -- search
-    ["<leader>f'"] = false,
-    ["<leader>f/"] = false,
-    ["<leader>f<CR>"] = false,
-    ["<leader>fa"] = false,
-    ["<leader>fb"] = false,
-    ["<leader>fC"] = false,
-    ["<leader>fc"] = false,
-    ["<leader>fF"] = false,
-    ["<leader>ff"] = false,
-    ["<leader>fh"] = false,
-    ["<leader>fk"] = false,
-    ["<leader>fm"] = false,
-    ["<leader>fn"] = false,
-    ["<leader>fo"] = false,
-    ["<leader>fr"] = false,
-    ["<leader>ft"] = false,
-    ["<leader>fW"] = false,
-    ["<leader>fw"] = false,
     ["<leader>f"] = { function() require("telescope.builtin").find_files { hidden = true } end,
       desc = "Find files" },
     ["<leader>n"] = { function() require("telescope.builtin").find_files { cwd = '%:p:h', hidden = true } end,
@@ -63,3 +45,12 @@ return {
     ["<leader>F"] = { function() require('user.telescope').live_grep_visual() end, desc = "Live grep" },
   },
 }
+
+return function(maps)
+  for key, _ in pairs(maps.n) do
+    -- remove all buitl-in mappings from `<leader>f` group so that we are not influenced by timeoutln
+    if key:match "^<leader>f.*" then maps.n[key] = false end
+  end
+
+  return require("astronvim.utils").extend_tbl(maps, mappings)
+end
