@@ -1,3 +1,5 @@
 [user]
   name = Rokas Brazdžionis
   email = rokas.brazdzionis@gmail.com
+[init]
+	defaultBranch = main
