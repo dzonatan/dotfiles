@@ -10,6 +10,20 @@ return {
       window = {
         width = 50,
         mappings = {
+          f = function(state)
+            local node = state.tree:get_node()
+            local path = node:get_id()
+            require("telescope.builtin").find_files {
+              cwd = node.type == "directory" and path or vim.fn.fnamemodify(path, ":h"),
+            }
+          end,
+          F = function(state)
+            local node = state.tree:get_node()
+            local path = node:get_id()
+            require("telescope.builtin").live_grep {
+              cwd = node.type == "directory" and path or vim.fn.fnamemodify(path, ":h"),
+            }
+          end,
           ["<c-g>"] = function(state)
             local node = state.tree:get_node()
             local basedir = node.type ~= 'file' and node.path or vim.fn.fnamemodify(node.path, ":h")
