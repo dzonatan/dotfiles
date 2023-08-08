@@ -6,4 +6,5 @@ return {
 
   { import = "astrocommunity.pack.yaml" },
   { import = "astrocommunity.pack.angular" },
+  { import = "astrocommunity.pack.java" },
 }
