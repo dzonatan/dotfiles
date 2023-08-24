@@ -44,6 +44,10 @@ local mappings = {
     --find by text
     ["<leader>F"] = { function() require('user.telescope').live_grep_visual() end, desc = "Live grep" },
   },
+  x = {
+    -- do not override clipboard when pasting
+    ["p"] = "P"
+  },
 }
 
 return function(maps)
