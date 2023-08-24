@@ -51,6 +51,7 @@ return {
     -- enable servers that you already have installed without mason
     servers = {
       -- "pyright"
+      "mdx_analyzer",
     },
     -- add to the global LSP on_attach function
     on_attach = function(client, bufnr)
@@ -60,6 +61,15 @@ return {
         client.server_capabilities.referencesProvider = false
       end
     end,
+    config = {
+      mdx_analyzer = function()
+        return {
+          cmd = { "mdx-language-server", "--stdio" },
+          filetypes = { "markdown.mdx" },
+          root_dir = require("lspconfig.util").root_pattern "package.json",
+        }
+      end,
+    },
   },
 
   -- Configure require("lazy").setup() options
@@ -78,6 +88,12 @@ return {
   -- anything that doesn't fit in the normal config locations above can go here
   polish = function()
     vim.opt.listchars:append("trail:•")
+    vim.filetype.add {
+      extension = {
+        mdx = "markdown.mdx",
+      },
+    }
+    vim.treesitter.language.register("markdown", "mdx")
     -- Set up custom filetypes
     -- vim.filetype.add {
     --   extension = {
