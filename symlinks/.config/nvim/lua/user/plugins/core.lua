@@ -33,6 +33,7 @@ return {
               return utils.root_has_file ".prettierrc"
                 or utils.root_has_file ".prettierrc.json"
                 or utils.root_has_file ".prettierrc.js"
+                or utils.root_has_file ".prettierrc.yml"
             end,
           })
         end,
