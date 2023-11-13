@@ -5,7 +5,14 @@ return {
     event = "InsertEnter",
     config = function()
       vim.schedule(function()
-        require("copilot").setup({ suggestion = { auto_trigger = true } })
+        require("copilot").setup({
+          suggestion = {
+            auto_trigger = true
+          },
+          filetypes = {
+            markdown = true,
+          },
+        })
       end, 100)
     end,
   },
