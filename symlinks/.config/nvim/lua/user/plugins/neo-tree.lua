@@ -7,6 +7,7 @@ return {
           hide_dotfiles = false,
         },
       },
+      enable_normal_mode_for_inputs = false,
       commands = {
         live_grep_in_dir = function(state)
           local node = state.tree:get_node()
