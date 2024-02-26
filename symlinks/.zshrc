@@ -19,7 +19,7 @@ alias lg="lazygit"
 
 # Custom key bindings
 
-bindkey '^ ' autosuggest-accept
+bindkey '^@' autosuggest-accept
 
 # Custom PATHS
 
