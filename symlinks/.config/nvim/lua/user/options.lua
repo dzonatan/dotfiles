@@ -8,6 +8,7 @@ return {
     -- signcolumn = "auto", -- sets vim.opt.signcolumn to auto
     wrap = true,
     list = true,
+    scrolloff = 2,
   },
   g = {
     semantic_tokens_enabled = false, -- enable or disable LSP semantic tokens on startup
