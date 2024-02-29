@@ -11,6 +11,11 @@ local mappings = {
     -- better buffer navigation
     ["]b"] = false,
     ["[b"] = false,
+
+    -- ctrl+a is used as a leader key for kitty/tmux
+    ["<C-b>"] = { "<C-a>", desc = "Increment number" },
+    ["<C-a>"] = { "<Nop>" },
+
     ["<C-q>"] = { function() require("user.utils").toggle_quick_fix() end, desc = "Toggle quick fix" },
     ["<S-h>"] = { function() require("astronvim.utils.buffer").nav(-(vim.v.count > 0 and vim.v.count or 1)) end, desc =
     "Previous buffer" },
