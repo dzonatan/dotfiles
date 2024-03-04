@@ -37,6 +37,17 @@ local mappings = {
       desc = "Find neighboring files" },
     ["<leader>F"] = { function() require("telescope.builtin").live_grep() end, desc = "Live grep" },
     ["<leader>R"] = { "<cmd>Telescope resume<CR>", desc = "Resume last search" },
+
+    ["<leader>s"] = { desc = "(S)earch" },
+    ["<leader>sf"] = { function() require("telescope.builtin").find_files { hidden = true } end, desc = "Find files" },
+    ["<leader>sn"] = { function() require("telescope.builtin").find_files { cwd = '%:p:h', hidden = true } end,
+      desc = "Find neighboring files" },
+    ["<leader>sg"] = { function() require("telescope.builtin").live_grep() end, desc = "Live grep" },
+    ["<leader>sr"] = { "<cmd>Telescope resume<CR>", desc = "Resume last search" },
+    ["<leader>s/"] = { function() require("telescope.builtin").current_buffer_fuzzy_find() end, desc = "Find words in current buffer" },
+    ["<leader>ss"] = { function() require("telescope.builtin").lsp_document_symbols() end, desc = "Find document symbols" },
+    ["<leader>sw"] = { function() require("telescope.builtin").lsp_dynamic_workspace_symbols() end, desc = "Find workspace symbols" },
+    ["<leader><leader>"] = { function() require("telescope.builtin").buffers() end, desc = "Search current buffers" },
   },
   i = {
     ["<C-CR>"] = { function() require('copilot.suggestion').accept() end, desc = "Accept Copilot suggestion" }
