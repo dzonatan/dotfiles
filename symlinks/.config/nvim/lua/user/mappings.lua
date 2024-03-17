@@ -47,7 +47,10 @@ local mappings = {
     ["<leader>s/"] = { function() require("telescope.builtin").current_buffer_fuzzy_find() end, desc = "Find words in current buffer" },
     ["<leader>ss"] = { function() require("telescope.builtin").lsp_document_symbols() end, desc = "Find document symbols" },
     ["<leader>sw"] = { function() require("telescope.builtin").lsp_dynamic_workspace_symbols() end, desc = "Find workspace symbols" },
+    ["<leader>sd"] = { function() require("telescope.builtin").diagnostics { bufnr = 0 } end, desc = "Find document symbols" },
     ["<leader><leader>"] = { function() require("telescope.builtin").buffers() end, desc = "Search current buffers" },
+
+    ["<leader>o"] = { "<cmd>Neotree reveal<CR>", desc = "Toggle explorer (focus current)" },
   },
   i = {
     ["<C-CR>"] = { function() require('copilot.suggestion').accept() end, desc = "Accept Copilot suggestion" }

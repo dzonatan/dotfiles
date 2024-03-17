@@ -6,6 +6,10 @@ return {
         filtered_items = {
           hide_dotfiles = false,
         },
+        follow_current_file = {
+          enabled = false,
+          leave_dirs_open = true,
+        },
       },
       enable_normal_mode_for_inputs = false,
       commands = {
