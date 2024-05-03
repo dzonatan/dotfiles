@@ -13,7 +13,8 @@ source $ZSH/oh-my-zsh.sh
 
 # Aliases
 
-alias v="nvim"
+alias nv="nvim"
+alias v="NVIM_APPNAME=astronvim_v4 nvim"
 alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
 
