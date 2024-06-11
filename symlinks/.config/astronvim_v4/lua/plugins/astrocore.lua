@@ -48,7 +48,7 @@ return {
     return require("astrocore").extend_tbl(opts, {
       -- Diagnostics configuration (for vim.diagnostics.config({...})) when diagnostics are on
       diagnostics = {
-        virtual_text = true,
+        virtual_text = false,
         underline = true,
       },
       -- vim options can be configured here
@@ -85,9 +85,6 @@ return {
           ["<leader>j"] = { function() require('harpoon.ui').nav_prev() end, desc = "Harpoon next file" },
           ["<leader>k"] = { function() require('harpoon.ui').nav_next() end, desc = "Harpoon previous file" },
 
-          -- search (old)
-          -- ["<leader>f"] = { function() require("telescope.builtin").find_files { hidden = true } end, desc = "Find files" },
-
           -- search (new)
           ["<leader>s"] = { desc = "(S)earch" },
           ["<leader>sf"] = { function() require("telescope.builtin").git_files() end, desc = "Find files (git)" },
@@ -106,6 +103,8 @@ return {
           ["<leader><leader>"] = { function() require("telescope.builtin").buffers() end, desc = "Search current buffers" },
 
           ["<leader>o"] = { "<cmd>Neotree reveal<CR>", desc = "Toggle explorer (focus current)" },
+          
+          ["<leader>lj"] = { function() vim.diagnostic.goto_next() end, desc = "Next diagnostic" },
         },
         i = {
           ["<C-CR>"] = { function() require('copilot.suggestion').accept() end, desc = "Accept Copilot suggestion" }
