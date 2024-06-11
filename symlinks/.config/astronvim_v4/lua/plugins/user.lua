@@ -36,7 +36,14 @@ return {
     event = "User AstroFile",
     opts = {
       suggestion = { auto_trigger = true, debounce = 150 },
-      filetypes = { markdown = true }
+      filetypes = { markdown = true },
     },
+  },
+
+  {
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    opts = {},
   },
 }
