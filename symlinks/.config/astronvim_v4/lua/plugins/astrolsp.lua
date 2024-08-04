@@ -20,6 +20,13 @@ return {
           -- "python",
         },
       },
+      filter = function(client) -- fully override the default formatting function
+        -- print(client)
+        -- require("notify")(client.name)
+        -- allow only `null-ls` to manage formatting
+        -- client.name == "null-ls"
+        return client.name ~= "typescript-tools"
+      end
     },
   },
 }

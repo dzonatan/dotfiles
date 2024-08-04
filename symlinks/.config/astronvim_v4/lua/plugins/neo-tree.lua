@@ -6,7 +6,7 @@ return {
         hide_dotfiles = false,
       },
       follow_current_file = {
-        enabled = false,
+        enabled = true,
         leave_dirs_open = true,
       },
     },
