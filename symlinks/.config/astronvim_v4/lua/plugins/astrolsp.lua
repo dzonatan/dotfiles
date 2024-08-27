@@ -31,5 +31,10 @@ return {
     autocmds = {
       eslint_fix_on_save = false,
     },
+    config = {
+      angularls = {
+        root_dir =  require("lspconfig.util").root_pattern("angular.json", "nx.json")
+      },
+    },
   },
 }
