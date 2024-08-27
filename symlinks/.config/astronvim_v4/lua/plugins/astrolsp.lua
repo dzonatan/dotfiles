@@ -28,5 +28,8 @@ return {
         return client.name ~= "typescript-tools"
       end
     },
+    autocmds = {
+      eslint_fix_on_save = false,
+    },
   },
 }
