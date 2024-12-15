@@ -75,6 +75,8 @@ return {
           ["<C-a>"] = { "<Nop>" },
 
           ["<C-q>"] = { function() toggle_quick_fix() end, desc = "Toggle quick fix" },
+          ["<Alt-j>"] = { ":cnext", desc = "Toggle quick fix" },
+          ["<Alt-k>"] = { ":cprevious", desc = "Toggle quick fix" },
           ["<S-h>"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
           ["<S-l>"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
 
