@@ -1,13 +1,13 @@
 return {
   {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
+    'zbirenbaum/copilot.lua',
+    cmd = 'Copilot',
+    event = 'InsertEnter',
     config = function()
       vim.schedule(function()
-        require("copilot").setup({
+        require('copilot').setup({
           suggestion = {
-            auto_trigger = true
+            auto_trigger = true,
           },
           filetypes = {
             markdown = true,

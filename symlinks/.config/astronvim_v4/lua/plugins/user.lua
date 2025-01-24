@@ -29,16 +29,11 @@ return {
     end,
   },
 
-  { "ThePrimeagen/harpoon" },
-
   {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "User AstroFile",
-    opts = {
-      suggestion = { auto_trigger = true, debounce = 150 },
-      filetypes = { markdown = true },
-    },
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function() require("harpoon").setup() end,
   },
 
   {

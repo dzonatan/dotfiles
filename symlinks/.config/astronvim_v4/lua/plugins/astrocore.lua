@@ -39,10 +39,36 @@ return {
   opts = function(_, opts)
     local nmaps = opts.mappings.n
     for lhs, key in pairs(nmaps) do
-      -- remove all buitl-in mappings from `<leader>f` group so that we are not influenced by timeoutln
+      -- remove all built-in mappings from `<leader>f` group so that we are not influenced by timeoutln
       if lhs:match("^<Leader>f") then
         nmaps[lhs] = nil
       end
+    end
+
+    local harpoon = require("harpoon")
+    local telescopeConf = require("telescope.config").values
+    local function toggle_telescope(harpoon_files)
+      local file_paths = {}
+      for _, item in ipairs(harpoon_files.items) do
+        table.insert(file_paths, item.value)
+      end
+
+      require("telescope.pickers").new({}, {
+        prompt_title = "Harpoon",
+        finder = require("telescope.finders").new_table({
+          results = file_paths,
+          entry_maker = function(entry)
+            return {
+              value = entry,
+              display = require("telescope.utils").path_tail(entry), -- Use smart path display
+              ordinal = entry,
+            }
+          end,
+        }),
+        previewer = telescopeConf.file_previewer({}),
+        sorter = telescopeConf.generic_sorter({}),
+        path_display = { "tail" },
+      }):find()
     end
 
     return require("astrocore").extend_tbl(opts, {
@@ -74,24 +100,25 @@ return {
           ["<C-b>"] = { "<C-a>", desc = "Increment number" },
           ["<C-a>"] = { "<Nop>" },
 
-          ["<C-q>"] = { function() toggle_quick_fix() end, desc = "Toggle quick fix" },
-          ["<Alt-j>"] = { ":cnext", desc = "Toggle quick fix" },
-          ["<Alt-k>"] = { ":cprevious", desc = "Toggle quick fix" },
+          ["<C-q>"] = { function() toggle_quick_fix() end, desc = "Toggle quick fix list" },
+          ["<Alt-j>"] = { ":cnext", desc = "Next item in quick fix list" },
+          ["<Alt-k>"] = { ":cprevious", desc = "Previous item quick fix list" },
           ["<S-h>"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
           ["<S-l>"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
 
           -- harpoon
-          ["<leader>a"] = { function() require('harpoon.mark').add_file() end, desc = "Harpoon add file" },
-          ["<leader>m"] = { function() require('harpoon.ui').toggle_quick_menu() end,
+          ["<leader>m"] = { desc = "Harpoon" },
+          ["<leader>ma"] = { function() harpoon:list():add() end, desc = "Harpoon add file" },
+          ["<leader>mm"] = { function() harpoon.ui:toggle_quick_menu(harpoon:list()) end,
             desc = "Harpoon quick menu" },
-          ["<leader>j"] = { function() require('harpoon.ui').nav_prev() end, desc = "Harpoon next file" },
-          ["<leader>k"] = { function() require('harpoon.ui').nav_next() end, desc = "Harpoon previous file" },
+          ["<leader>j"] = { function() harpoon:list():next() end, desc = "Harpoon next file" },
+          ["<leader>k"] = { function() harpoon:list():prev() end, desc = "Harpoon previous file" },
 
           -- search (new)
           ["<leader>s"] = { desc = "(S)earch" },
-          ["<leader>sf"] = { function() require("telescope.builtin").git_files() end, desc = "Find files (git)" },
+          ["<leader>sa"] = { function() require("telescope.builtin").git_files() end, desc = "Find files (git)" },
           ["<leader>sn"] = { function() require("telescope.builtin").find_files { cwd = '%:p:h', hidden = true } end, desc = "Find neighboring files" },
-          ["<leader>sa"] = { function() require("telescope.builtin").find_files { hidden = true } end, desc = "Find all files" },
+          ["<leader>sf"] = { function() require("telescope.builtin").find_files { hidden = true } end, desc = "Find all files" },
           ["<leader>sg"] = { function() require("telescope.builtin").live_grep() end, desc = "Live grep" },
           ["<leader>sr"] = { "<cmd>Telescope resume<CR>", desc = "Resume last search" },
           ["<leader>so"] = { function() require("telescope.builtin").oldfiles() end, desc = "Find history" },
@@ -101,12 +128,15 @@ return {
           ["<leader>ss"] = { function() require("telescope.builtin").lsp_document_symbols() end, desc = "Find document symbols" },
           ["<leader>sS"] = { function() require("telescope.builtin").lsp_dynamic_workspace_symbols() end, desc = "Find workspace symbols" },
           ["<leader>sd"] = { function() require("telescope.builtin").diagnostics { bufnr = 0 } end, desc = "Find document symbols" },
+          ["<leader>sm"] = { function() toggle_telescope(harpoon:list()) end, desc = "Find in harpoon" },
 
           ["<leader><leader>"] = { function() require("telescope.builtin").buffers() end, desc = "Search current buffers" },
 
           ["<leader>o"] = { "<cmd>Neotree reveal<CR>", desc = "Toggle explorer (focus current)" },
           
           ["<leader>lj"] = { function() vim.diagnostic.goto_next() end, desc = "Next diagnostic" },
+          
+          ["<leader>a"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
         },
         i = {
           ["<C-CR>"] = { function() require('copilot.suggestion').accept() end, desc = "Accept Copilot suggestion" }
@@ -115,6 +145,8 @@ return {
           --find by text
           ["<leader>f"] = { function() live_grep_visual() end, desc = "Live grep" },
           ["<leader>F"] = { function() live_grep_visual() end, desc = "Live grep" },
+          
+          ["<leader>a"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
         },
         x = {
           -- do not override clipboard when pasting
