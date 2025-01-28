@@ -136,7 +136,15 @@ return {
           
           ["<leader>lj"] = { function() vim.diagnostic.goto_next() end, desc = "Next diagnostic" },
           
-          ["<leader>a"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
+          ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
+          ["<leader>aa"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
+          ["<leader>ax"] = { ":CopilotChatReset<CR>", desc = "Reset copilot chat" },
+          ["<leader>as"] = { ":CopilotChatStop<CR>", desc = "Stop copilot chat" },
+          ["<leader>am"] = { ":CopilotChatModels<CR>", desc = "Select copilot chat model" },
+          ["<leader>ap"] = { function()
+            local actions = require("CopilotChat.actions")
+            require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+          end, desc = "Select copilot prompt" },
         },
         i = {
           ["<C-CR>"] = { function() require('copilot.suggestion').accept() end, desc = "Accept Copilot suggestion" }
@@ -146,7 +154,12 @@ return {
           ["<leader>f"] = { function() live_grep_visual() end, desc = "Live grep" },
           ["<leader>F"] = { function() live_grep_visual() end, desc = "Live grep" },
           
-          ["<leader>a"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
+          ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
+          ["<leader>aa"] = { ":CopilotChatOpen<CR>", desc = "Open copilot chat" },
+          ["<leader>ap"] = { function()
+            local actions = require("CopilotChat.actions")
+            require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+          end, desc = "Select copilot prompt" },
         },
         x = {
           -- do not override clipboard when pasting
