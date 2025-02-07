@@ -184,14 +184,16 @@ return {
                     local entry = action_state.get_selected_entry()
                     if entry then
                       actions.close(prompot_bufnr)
-                      vim.api.nvim_put({ entry.path }, "", true, true)
+                      local relative_path = vim.fn.fnamemodify(entry.path, ":.")
+                      vim.api.nvim_put({ relative_path }, "", true, true)
                     end
                   end)
                   map("n", "<CR>", function() -- Override Enter in normal mode
                     local entry = action_state.get_selected_entry()
                     if entry then
                       actions.close(prompot_bufnr)
-                      vim.api.nvim_put({ entry.path }, "", true, true)
+                      local relative_path = vim.fn.fnamemodify(entry.path, ":.")
+                      vim.api.nvim_put({ relative_path }, "", true, true)
                     end
                   end)
                   return true
