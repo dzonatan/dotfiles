@@ -209,7 +209,7 @@ return {
           ["<leader>F"] = { function() live_grep_visual() end, desc = "Live grep" },
 
           ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
-          ["<leader>aa"] = { ":CopilotChatOpen<CR>", desc = "Open copilot chat" },
+          ["<leader>aa"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
           ["<leader>ap"] = {
             function()
               local actions = require "CopilotChat.actions"
