@@ -121,9 +121,18 @@ return {
           },
           ["<leader>sf"] = {
             function() require("telescope.builtin").find_files { hidden = true } end,
-            desc = "Find all files",
+            desc = "Find files (skip ignored)",
           },
-          ["<leader>sg"] = { function() require("telescope.builtin").live_grep() end, desc = "Live grep" },
+          ["<leader>sF"] = {
+            function() require("telescope.builtin").find_files { hidden = true, no_ignore = true } end,
+            desc = "Find files (all)",
+          },
+          ["<leader>sg"] = { function() require("telescope.builtin").live_grep {
+            additional_args = function() return { "--hidden", "--glob", "!package-lock.json" } end
+          } end, desc = "Live grep (skip ignored)" },
+          ["<leader>sG"] = { function() require("telescope.builtin").live_grep {
+            additional_args = function() return { "--hidden", "--no-ignore" } end
+          } end, desc = "Live grep (everything)" },
           ["<leader>sr"] = { "<cmd>Telescope resume<CR>", desc = "Resume last search" },
           ["<leader>so"] = { function() require("telescope.builtin").oldfiles() end, desc = "Find history" },
           ["<leader>sw"] = {
