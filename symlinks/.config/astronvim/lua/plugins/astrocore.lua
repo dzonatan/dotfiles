@@ -13,6 +13,7 @@ local live_grep_visual = function()
   end
   require("telescope.builtin").live_grep {
     default_text = visual_selection(),
+    additional_args = function() return { "--hidden", "--glob", "!package-lock.json" } end,
   }
 end
 
@@ -127,12 +128,22 @@ return {
             function() require("telescope.builtin").find_files { hidden = true, no_ignore = true } end,
             desc = "Find files (all)",
           },
-          ["<leader>sg"] = { function() require("telescope.builtin").live_grep {
-            additional_args = function() return { "--hidden", "--glob", "!package-lock.json" } end
-          } end, desc = "Live grep (skip ignored)" },
-          ["<leader>sG"] = { function() require("telescope.builtin").live_grep {
-            additional_args = function() return { "--hidden", "--no-ignore" } end
-          } end, desc = "Live grep (everything)" },
+          ["<leader>sg"] = {
+            function()
+              require("telescope.builtin").live_grep {
+                additional_args = function() return { "--hidden", "--glob", "!package-lock.json" } end,
+              }
+            end,
+            desc = "Live grep (skip ignored)",
+          },
+          ["<leader>sG"] = {
+            function()
+              require("telescope.builtin").live_grep {
+                additional_args = function() return { "--hidden", "--no-ignore" } end,
+              }
+            end,
+            desc = "Live grep (everything)",
+          },
           ["<leader>sr"] = { "<cmd>Telescope resume<CR>", desc = "Resume last search" },
           ["<leader>so"] = { function() require("telescope.builtin").oldfiles() end, desc = "Find history" },
           ["<leader>sw"] = {
@@ -167,18 +178,26 @@ return {
 
           ["<leader>lj"] = { function() vim.diagnostic.goto_next() end, desc = "Next diagnostic" },
 
+          -- CopilotChat
+          -- ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
+          -- ["<leader>aa"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
+          -- ["<leader>ac"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
+          -- ["<leader>ax"] = { ":CopilotChatReset<CR>", desc = "Reset copilot chat" },
+          -- ["<leader>as"] = { ":CopilotChatStop<CR>", desc = "Stop copilot chat" },
+          -- ["<leader>am"] = { ":CopilotChatModels<CR>", desc = "Select copilot chat model" },
+          -- ["<leader>ap"] = {
+          --   function()
+          --     local actions = require "CopilotChat.actions"
+          --     require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+          --   end,
+          --   desc = "Select copilot prompt",
+          -- },
+
+          -- CodeCompanion
           ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
-          ["<leader>aa"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
-          ["<leader>ax"] = { ":CopilotChatReset<CR>", desc = "Reset copilot chat" },
-          ["<leader>as"] = { ":CopilotChatStop<CR>", desc = "Stop copilot chat" },
-          ["<leader>am"] = { ":CopilotChatModels<CR>", desc = "Select copilot chat model" },
-          ["<leader>ap"] = {
-            function()
-              local actions = require "CopilotChat.actions"
-              require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-            end,
-            desc = "Select copilot prompt",
-          },
+          ["<leader>ac"] = { ":CodeCompanionChat Toggle<CR>", desc = "Open code companion chat" },
+          ["<leader>ap"] = { ":CodeCompanion<CR>", desc = "Code companion prompt" },
+          ["<leader>ak"] = { ":CodeCompanionActions<CR>", desc = "Code companion action" },
         },
         i = {
           ["<C-CR>"] = { function() require("copilot.suggestion").accept() end, desc = "Accept Copilot suggestion" },
@@ -217,15 +236,24 @@ return {
           ["<leader>f"] = { function() live_grep_visual() end, desc = "Live grep" },
           ["<leader>F"] = { function() live_grep_visual() end, desc = "Live grep" },
 
+          -- CopilotChat
+          -- ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
+          -- ["<leader>aa"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
+          -- ["<leader>ac"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
+          -- ["<leader>ap"] = {
+          --   function()
+          --     local actions = require "CopilotChat.actions"
+          --     require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+          --   end,
+          --   desc = "Select copilot prompt",
+          -- },
+
+          -- CodeCompanion
           ["<leader>a"] = { desc = "(A)rtificial Inteligence" },
-          ["<leader>aa"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
-          ["<leader>ap"] = {
-            function()
-              local actions = require "CopilotChat.actions"
-              require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-            end,
-            desc = "Select copilot prompt",
-          },
+          ["<leader>ac"] = { ":'<,'>CodeCompanionChat Toggle<CR>", desc = "Open code companion chat" },
+          ["<leader>ap"] = { ":'<,'>CodeCompanion<CR>", desc = "Code companion prompt" },
+          ["<leader>ak"] = { ":'<,'>CodeCompanionActions<CR>", desc = "Code companion action" },
+          ["ga"] = { ":'<,'>CodeCompanionChat Add<CR>", desc = "Add selection to AI chat" },
         },
         x = {
           -- do not override clipboard when pasting
