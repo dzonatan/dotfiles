@@ -6,9 +6,10 @@ return {
     opts = {
       suggestion = { auto_trigger = true },
       filetypes = { markdown = true },
+      copilot_model = "gpt-4o-copilot",
     },
   },
-  
+
   {
     "olimorris/codecompanion.nvim",
     dependencies = {
@@ -38,7 +39,7 @@ return {
       },
     },
   },
-  
+
   -- {
   --   "CopilotC-Nvim/CopilotChat.nvim",
   --   dependencies = {
