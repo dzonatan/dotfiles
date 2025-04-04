@@ -1,15 +1,10 @@
 {
   "editor.fontFamily": "FiraCode-Retina",
-  "editor.fontSize": 13,
   "editor.fontLigatures": true,
   "editor.renderWhitespace": "boundary",
   "editor.wordWrap": "on",
   "editor.formatOnSave": false,
   "explorer.openEditors.visible": 0,
-  "breadcrumbs.enabled": true,
-  "terminal.explorerKind": "external",
-  "terminal.external.linuxExec": "hyper",
-  "terminal.external.osxExec": "Hyper.app",
   "json.format.enable": false,
   "files.autoSave": "off",
   "vim.leader": " ",
@@ -24,30 +19,6 @@
       "before": ["k", "j"],
       "after": ["<Esc>"]
     }
-  ],
-  "vim.normalModeKeyBindingsNonRecursive": [
-    // {
-    //   "before": ["leader "],
-    //   "after": ["leader", "leader", "leader", "b", "d", "w"]
-    // },
-    // {
-    //   "before": [":"],
-    //   "commands": [
-    //     "workbench.action.showCommands",
-    //   ]
-    // },
-    // {
-    //   "before": ["<leader>", "m"],
-    //   "commands": [
-    //     "bookmarks.toggle"
-    //   ]
-    // }
-    // {
-    //   "before": ["<leader>", "b"],
-    //   "commands": [
-    //     "bookmarks.list"
-    //   ]
-    // }
   ],
   "vim.visualModeKeyBindingsNonRecursive": [
     {

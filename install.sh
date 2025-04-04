@@ -4,10 +4,8 @@ echo -e "\\nCreating symlinks"
 echo "=============================="
 symlinks=(
   ".zshrc" 
-  ".tmux.conf"
   ".gitconfig"
-  ".config/lvim"
-  ".config/kitty"
+  ".config/astronvim"
 )
 for file in ${symlinks[@]}; do
     from="$HOME/dotfiles/symlinks/$file"
