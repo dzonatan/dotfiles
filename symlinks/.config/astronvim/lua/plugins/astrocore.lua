@@ -125,7 +125,7 @@ return {
           function() require("snacks").picker.buffers() end,
           desc = "Search current buffers",
         },
-        
+
         -- CopilotChat
         ["<Leader>a"] = { desc = "(A)rtificial Inteligence" },
         ["<Leader>ac"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
@@ -133,10 +133,7 @@ return {
         ["<Leader>as"] = { ":CopilotChatStop<CR>", desc = "Stop copilot chat" },
         ["<Leader>am"] = { ":CopilotChatModels<CR>", desc = "Select copilot chat model" },
         ["<Leader>ap"] = {
-          function()
-            local actions = require "CopilotChat.actions"
-            require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-          end,
+          function() require("CopilotChat").select_prompt() end,
           desc = "Select copilot prompt",
         },
 
@@ -158,17 +155,14 @@ return {
           function() require("snacks").picker.grep_word { hidden = true, ignored = true } end,
           desc = "Find word under cursor (everything)",
         },
-        
-          -- CopilotChat
-          ["<Leader>a"] = { desc = "(A)rtificial Inteligence" },
-          ["<Leader>ac"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
-          ["<Leader>ap"] = {
-            function()
-              local actions = require "CopilotChat.actions"
-              require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-            end,
-            desc = "Select copilot prompt",
-          },
+
+        -- CopilotChat
+        ["<Leader>a"] = { desc = "(A)rtificial Inteligence" },
+        ["<Leader>ac"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
+        ["<Leader>ap"] = {
+          function() require("CopilotChat").select_prompt() end,
+          desc = "Select copilot prompt",
+        },
 
         -- CodeCompanion
         -- ["<Leader>a"] = { desc = "(A)rtificial Inteligence" },
