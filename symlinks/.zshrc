@@ -15,7 +15,6 @@ alias nv="nvim"
 alias v="NVIM_APPNAME=astronvim nvim"
 alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
-alias cdf="cd $(find . -type d -print | fzf)"
 
 # Custom key bindings
 bindkey '^@' autosuggest-accept

@@ -2,6 +2,15 @@
 return {
   "nvim-treesitter/nvim-treesitter",
   opts = {
+    ensure_installed = {
+      "lua",
+      "angular",
+      "css",
+      "html",
+      "javascript",
+      "typescript",
+      "tsx",
+    },
     textobjects = {
       select = {
         keymaps = {

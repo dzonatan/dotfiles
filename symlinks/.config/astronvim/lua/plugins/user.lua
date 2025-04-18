@@ -1,30 +1,37 @@
--- You can also add or configure plugins by creating files in this `plugins/` folder
--- Here are some examples:
-
 ---@type LazySpec
 return {
-  -- customize alpha options
   {
-    "goolord/alpha-nvim",
-    opts = function(_, opts)
-      -- customize the dashboard header
-      -- opts.section.header.val = {
-      --   "    ███    ██ ██    ██ ██ ███    ███",
-      --   "    ████   ██ ██    ██ ██ ████  ████",
-      --   "    ██ ██  ██ ██    ██ ██ ██ ████ ██",
-      --   "    ██  ██ ██  ██  ██  ██ ██  ██  ██",
-      --   "    ██   ████   ████   ██ ██      ██",
-      -- }
-      return opts
-    end,
+    "folke/snacks.nvim",
+    opts = {
+      dashboard = {
+        preset = {
+          header = table.concat({
+            "███    ██ ██    ██ ██ ███    ███",
+            "████   ██ ██    ██ ██ ████  ████",
+            "██ ██  ██ ██    ██ ██ ██ ████ ██",
+            "██  ██ ██  ██  ██  ██ ██  ██  ██",
+            "██   ████   ████   ██ ██      ██",
+          }, "\n"),
+        },
+      },
+    },
   },
 
   {
     "max397574/better-escape.nvim",
-    version = "1.0.0",
     config = function()
       require("better_escape").setup {
-        mapping = { "jk", "kj" },
+        default_mappings = false,
+        mappings = {
+          i = {
+            k = {
+              j = "<Esc>",
+            },
+            j = {
+              k = "<Esc>",
+            },
+          },
+        },
       }
     end,
   },
@@ -37,9 +44,12 @@ return {
   },
 
   {
-    "kylechui/nvim-surround",
-    version = "*", -- Use for stability; omit to use `main` branch for the latest features
-    event = "VeryLazy",
+    "stevearc/oil.nvim",
+    ---@module 'oil'
+    ---@type oil.SetupOpts
     opts = {},
+    -- Optional dependencies
+    dependencies = { { "echasnovski/mini.icons", opts = {} } },
+    -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
   },
 }
