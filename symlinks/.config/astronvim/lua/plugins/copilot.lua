@@ -10,35 +10,35 @@ return {
     },
   },
 
-  -- {
-  --   "olimorris/codecompanion.nvim",
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-treesitter/nvim-treesitter",
-  --   },
-  --   opts = {
-  --     strategies = {
-  --       chat = {
-  --         adapter = "copilot",
-  --       },
-  --       inline = {
-  --         adapter = "copilot",
-  --       },
-  --     },
-  --     adapters = {
-  --       copilot = function()
-  --         return require("codecompanion.adapters").extend("copilot", {
-  --           name = "copilot",
-  --           schema = {
-  --             model = {
-  --               default = "claude-3.7-sonnet",
-  --             },
-  --           },
-  --         })
-  --       end,
-  --     },
-  --   },
-  -- },
+  {
+    "olimorris/codecompanion.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    opts = {
+      strategies = {
+        chat = {
+          adapter = "copilot",
+        },
+        inline = {
+          adapter = "copilot",
+        },
+      },
+      adapters = {
+        copilot = function()
+          return require("codecompanion.adapters").extend("copilot", {
+            name = "copilot",
+            schema = {
+              model = {
+                default = "gpt-4.1",
+              },
+            },
+          })
+        end,
+      },
+    },
+  },
 
   {
     "CopilotC-Nvim/CopilotChat.nvim",
@@ -49,7 +49,7 @@ return {
     build = "make tiktoken", -- Only on MacOS or Linux
     opts = {
       -- set default model
-      model = "gpt-4.1",--"claude-3.7-sonnet",
+      model = "gpt-4.1", --"claude-3.7-sonnet",
       contexts = {
         -- custom contexts
         fileg = {
