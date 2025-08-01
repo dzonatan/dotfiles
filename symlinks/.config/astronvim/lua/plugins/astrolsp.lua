@@ -7,6 +7,9 @@ return {
       format_on_save = {
         enabled = false, -- enable or disable format on save globally
       },
+      disabled = {
+        "vtsls",
+      },
     },
   },
 }
