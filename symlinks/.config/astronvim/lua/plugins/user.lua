@@ -1,3 +1,16 @@
+function TwoFolderPathFileFormat(item, picker)
+  -- Format the file path to always show the first two directories instead of one (default)
+  -- this is useful for monorepos
+  local defaultFormat = require("snacks.picker.format").file(item, picker)
+  local pathParts = vim.split(item.file, "/")
+  if #pathParts > 3 then
+    local twoFolders = pathParts[1] .. "/" .. pathParts[2]
+    -- the second part of the path is always a folder
+    defaultFormat[2][1] = defaultFormat[2][1]:gsub(vim.pesc(pathParts[1]), twoFolders, 1)
+  end
+  return defaultFormat
+end
+
 ---@type LazySpec
 return {
   {
@@ -12,6 +25,16 @@ return {
             "██  ██ ██  ██  ██  ██ ██  ██  ██",
             "██   ████   ████   ██ ██      ██",
           }, "\n"),
+        },
+      },
+      picker = {
+        sources = {
+          files = {
+            format = TwoFolderPathFileFormat,
+          },
+          grep = {
+            format = TwoFolderPathFileFormat,
+          },
         },
       },
     },
@@ -58,9 +81,9 @@ return {
     version = "^3.0.0", -- Use for stability; omit to use `main` branch for the latest features
     event = "VeryLazy",
     config = function()
-        require("nvim-surround").setup({
-            -- Configuration here, or leave empty to use defaults
-        })
-    end
-  }
+      require("nvim-surround").setup {
+        -- Configuration here, or leave empty to use defaults
+      }
+    end,
+  },
 }
