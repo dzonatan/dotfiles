@@ -17,10 +17,16 @@
           pkgs.stow
           pkgs.jump
           pkgs.starship
+          pkgs.zinit
+          pkgs.fzf
           pkgs.neovim
           pkgs.lazygit
           pkgs.bottom
           pkgs.gh
+          pkgs.nodejs_22
+          pkgs.bun
+          pkgs.pnpm
+          pkgs.claude-code
           pkgs.bitwarden-desktop
           pkgs.keepassxc
           pkgs.spotify
