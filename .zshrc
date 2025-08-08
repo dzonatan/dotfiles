@@ -1,6 +1,5 @@
 # Aliases
-alias nv="nvim"
-alias av="NVIM_APPNAME=astronvim nvim"
+alias v="NVIM_APPNAME=astronvim nvim"
 alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
 alias cl="claude"

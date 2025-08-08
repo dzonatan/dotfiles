@@ -14,8 +14,10 @@
       # $ nix-env -qaP | grep wget
       environment.systemPackages =
         [
+          pkgs.git
           pkgs.stow
           pkgs.jump
+          pkgs.ripgrep
           pkgs.starship
           pkgs.zinit
           pkgs.fzf
@@ -71,6 +73,7 @@
         dock.autohide = true;
         finder.AppleShowAllExtensions = true;
         NSGlobalDomain."com.apple.swipescrolldirection" = false;
+        NSGlobalDomain.AppleInterfaceStyle = "Dark";
       };
 
       # The platform the configuration will be used on.
