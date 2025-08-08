@@ -1,15 +1,3 @@
-# Path to your oh-my-zsh installation.
-# export ZSH="$HOME/.oh-my-zsh"
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-# plugins=(git zsh-autosuggestions)
-
-# source $ZSH/oh-my-zsh.sh
-
 # Aliases
 alias nv="nvim"
 alias av="NVIM_APPNAME=astronvim nvim"
@@ -32,14 +20,8 @@ eval "$(starship init zsh)"
 ## fzf integration
 eval  "$(fzf --zsh)"
 
-## Syntax highlighting
-# source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
 # Private stuff that shouldn't be public
 #source ~/.zshrc_private
-
-# bun completions
-# [ -s "/Users/dzonatan/.bun/_bun" ] && source "/Users/dzonatan/.bun/_bun"
 
 # zinit
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
