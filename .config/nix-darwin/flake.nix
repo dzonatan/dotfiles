@@ -37,16 +37,22 @@
 
       homebrew = {
         enable = true;
+        taps = [
+          "sst/tap"
+        ];
         brews = [
-	        "batt"
+	        "batt" # also read the notes to enable service https://github.com/charlie0129/batt
 	        "ollama"
+	        "sst/tap/opencode"
         ];
         casks = [
 	        "ghostty"
 	        "arc"
-	        "zen"
+	        #"zen"
 	        "raycast"
 	        "claude-code"
+	        "yubico-authenticator"
+	        "shottr"
         ];
       };
 
@@ -74,6 +80,8 @@
         finder.AppleShowAllExtensions = true;
         NSGlobalDomain."com.apple.swipescrolldirection" = false;
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
+        controlcenter.BatteryShowPercentage = true;
+        controlcenter.Sound = true;
       };
 
       # The platform the configuration will be used on.
