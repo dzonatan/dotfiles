@@ -48,7 +48,6 @@
         casks = [
 	        "ghostty"
 	        "arc"
-	        #"zen"
 	        "raycast"
 	        "claude-code"
 	        "yubico-authenticator"
@@ -73,15 +72,26 @@
       # Used for backwards compatibility, please read the changelog before changing.
       # $ darwin-rebuild changelog
       system.stateVersion = 6;
-      
+
       system.primaryUser = "Rokas";
       system.defaults = {
         dock.autohide = true;
+
         finder.AppleShowAllExtensions = true;
+        finder.ShowPathbar = true;
+
         NSGlobalDomain."com.apple.swipescrolldirection" = false;
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
+        NSGlobalDomain.KeyRepeat = 2;
+ 
         controlcenter.BatteryShowPercentage = true;
         controlcenter.Sound = true;
+ 
+        CustomUserPreferences = {
+          "NSGlobalDomain" = {
+            NSQuitAlwaysKeepsWindows = true;
+          };
+        };
       };
 
       # The platform the configuration will be used on.
