@@ -21,6 +21,7 @@
           pkgs.starship
           pkgs.zinit
           pkgs.fzf
+          pkgs.yazi
           pkgs.neovim
           pkgs.lazygit
           pkgs.bottom
@@ -32,7 +33,6 @@
           pkgs.keepassxc
           pkgs.spotify
           pkgs.openscad-unstable
-          pkgs.slack
         ];
 
       homebrew = {

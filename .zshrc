@@ -19,6 +19,15 @@ eval "$(starship init zsh)"
 ## fzf integration
 eval  "$(fzf --zsh)"
 
+## yazi shorcut with support of current working directory change
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
 # Private stuff that shouldn't be public
 #source ~/.zshrc_private
 
