@@ -1,2 +1,5 @@
 .netrwhist
 .DS_Store
+.config/raycast
+.config/github-copilot
+.config/gh
