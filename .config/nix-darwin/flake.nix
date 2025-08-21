@@ -73,6 +73,9 @@
       # $ darwin-rebuild changelog
       system.stateVersion = 6;
 
+      system.keyboard.enableKeyMapping = true;
+      system.keyboard.remapCapsLockToControl = true;
+
       system.primaryUser = "Rokas";
       system.defaults = {
         dock.autohide = true;
