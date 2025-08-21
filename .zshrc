@@ -3,6 +3,7 @@ alias v="NVIM_APPNAME=astronvim nvim"
 alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
 alias cl="claude"
+alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 
 # emacs mode (^f for accept suggestion)
 bindkey -e
@@ -18,6 +19,9 @@ eval "$(starship init zsh)"
 
 ## fzf integration
 eval  "$(fzf --zsh)"
+
+## homebrew integration
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 ## yazi shorcut with support of current working directory change
 function y() {

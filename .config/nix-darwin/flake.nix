@@ -86,6 +86,7 @@
         NSGlobalDomain."com.apple.swipescrolldirection" = false;
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
         NSGlobalDomain.KeyRepeat = 2;
+        NSGlobalDomain.InitialKeyRepeat = 15;
  
         controlcenter.BatteryShowPercentage = true;
         controlcenter.Sound = true;
@@ -93,6 +94,14 @@
         CustomUserPreferences = {
           "NSGlobalDomain" = {
             NSQuitAlwaysKeepsWindows = true;
+          };
+          "com.apple.symbolichotkeys" = {
+            AppleSymbolicHotKeys = {
+              # Disable 'Cmd + Space' for Spotlight Search
+              "64" = {
+                enabled = false;
+              };
+            };
           };
         };
       };
@@ -103,8 +112,8 @@
   in
   {
     # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#dzonatan-m4
-    darwinConfigurations."dzonatan-m4" = nix-darwin.lib.darwinSystem {
+    # $ darwin-rebuild build --flake .#dzonatan
+    darwinConfigurations."dzonatan" = nix-darwin.lib.darwinSystem {
       modules = [ configuration ];
     };
   };
