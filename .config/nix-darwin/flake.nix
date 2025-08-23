@@ -97,6 +97,10 @@
           };
           "com.apple.symbolichotkeys" = {
             AppleSymbolicHotKeys = {
+              # Disable '^ + Space' for selecting the previous input source
+              "60" = {
+                enabled = false;
+              };
               # Disable 'Cmd + Space' for Spotlight Search
               "64" = {
                 enabled = false;
