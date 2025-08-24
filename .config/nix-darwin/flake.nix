@@ -33,6 +33,9 @@
           pkgs.keepassxc
           pkgs.spotify
           pkgs.openscad-unstable
+          pkgs.podman
+          pkgs.podman-compose
+          pkgs.podman-tui
         ];
 
       homebrew = {

@@ -3,3 +3,6 @@
 .config/raycast
 .config/github-copilot
 .config/gh
+.config/containers/podman-connections.json.lock
+.config/containers/podman-connections.json
+.config/containers/podman/machine/applehv
