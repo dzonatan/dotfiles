@@ -33,7 +33,7 @@ function y() {
 }
 
 # Private stuff that shouldn't be public
-#source ~/.zshrc_private
+source ~/.zshrc_private
 
 # zinit
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
