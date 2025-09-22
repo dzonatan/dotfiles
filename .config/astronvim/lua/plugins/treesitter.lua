@@ -13,6 +13,7 @@ return {
     },
     textobjects = {
       select = {
+        enable = true,
         keymaps = {
           ["a="] = { query = "@assignment.outer", desc = "Select outer part of an assignment" },
           ["i="] = { query = "@assignment.inner", desc = "Select inner part of an assignment" },
@@ -24,6 +25,14 @@ return {
 
           ["aa"] = { query = "@attribute.outer", desc = "Select outer part of an attribute" },
           ["ia"] = { query = "@attribute.inner", desc = "Select inner part of an attribute" },
+
+          ["ai"] = { query = "@conditional.outer", desc = "Select around if" },
+          ["ii"] = { query = "@conditional.inner", desc = "Select inside if" },
+
+          ["al"] = { query = "@loop.outer", desc = "Select around loop" },
+          ["il"] = { query = "@loop.inner", desc = "Select inside loop" },
+
+          ["ak"] = { query = "@comment.outer", desc = "Select around comment" },
         },
       },
     },
