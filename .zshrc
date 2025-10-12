@@ -5,6 +5,9 @@ alias lg="lazygit"
 alias cl="claude"
 alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 
+# Set default editor
+export EDITOR="v"
+
 # emacs mode (^f for accept suggestion)
 bindkey -e
 
