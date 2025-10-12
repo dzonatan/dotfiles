@@ -142,7 +142,7 @@ return {
         ["<Leader>ak"] = { ":CodeCompanionActions<CR>", desc = "Code companion action" },
       },
       i = {
-        ["<C-CR>"] = { function() require("copilot.suggestion").accept() end, desc = "Accept Copilot suggestion" },
+        ["<C-f>"] = { function() require("copilot.suggestion").accept() end, desc = "Accept Copilot suggestion" },
       },
       v = {
         ["<Leader>f"] = {
