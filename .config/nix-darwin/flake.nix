@@ -17,6 +17,7 @@
           pkgs.git
           pkgs.stow
           pkgs.jump
+          pkgs.nnn
           pkgs.ripgrep
           pkgs.starship
           pkgs.zinit
