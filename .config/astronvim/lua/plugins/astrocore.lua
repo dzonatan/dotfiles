@@ -118,7 +118,7 @@ return {
         },
         -- ["<Leader>sm"] = { function() toggle_telescope(harpoon:list()) end, desc = "Find in harpoon" },
         ["<Leader><Leader>"] = {
-          function() require("snacks").picker.smart() end,
+          function() require("snacks").picker.buffers() end,
           desc = "Smart search",
         },
         ["<Leader>sb"] = {
