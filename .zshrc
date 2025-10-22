@@ -12,7 +12,7 @@ export EDITOR="v"
 bindkey -e
 
 # Custom PATHS
-# export PATH=$HOME/.local/bin:$PATH
+export PATH="$HOME/.npm-packages/bin:$PATH"
 
 ## Jump https://github.com/gsamokovarov/jump
 eval "$(jump shell)"
