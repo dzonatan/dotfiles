@@ -32,7 +32,6 @@
           pkgs.pnpm
           pkgs.bitwarden-desktop
           pkgs.keepassxc
-          pkgs.spotify
           pkgs.openscad-unstable
           pkgs.podman
           pkgs.podman-compose
@@ -44,6 +43,7 @@
         enable = true;
         taps = [
           "sst/tap"
+          "nikitabobko/tap"
         ];
         brews = [
 	        "batt" # also read the notes to enable service https://github.com/charlie0129/batt
@@ -57,6 +57,8 @@
 	        "claude-code"
 	        "yubico-authenticator"
 	        "shottr"
+	        "spotify"
+	        "nikitabobko/tap/aerospace"
         ];
       };
 
