@@ -53,8 +53,12 @@ return {
         ["[b"] = false,
 
         ["<C-q>"] = { function() toggle_quick_fix() end, desc = "Toggle quick fix list" },
+        ["∆"] = { "<cmd>cnext<cr>", desc = "Next quickfix item" },
+        ["˚"] = { "<cmd>cprev<cr>", desc = "Previous quickfix item" },
+
         ["<S-h>"] = { function() require("astrocore.buffer").nav(-vim.v.count1) end, desc = "Previous buffer" },
         ["<S-l>"] = { function() require("astrocore.buffer").nav(vim.v.count1) end, desc = "Next buffer" },
+
 
         -- harpoon
         ["<Leader>m"] = { desc = "Harpoon" },
