@@ -37,6 +37,7 @@
           pkgs.podman-compose
           pkgs.podman-tui
           pkgs.amp-cli
+          pkgs.awscli2
         ];
 
       homebrew = {
