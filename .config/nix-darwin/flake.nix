@@ -38,6 +38,7 @@
           pkgs.podman-tui
           pkgs.amp-cli
           pkgs.awscli2
+          pkgs.google-chrome
         ];
 
       homebrew = {
