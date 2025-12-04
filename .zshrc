@@ -8,7 +8,7 @@ alias cl="claude"
 alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 
 # Set default editor
-export EDITOR="v"
+export EDITOR="NVIM_APPNAME=astronvim nvim"
 
 # emacs mode (^f for accept suggestion)
 bindkey -e
@@ -39,6 +39,9 @@ function y() {
 
 # Private stuff that shouldn't be public
 source ~/.zshrc_private
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
 
 # zinit
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
