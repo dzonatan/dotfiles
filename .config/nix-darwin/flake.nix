@@ -61,6 +61,7 @@
 	        "shottr"
 	        "spotify"
 	        "nikitabobko/tap/aerospace"
+	        "signal"
         ];
       };
 
