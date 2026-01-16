@@ -1,6 +1,8 @@
 theme = gruvbox
 font-size = 17
 
+split-divider-color = #d5c4a1
+
 # tmux like keymaps
 keybind = ctrl+a>l=goto_split:right
 keybind = ctrl+a>h=goto_split:left
