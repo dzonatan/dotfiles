@@ -33,10 +33,16 @@
           pkgs.bitwarden-desktop
           pkgs.keepassxc
           pkgs.openscad-unstable
+
+          # Container tools
           pkgs.podman
           pkgs.podman-compose
           pkgs.podman-tui
-          pkgs.amp-cli
+          pkgs.colima
+          pkgs.docker
+          pkgs.docker-compose
+          pkgs.lazydocker
+
           pkgs.awscli2
           pkgs.google-chrome
           pkgs.tmux

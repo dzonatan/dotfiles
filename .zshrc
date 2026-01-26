@@ -15,6 +15,8 @@ bindkey -e
 
 # Custom PATHS
 export PATH="$HOME/.npm-packages/bin:$PATH"
+export PATH="$(brew --prefix)/opt/openjdk@25/bin:$PATH"
+export JAVA_HOME="$(brew --prefix)/opt/openjdk@25"
 
 ## Jump https://github.com/gsamokovarov/jump
 eval "$(jump shell)"
