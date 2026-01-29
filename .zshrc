@@ -15,8 +15,15 @@ bindkey -e
 
 # Custom PATHS
 export PATH="$HOME/.npm-packages/bin:$PATH"
-export PATH="$(brew --prefix)/opt/openjdk@25/bin:$PATH"
-export JAVA_HOME="$(brew --prefix)/opt/openjdk@25"
+export PATH="$(/opt/homebrew/bin/brew --prefix)/opt/openjdk@25/bin:$PATH"
+export JAVA_HOME="$(/opt/homebrew/bin/brew --prefix)/opt/openjdk@25"
+# pnpm
+export PNPM_HOME="/Users/dzonatan/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
 
 ## Jump https://github.com/gsamokovarov/jump
 eval "$(jump shell)"
@@ -59,3 +66,4 @@ zinit light Aloxaf/fzf-tab
 
 # zinit configuration
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
