@@ -21,6 +21,7 @@
           pkgs.ripgrep
           pkgs.starship
           pkgs.zinit
+          pkgs.tmux
           pkgs.fzf
           pkgs.yazi
           pkgs.neovim
@@ -43,9 +44,12 @@
           pkgs.docker-compose
           pkgs.lazydocker
 
+          # DBs
+          pkgs.pgcli
+          pkgs.mycli
+
           pkgs.awscli2
           pkgs.google-chrome
-          pkgs.tmux
         ];
 
       homebrew = {
