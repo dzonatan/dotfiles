@@ -16,7 +16,7 @@
         [
           pkgs.git
           pkgs.stow
-          pkgs.jump
+          pkgs.zoxide
           pkgs.nnn
           pkgs.ripgrep
           pkgs.starship
