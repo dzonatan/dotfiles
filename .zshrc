@@ -25,14 +25,14 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-## Jump https://github.com/gsamokovarov/jump
-eval "$(jump shell)"
+## Zoxide
+eval "$(zoxide init zsh --cmd j)"
 
 ## Starship prompt
 eval "$(starship init zsh)"
 
 ## fzf integration
-eval  "$(fzf --zsh)"
+eval "$(fzf --zsh)"
 
 ## homebrew integration
 eval "$(/opt/homebrew/bin/brew shellenv)"

@@ -1,7 +1,9 @@
 theme = gruvbox
 font-size = 16
+macos-option-as-alt = true
 
 split-divider-color = #d5c4a1
+unfocused-split-opacity = 0.85
 
 # tmux like keymaps
 keybind = ctrl+a>l=goto_split:right
