@@ -5,6 +5,8 @@ alias lvim="NVIM_APPNAME=lazyvim nvim"
 alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
 alias cl="claude"
+alias nnn="yazi"
+alias ya="yazi"
 alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 
 # Set default editor

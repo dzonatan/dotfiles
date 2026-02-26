@@ -17,7 +17,6 @@
           pkgs.git
           pkgs.stow
           pkgs.zoxide
-          pkgs.nnn
           pkgs.ripgrep
           pkgs.starship
           pkgs.zinit
