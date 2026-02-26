@@ -46,7 +46,7 @@
 
           # DBs
           pkgs.pgcli
-          pkgs.mycli
+          # pkgs.mycli # temporarily disabled: sqlglot version mismatch
 
           pkgs.awscli2
           pkgs.google-chrome
