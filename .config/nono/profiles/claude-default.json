@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "name": "claude-default",
+    "version": "1.0.0",
+    "description": "Anthropic Claude Code CLI agent"
+  },
+  "security": {
+    "groups": [
+      "user_caches_macos",
+      "node_runtime",
+      "rust_runtime",
+      "python_runtime",
+      "vscode",
+      "unlink_protection"
+    ]
+  },
+  "trust_groups": [],
+  "filesystem": {
+    "allow": ["$WORKDIR", "$HOME/.claude"],
+    "read": [
+      "$HOME/.local/share/claude",
+      "$HOME/.npm-packages",
+      "$HOME/.npm",
+      "/run/current-system/sw/bin",
+      "/nix"
+    ],
+    "allow_file": ["$HOME/.claude.json", "$HOME/.claude/settings.json"],
+    "read_file": [
+      "$HOME/Library/Keychains/login.keychain-db",
+      "$HOME/.gitconfig",
+      "$HOME/.gitignore_global",
+      "$HOME/.config/git/ignore",
+      "$HOME/.npmrc"
+    ]
+  },
+  "network": { "block": false },
+  "workdir": { "access": "readwrite" },
+  "undo": {
+    "exclude_patterns": ["node_modules", ".next", "__pycache__", "target"],
+    "exclude_globs": ["*.tmp.[0-9]*.[0-9]*"]
+  },
+  "interactive": true
+}
