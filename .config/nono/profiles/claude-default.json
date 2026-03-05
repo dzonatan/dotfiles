@@ -17,20 +17,15 @@
   "trust_groups": [],
   "filesystem": {
     "allow": ["$WORKDIR", "$HOME/.claude"],
-    "read": [
-      "$HOME/.local/share/claude",
-      "$HOME/.npm-packages",
-      "$HOME/.npm",
-      "/run/current-system/sw/bin",
-      "/nix"
-    ],
+    "read": ["$HOME/.local/share/claude", "$HOME/.npm-packages", "$HOME/.npm"],
     "allow_file": ["$HOME/.claude.json", "$HOME/.claude/settings.json"],
     "read_file": [
       "$HOME/Library/Keychains/login.keychain-db",
       "$HOME/.gitconfig",
       "$HOME/.gitignore_global",
       "$HOME/.config/git/ignore",
-      "$HOME/.npmrc"
+      "$HOME/.npmrc",
+      "$HOME/.claude/statusline.sh"
     ]
   },
   "network": { "block": false },
