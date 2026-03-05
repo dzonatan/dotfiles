@@ -56,11 +56,13 @@
         taps = [
           "sst/tap"
           "nikitabobko/tap"
+	        "always-further/nono"
         ];
         brews = [
 	        "batt" # also read the notes to enable service https://github.com/charlie0129/batt
 	        "ollama"
 	        "sst/tap/opencode"
+	        "llmfit"
         ];
         casks = [
 	        "ghostty"
@@ -72,6 +74,7 @@
 	        "spotify"
 	        "nikitabobko/tap/aerospace"
 	        "signal"
+	        "claude"
         ];
       };
 
