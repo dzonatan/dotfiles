@@ -1,29 +1,11 @@
 {
-  "meta": {
-    "name": "claude-default",
-    "version": "1.0.0",
-    "description": "Anthropic Claude Code CLI agent"
-  },
-  "security": {
-    "groups": [
-      "user_caches_macos",
-      "node_runtime",
-      "rust_runtime",
-      "python_runtime",
-      "vscode",
-      "unlink_protection"
-    ]
-  },
-  "trust_groups": [],
+  "extends": "claude-code",
+  "meta": { "name": "claude-ng" },
   "filesystem": {
-    "allow": ["$WORKDIR", "$HOME/.claude"],
-    "read": ["$HOME/.local/share/claude", "$HOME/.npm-packages", "$HOME/.npm"],
-    "allow_file": ["$HOME/.claude.json", "$HOME/.claude/settings.json"],
+    "allow": ["$WORKDIR"],
+    "read": ["$HOME/.npm-packages", "$HOME/.npm"],
+    "allow_file": ["$HOME/.claude/settings.json", "$HOME/.angular-config.json"],
     "read_file": [
-      "$HOME/Library/Keychains/login.keychain-db",
-      "$HOME/.gitconfig",
-      "$HOME/.gitignore_global",
-      "$HOME/.config/git/ignore",
       "$HOME/.npmrc",
       "$HOME/.claude/statusline.sh"
     ]
