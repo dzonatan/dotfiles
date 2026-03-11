@@ -2,13 +2,15 @@
   "extends": "claude-code",
   "meta": { "name": "claude-ng" },
   "filesystem": {
-    "allow": ["$WORKDIR"],
-    "read": ["$HOME/.npm-packages", "$HOME/.npm"],
+    "allow": [
+      "$WORKDIR",
+      "$HOME/.npm/_logs",
+      "$HOME/.npm/_npx",
+      "$HOME/.npm/_cacache"
+    ],
+    "read": ["$HOME/.npm-packages", "$HOME/.npm", "/run"],
     "allow_file": ["$HOME/.claude/settings.json", "$HOME/.angular-config.json"],
-    "read_file": [
-      "$HOME/.npmrc",
-      "$HOME/.claude/statusline.sh"
-    ]
+    "read_file": ["$HOME/.npmrc", "$HOME/.claude/statusline.sh"]
   },
   "network": { "block": false },
   "workdir": { "access": "readwrite" },
