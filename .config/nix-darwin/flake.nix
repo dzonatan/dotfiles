@@ -34,6 +34,9 @@
           pkgs.keepassxc
           pkgs.openscad-unstable
 
+          # Rust
+          pkgs.cargo
+
           # Container tools
           pkgs.podman
           pkgs.podman-compose
