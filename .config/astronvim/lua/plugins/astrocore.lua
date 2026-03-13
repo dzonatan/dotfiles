@@ -120,7 +120,7 @@ return {
           function() require("snacks").picker.diagnostics_buffer() end,
           desc = "Find document symbols",
         },
-        -- ["<Leader>sm"] = { function() toggle_telescope(harpoon:list()) end, desc = "Find in harpoon" },
+        ["<Leader>sm"] = { function() Snacks.notifier.show_history() end, desc = "Show messages" },
         ["<Leader><Leader>"] = {
           function() require("snacks").picker.buffers() end,
           desc = "Smart search",
