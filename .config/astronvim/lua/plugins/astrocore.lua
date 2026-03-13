@@ -131,15 +131,6 @@ return {
         },
 
         ["<Leader>a"] = { desc = "(A)rtificial Inteligence" },
-        -- CopilotChat
-        -- ["<Leader>ac"] = { ":CopilotChatToggle<CR>", desc = "Toggle copilot chat" },
-        -- ["<Leader>ax"] = { ":CopilotChatReset<CR>", desc = "Reset copilot chat" },
-        -- ["<Leader>as"] = { ":CopilotChatStop<CR>", desc = "Stop copilot chat" },
-        -- ["<Leader>am"] = { ":CopilotChatModels<CR>", desc = "Select copilot chat model" },
-        -- ["<Leader>ap"] = {
-        --   function() require("CopilotChat").select_prompt() end,
-        --   desc = "Select copilot prompt",
-        -- },
         -- CodeCompanion
         ["<Leader>ac"] = { ":CodeCompanionChat Toggle<CR>", desc = "Open code companion chat" },
         ["<Leader>ap"] = { ":CodeCompanion<CR>", desc = "Code companion prompt" },
@@ -159,12 +150,6 @@ return {
         },
 
         ["<Leader>a"] = { desc = "(A)rtificial Inteligence" },
-        -- CopilotChat
-        -- ["<Leader>ac"] = { ":CopilotChat<CR>", desc = "Open copilot chat" },
-        -- ["<Leader>ap"] = {
-        --   function() require("CopilotChat").select_prompt() end,
-        --   desc = "Select copilot prompt",
-        -- },
         -- CodeCompanion
         ["<Leader>ac"] = { ":'<,'>CodeCompanionChat Toggle<CR>", desc = "Open code companion chat" },
         ["<Leader>ap"] = { ":'<,'>CodeCompanion<CR>", desc = "Code companion prompt" },
