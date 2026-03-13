@@ -6,7 +6,7 @@ return {
     opts = {
       suggestion = { auto_trigger = true },
       filetypes = { markdown = true },
-      copilot_model = "gpt-4o-copilot",
+      copilot_model = "gpt-41-copilot",
     },
   },
 
