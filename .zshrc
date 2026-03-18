@@ -4,11 +4,14 @@ alias avim="NVIM_APPNAME=astronvim nvim"
 alias lvim="NVIM_APPNAME=lazyvim nvim"
 alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
-alias cl="claude"
-alias ncl="nono run --profile claude-default -- claude --dangerously-skip-permissions"
 alias nnn="yazi"
 alias ya="yazi"
 alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
+alias cl="claude"
+alias ncl="nono run --profile claude-default -- claude --dangerously-skip-permissions"
+clt() {
+  CLAUDE_CODE_TASK_LIST_ID="$1" claude "${@:2}"
+}
 
 # Set default editor
 export EDITOR="NVIM_APPNAME=astronvim nvim"
