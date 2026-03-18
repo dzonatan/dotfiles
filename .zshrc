@@ -18,8 +18,8 @@ bindkey -e
 
 # Custom PATHS
 export PATH="$HOME/.npm-packages/bin:$PATH"
-export PATH="$(/opt/homebrew/bin/brew --prefix)/opt/openjdk@25/bin:$PATH"
-export JAVA_HOME="$(/opt/homebrew/bin/brew --prefix)/opt/openjdk@25"
+export PATH="/opt/homebrew/opt/openjdk@25/bin:$PATH"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@25"
 # pnpm
 export PNPM_HOME="/Users/dzonatan/Library/pnpm"
 case ":$PATH:" in
@@ -52,8 +52,12 @@ function y() {
 # Private stuff that shouldn't be public
 source ~/.zshrc_private
 
-# Load Angular CLI autocompletion.
-source <(ng completion script)
+# Lazy-load Angular CLI autocompletion (only when ng is first used)
+ng() {
+  unfunction ng
+  source <(command ng completion script)
+  command ng "$@"
+}
 
 # zinit
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -80,4 +84,3 @@ if command -v dcg &>/dev/null && command -v jq &>/dev/null; then
     printf '\033[1;33m[dcg] Hook missing from ~/.claude/settings.json — run: dcg install\033[0m\n'
   fi
 fi
-
