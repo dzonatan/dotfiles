@@ -6,9 +6,15 @@
       "$WORKDIR",
       "$HOME/.npm/_logs",
       "$HOME/.npm/_npx",
-      "$HOME/.npm/_cacache"
+      "$HOME/.npm/_cacache",
+      "$HOME/.cache/chrome-devtools-mcp/chrome-profile"
     ],
-    "read": ["$HOME/.npm-packages", "$HOME/.npm", "/run"],
+    "read": [
+      "$HOME/.npm-packages",
+      "$HOME/.npm",
+      "/run",
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    ],
     "allow_file": ["$HOME/.claude/settings.json", "$HOME/.angular-config.json"],
     "read_file": ["$HOME/.npmrc", "$HOME/.claude/statusline.sh"]
   },
@@ -17,6 +23,9 @@
   "undo": {
     "exclude_patterns": ["node_modules", ".next", "__pycache__", "target"],
     "exclude_globs": ["*.tmp.[0-9]*.[0-9]*"]
+  },
+  "policy": {
+    "override_deny": ["$HOME/.npmrc"]
   },
   "interactive": true
 }
