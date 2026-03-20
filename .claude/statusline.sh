@@ -27,18 +27,36 @@ if cd "$CURRENT_DIR" 2>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; th
     fi
 fi
 
-# ANSI codes
-BOLD="\033[1m"
-RESET="\033[0m"
+# Get 5-hour rate limit usage and reset time
+RATE_LIMIT=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+RESETS_AT=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 
-# Build output with bold values
-# Using \e[1m for bold, \e[22m to turn off bold only (preserves other attributes)
+# ANSI codes
 BOLD=$'\e[1m'
 UNBOLD=$'\e[22m'
 
-OUTPUT="folder:${BOLD}${FOLDER_NAME}${UNBOLD} branch:${BOLD}${GIT_BRANCH}${GIT_STATUS_FLAG}${UNBOLD}"
-if [ -z "$GIT_BRANCH" ]; then
-    OUTPUT="folder:${BOLD}${FOLDER_NAME}${UNBOLD}"
+OUTPUT="folder:${BOLD}${FOLDER_NAME}${UNBOLD}"
+if [ -n "$GIT_BRANCH" ]; then
+    OUTPUT="${OUTPUT} branch:${BOLD}${GIT_BRANCH}${GIT_STATUS_FLAG}${UNBOLD}"
+fi
+if [ -n "$RATE_LIMIT" ]; then
+    USAGE_STR="usage:${BOLD}${RATE_LIMIT}%${UNBOLD}"
+    if [ -n "$RESETS_AT" ] && [ "$RESETS_AT" != "null" ]; then
+        # resets_at is a Unix epoch timestamp
+        RESET_EPOCH="$RESETS_AT"
+        NOW_EPOCH=$(date "+%s")
+        if [ "$RESET_EPOCH" -gt "$NOW_EPOCH" ] 2>/dev/null; then
+            REMAINING=$(( RESET_EPOCH - NOW_EPOCH ))
+            HOURS=$(( REMAINING / 3600 ))
+            MINS=$(( (REMAINING % 3600) / 60 ))
+            if [ "$HOURS" -gt 0 ]; then
+                USAGE_STR="${USAGE_STR}(${HOURS}h${MINS}m)"
+            else
+                USAGE_STR="${USAGE_STR}(${MINS}m)"
+            fi
+        fi
+    fi
+    OUTPUT="${OUTPUT} ${USAGE_STR}"
 fi
 
 printf '%s\n' "$OUTPUT"
