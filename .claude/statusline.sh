@@ -40,6 +40,7 @@ if [ -n "$GIT_BRANCH" ]; then
     OUTPUT="${OUTPUT} branch:${BOLD}${GIT_BRANCH}${GIT_STATUS_FLAG}${UNBOLD}"
 fi
 if [ -n "$RATE_LIMIT" ]; then
+    RATE_LIMIT=$(printf '%.0f' "$RATE_LIMIT")
     USAGE_STR="usage:${BOLD}${RATE_LIMIT}%${UNBOLD}"
     if [ -n "$RESETS_AT" ] && [ "$RESETS_AT" != "null" ]; then
         # resets_at is a Unix epoch timestamp
