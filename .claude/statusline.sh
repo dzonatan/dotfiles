@@ -27,6 +27,9 @@ if cd "$CURRENT_DIR" 2>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; th
     fi
 fi
 
+# Get context remaining percentage
+CTX_LEFT=$(echo "$input" | jq -r '.context_window.remaining_percentage // empty')
+
 # Get 5-hour rate limit usage and reset time
 RATE_LIMIT=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 RESETS_AT=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
@@ -38,6 +41,10 @@ UNBOLD=$'\e[22m'
 OUTPUT="folder:${BOLD}${FOLDER_NAME}${UNBOLD}"
 if [ -n "$GIT_BRANCH" ]; then
     OUTPUT="${OUTPUT} branch:${BOLD}${GIT_BRANCH}${GIT_STATUS_FLAG}${UNBOLD}"
+fi
+if [ -n "$CTX_LEFT" ]; then
+    CTX_LEFT=$(printf '%.0f' "$CTX_LEFT")
+    OUTPUT="${OUTPUT} ctx:${BOLD}${CTX_LEFT}%${UNBOLD}"
 fi
 if [ -n "$RATE_LIMIT" ]; then
     RATE_LIMIT=$(printf '%.0f' "$RATE_LIMIT")
