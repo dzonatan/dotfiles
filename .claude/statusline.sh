@@ -43,8 +43,8 @@ if [ -n "$GIT_BRANCH" ]; then
     OUTPUT="${OUTPUT} branch:${BOLD}${GIT_BRANCH}${GIT_STATUS_FLAG}${UNBOLD}"
 fi
 if [ -n "$CTX_LEFT" ]; then
-    CTX_LEFT=$(printf '%.0f' "$CTX_LEFT")
-    OUTPUT="${OUTPUT} ctx:${BOLD}${CTX_LEFT}%${UNBOLD}"
+    CTX_USED=$(printf '%.0f' "$(echo "100 - $CTX_LEFT" | bc)")
+    OUTPUT="${OUTPUT} ctx:${BOLD}${CTX_USED}%${UNBOLD}"
 fi
 if [ -n "$RATE_LIMIT" ]; then
     RATE_LIMIT=$(printf '%.0f' "$RATE_LIMIT")
