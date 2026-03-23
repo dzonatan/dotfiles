@@ -18,10 +18,10 @@ keybind = ctrl+alt+h=goto_split:left
 keybind = ctrl+alt+j=goto_split:bottom
 keybind = ctrl+alt+k=goto_split:top
 keybind = shift+enter=text:\n
-keybind = cmd+alt+l=goto_split:right
-keybind = cmd+alt+h=goto_split:left
-keybind = cmd+alt+j=goto_split:bottom
-keybind = cmd+alt+k=goto_split:top
+keybind = cmd+ctrl+l=goto_split:right
+keybind = cmd+ctrl+h=goto_split:left
+keybind = cmd+ctrl+j=goto_split:bottom
+keybind = cmd+ctrl+k=goto_split:top
 
 # scroll up/down
 keybind = page_up=scroll_page_lines:-5
