@@ -111,6 +111,7 @@
 
         NSGlobalDomain."com.apple.swipescrolldirection" = false;
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
+        NSGlobalDomain.ApplePressAndHoldEnabled = false;
         NSGlobalDomain.KeyRepeat = 2;
         NSGlobalDomain.InitialKeyRepeat = 15;
  
