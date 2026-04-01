@@ -71,7 +71,7 @@
 	        "ghostty"
 	        "arc"
 	        "raycast"
-	        "claude-code"
+	        "claude-code@latest"
 	        "yubico-authenticator"
 	        "shottr"
 	        "spotify"
