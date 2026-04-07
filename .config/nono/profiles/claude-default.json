@@ -12,11 +12,10 @@
     "read": [
       "$HOME/.npm-packages",
       "$HOME/.npm",
-      "/run",
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      "/run"
     ],
     "allow_file": ["$HOME/.claude/settings.json", "$HOME/.angular-config.json"],
-    "read_file": ["$HOME/.npmrc", "$HOME/.claude/statusline.sh"]
+    "read_file": ["$HOME/.npmrc", "$HOME/.claude/statusline.sh", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
   },
   "network": { "block": false },
   "workdir": { "access": "readwrite" },
