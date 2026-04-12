@@ -15,7 +15,7 @@
       "$HOME/Library/pnpm/",
       "/run"
     ],
-    "allow_file": ["$HOME/.angular-config.json"],
+    "allow_file": ["$HOME/.angular-config.json", "$HOME/.pi/agent/settings.json"],
     "read_file": ["$HOME/.npmrc", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
   },
   "network": { "block": false },
