@@ -64,7 +64,7 @@
         brews = [
 	        "batt" # also read the notes to enable service https://github.com/charlie0129/batt
 	        "ollama"
-	        "sst/tap/opencode"
+	        "anomalyco/tap/opencode"
 	        "llmfit"
         ];
         casks = [
