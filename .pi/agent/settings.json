@@ -1,0 +1,10 @@
+{
+  "lastChangelogVersion": "0.66.1",
+  "defaultProvider": "github-copilot",
+  "defaultModel": "claude-opus-4.6",
+  "defaultThinkingLevel": "high",
+  "packages": [
+    "npm:@tmustier/pi-files-widget",
+    "npm:@tmustier/pi-code-actions"
+  ]
+}

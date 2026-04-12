@@ -1,0 +1,31 @@
+{
+  "meta": { "name": "pi-code" },
+  "filesystem": {
+    "allow": [
+      "$WORKDIR",
+      "$HOME/.npm/_logs",
+      "$HOME/.npm/_npx",
+      "$HOME/.npm/_cacache",
+      "$HOME/.cache/chrome-devtools-mcp/chrome-profile",
+      "$HOME/.pi/"
+    ],
+    "read": [
+      "$HOME/.npm-packages",
+      "$HOME/.npm",
+      "$HOME/Library/pnpm/",
+      "/run"
+    ],
+    "allow_file": ["$HOME/.angular-config.json"],
+    "read_file": ["$HOME/.npmrc", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
+  },
+  "network": { "block": false },
+  "workdir": { "access": "readwrite" },
+  "undo": {
+    "exclude_patterns": ["node_modules", ".next", "__pycache__", "target"],
+    "exclude_globs": ["*.tmp.[0-9]*.[0-9]*"]
+  },
+  "policy": {
+    "override_deny": ["$HOME/.npmrc"]
+  },
+  "interactive": true
+}

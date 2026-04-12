@@ -10,6 +10,7 @@ alias oc="opencode"
 alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 alias cl="claude"
 alias ncl="nono run --profile claude-default -- claude --dangerously-skip-permissions"
+alias npi="nono run --profile pi -- pi"
 clt() {
   CLAUDE_CODE_TASK_LIST_ID="$1" claude "${@:2}"
 }

@@ -22,6 +22,7 @@
           pkgs.zinit
           pkgs.tmux
           pkgs.fzf
+          pkgs.fd
           pkgs.yazi
           pkgs.neovim
           pkgs.lazygit
