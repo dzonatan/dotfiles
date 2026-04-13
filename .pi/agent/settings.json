@@ -5,6 +5,8 @@
   "defaultThinkingLevel": "high",
   "packages": [
     "npm:@tmustier/pi-files-widget",
-    "npm:@tmustier/pi-code-actions"
-  ]
+    "npm:@tmustier/pi-code-actions",
+    "npm:pi-web-providers"
+  ],
+  "hideThinkingBlock": true
 }

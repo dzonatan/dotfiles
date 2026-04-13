@@ -28,7 +28,7 @@
           pkgs.lazygit
           pkgs.bottom
           pkgs.gh
-          pkgs.nodejs_22
+          pkgs.nodejs_24
           pkgs.bun
           pkgs.pnpm
           pkgs.bitwarden-desktop

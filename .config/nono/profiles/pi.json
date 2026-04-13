@@ -1,5 +1,15 @@
 {
-  "meta": { "name": "pi-code" },
+  "meta": { "name": "pi" },
+  "extends": "default",
+  "security": {
+    "groups": ["git_config"]
+  },
+  "network": {
+    "block": false
+  },
+  "workdir": {
+    "access": "readwrite"
+  },
   "filesystem": {
     "allow": [
       "$WORKDIR",
@@ -15,17 +25,16 @@
       "$HOME/Library/pnpm/",
       "/run"
     ],
-    "allow_file": ["$HOME/.angular-config.json", "$HOME/.pi/agent/settings.json"],
-    "read_file": ["$HOME/.npmrc", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
-  },
-  "network": { "block": false },
-  "workdir": { "access": "readwrite" },
-  "undo": {
-    "exclude_patterns": ["node_modules", ".next", "__pycache__", "target"],
-    "exclude_globs": ["*.tmp.[0-9]*.[0-9]*"]
+    "allow_file": [
+      "$HOME/.angular-config.json",
+      "$HOME/.pi/agent/settings.json"
+    ],
+    "read_file": [
+      "$HOME/.npmrc",
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    ]
   },
   "policy": {
     "override_deny": ["$HOME/.npmrc"]
-  },
-  "interactive": true
+  }
 }
