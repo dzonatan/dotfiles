@@ -47,6 +47,11 @@
           pkgs.docker-compose
           pkgs.lazydocker
 
+          #pi dependencies
+          pkgs.bat
+          pkgs.delta
+          pkgs.glow
+
           # DBs
           pkgs.pgcli
           # pkgs.mycli # temporarily disabled: sqlglot version mismatch
@@ -58,15 +63,14 @@
       homebrew = {
         enable = true;
         taps = [
-          "sst/tap"
           "nikitabobko/tap"
-	        "always-further/nono"
         ];
         brews = [
 	        "batt" # also read the notes to enable service https://github.com/charlie0129/batt
 	        "ollama"
-	        "anomalyco/tap/opencode"
 	        "llmfit"
+	        "anomalyco/tap/opencode"
+	        "agavra/tap/tuicr"
         ];
         casks = [
 	        "ghostty"
