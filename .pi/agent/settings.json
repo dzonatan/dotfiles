@@ -1,12 +1,18 @@
 {
-  "lastChangelogVersion": "0.66.1",
-  "defaultProvider": "github-copilot",
-  "defaultModel": "claude-opus-4.6",
+  "lastChangelogVersion": "0.67.68",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "high",
   "packages": [
     "npm:@tmustier/pi-files-widget",
     "npm:@tmustier/pi-code-actions",
     "npm:pi-web-providers"
   ],
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "enabledModels": [
+    "github-copilot/claude-opus-4.6",
+    "github-copilot/claude-sonnet-4.6",
+    "github-copilot/gpt-5.4",
+    "openai-codex/gpt-5.4"
+  ]
 }
