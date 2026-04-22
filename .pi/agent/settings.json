@@ -11,7 +11,8 @@
     "git:github.com/SamuelLHuber/pi-fff",
     "npm:pi-mono-simplify",
     "npm:pi-mono-btw",
-    "npm:pi-mono-ask-user-question"
+    "npm:pi-mono-ask-user-question",
+    "npm:pi-chrome-cdp"
   ],
   "hideThinkingBlock": true,
   "enabledModels": [
