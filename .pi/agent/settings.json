@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.67.68",
+  "lastChangelogVersion": "0.68.1",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "high",
@@ -8,13 +8,15 @@
     "npm:@tmustier/pi-code-actions",
     "npm:pi-web-providers",
     "npm:@plannotator/pi-extension",
-    "git:github.com/SamuelLHuber/pi-fff"
+    "git:github.com/SamuelLHuber/pi-fff",
+    "npm:pi-mono-simplify",
+    "npm:pi-mono-btw",
+    "npm:pi-mono-ask-user-question"
   ],
   "hideThinkingBlock": true,
   "enabledModels": [
-    "github-copilot/claude-opus-4.6",
-    "github-copilot/claude-sonnet-4.6",
-    "github-copilot/gpt-5.4",
-    "openai-codex/gpt-5.4"
+    "github-copilot/claude-opus-4.7",
+    "openai-codex/gpt-5.4",
+    "openai-codex/gpt-5.4-mini"
   ]
 }

@@ -1,6 +1,5 @@
 {
   "meta": { "name": "pi" },
-  "extends": "default",
   "security": {
     "groups": ["git_config"]
   },
@@ -35,6 +34,7 @@
     ]
   },
   "policy": {
-    "override_deny": ["$HOME/.npmrc"]
+    "override_deny": ["$HOME/.npmrc"],
+    "exclude_groups": ["dangerous_commands"]
   }
 }
