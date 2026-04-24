@@ -1,6 +1,3 @@
-- Make a plan extremely concise. Sacrifice grammar for the sake of concision.
-- ALWAYS prefer built-in tools (Read, Edit, Write, Grep, Glob) over Bash for file operations. Never use awk, sed, grep, rg, find, cat, head, tail, Python/Node one-liners, or shell loops for searching/editing files. Use Bash only for actual system commands (git, npm, build tools, etc). This is strict — no exceptions for "bulk" or "multi-file" operations.
-
 <!-- nono-sandbox-start -->
 ## Nono Sandbox - CRITICAL
 
