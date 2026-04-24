@@ -1,6 +1,7 @@
 {
   "env": {
-    "CLAUDE_CODE_CHROME_PATH": "/run/current-system/sw/bin/google-chrome-stable"
+    "CLAUDE_CODE_CHROME_PATH": "/run/current-system/sw/bin/google-chrome-stable",
+    "CLAUDE_CODE_FORK_SUBAGENT": "1"
   },
   "hooks": {
     "PostToolUseFailure": [
@@ -38,7 +39,8 @@
     "claude-code-setup@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
-    "chrome-devtools-mcp@claude-plugins-official": true
+    "chrome-devtools-mcp@chrome-devtools-plugins": true,
+    "gaia-prototyping@visma-software-nordic-marketplace": true
   },
   "extraKnownMarketplaces": {
     "chrome-devtools-plugins": {
@@ -49,6 +51,9 @@
     }
   },
   "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "autoDreamEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
   "voiceEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "skipAutoPermissionPrompt": true
 }
