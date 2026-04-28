@@ -16,7 +16,7 @@ clt() {
 }
 
 # Set default editor
-export EDITOR="NVIM_APPNAME=astronvim nvim"
+export EDITOR="env NVIM_APPNAME=astronvim nvim"
 
 # emacs mode (^f for accept suggestion)
 bindkey -e
