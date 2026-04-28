@@ -1,4 +1,5 @@
-import { AuthStorage, type ExtensionAPI, type ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { AuthStorage, type ExtensionAPI, type ExtensionContext, type Theme } from "@mariozechner/pi-coding-agent";
+import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 
 type WindowUsage = {
   usedPercent: number | null;
@@ -21,7 +22,6 @@ const USAGE_ENDPOINT = "https://chatgpt.com/backend-api/wham/usage";
 let refreshTimer: ReturnType<typeof setInterval> | undefined;
 let lastUsage: CodexUsage | undefined;
 let lastError: string | undefined;
-let detailsVisible = false;
 let sessionGeneration = 0;
 
 function clampPercent(value: number): number {
@@ -165,20 +165,63 @@ function formatStatus(usage: CodexUsage): string {
   return `Codex ${fiveHour}${reset}`;
 }
 
-function formatWidget(usage: CodexUsage): string[] {
-  const lines = ["ChatGPT/Codex usage"];
-  if (usage.planType) lines.push(`Plan: ${usage.planType}`);
+function formatWidget(usage: CodexUsage, theme?: Theme): string[] {
+  const dim = (text: string) => (theme ? theme.fg("dim", text) : text);
+  const accent = (text: string) => (theme ? theme.fg("accent", text) : text);
+
+  const lines = [];
+  if (usage.planType) lines.push(`${dim("Plan")}    ${usage.planType}`);
 
   const primaryLabel = usage.primary.leftPercent == null ? "?" : `${usage.primary.leftPercent}% left`;
-  lines.push(`5h     ${bar(usage.primary.leftPercent)} ${primaryLabel}${usage.primary.resetsIn ? ` · resets in ${usage.primary.resetsIn}` : ""}`);
+  lines.push(`${accent("5h")}      ${bar(usage.primary.leftPercent)} ${primaryLabel}${usage.primary.resetsIn ? dim(` · resets in ${usage.primary.resetsIn}`) : ""}`);
 
   if (usage.secondary) {
     const secondaryLabel = usage.secondary.leftPercent == null ? "?" : `${usage.secondary.leftPercent}% left`;
-    lines.push(`Weekly  ${bar(usage.secondary.leftPercent)} ${secondaryLabel}${usage.secondary.resetsIn ? ` · resets in ${usage.secondary.resetsIn}` : ""}`);
+    lines.push(`${accent("Weekly")}  ${bar(usage.secondary.leftPercent)} ${secondaryLabel}${usage.secondary.resetsIn ? dim(` · resets in ${usage.secondary.resetsIn}`) : ""}`);
   }
 
-  lines.push(`Updated ${usage.updatedAt.toLocaleTimeString()} · source: wham/usage`);
+  lines.push(dim(`Updated ${usage.updatedAt.toLocaleTimeString()} · wham/usage`));
+  lines.push(dim("Press any key to close"));
   return lines;
+}
+
+class UsageOverlay {
+  constructor(
+    private theme: Theme,
+    private usage: CodexUsage | undefined,
+    private error: string | undefined,
+    private done: () => void,
+  ) {}
+
+  handleInput(): void {
+    this.done();
+  }
+
+  render(width: number): string[] {
+    const th = this.theme;
+    const innerW = Math.max(1, width - 2);
+    const result: string[] = [];
+    const title = truncateToWidth(" ChatGPT/Codex usage ", innerW);
+    const titleW = visibleWidth(title);
+    const left = "─".repeat(Math.floor((innerW - titleW) / 2));
+    const right = "─".repeat(Math.max(0, innerW - titleW - left.length));
+
+    result.push(th.fg("border", `╭${left}`) + th.fg("accent", title) + th.fg("border", `${right}╮`));
+
+    const lines = this.usage
+      ? formatWidget(this.usage, th)
+      : [th.fg("error", `Error: ${this.error ?? "usage unavailable"}`), th.fg("dim", "Press any key to close")];
+
+    for (const line of lines) {
+      result.push(th.fg("border", "│") + truncateToWidth(` ${line}`, innerW, "...", true) + th.fg("border", "│"));
+    }
+
+    result.push(th.fg("border", `╰${"─".repeat(innerW)}╯`));
+    return result;
+  }
+
+  invalidate(): void {}
+  dispose(): void {}
 }
 
 function render(ctx: ExtensionContext) {
@@ -186,16 +229,8 @@ function render(ctx: ExtensionContext) {
 
   if (lastUsage) {
     ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", formatStatus(lastUsage)));
-    ctx.ui.setWidget(STATUS_KEY, detailsVisible ? formatWidget(lastUsage) : undefined, {
-      placement: "belowEditor",
-    });
   } else if (lastError) {
     ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "Codex usage unavailable"));
-    ctx.ui.setWidget(
-      STATUS_KEY,
-      detailsVisible ? ["ChatGPT/Codex usage", `Error: ${lastError}`] : undefined,
-      { placement: "belowEditor" },
-    );
   } else {
     ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "Codex usage loading…"));
   }
@@ -260,13 +295,23 @@ export default function (pi: ExtensionAPI) {
     handler: async (args, ctx) => {
       const normalized = args.trim().toLowerCase();
       if (normalized === "hide" || normalized === "off") {
-        detailsVisible = false;
-        render(ctx);
+        ctx.ui.setWidget(STATUS_KEY, undefined);
         return;
       }
 
-      detailsVisible = normalized !== "status";
-      await refresh(ctx, true);
+      await refresh(ctx, false);
+      await ctx.ui.custom<void>(
+        (_tui, theme, _keybindings, done) => new UsageOverlay(theme, lastUsage, lastError, done),
+        {
+          overlay: true,
+          overlayOptions: {
+            anchor: "bottom-center",
+            width: 58,
+            maxHeight: 10,
+            margin: { bottom: 1 },
+          },
+        },
+      );
     },
   });
 }
