@@ -1,23 +1,26 @@
 {
-  "lastChangelogVersion": "0.68.1",
+  "lastChangelogVersion": "0.70.5",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.4",
+  "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "high",
   "packages": [
     "npm:@tmustier/pi-files-widget",
     "npm:@tmustier/pi-code-actions",
-    "npm:pi-web-providers",
     "npm:@plannotator/pi-extension",
     "git:github.com/SamuelLHuber/pi-fff",
     "npm:pi-mono-simplify",
     "npm:pi-mono-btw",
     "npm:pi-mono-ask-user-question",
-    "npm:pi-chrome-cdp"
+    "npm:pi-chrome-cdp",
+    "npm:pi-subagents",
+    "npm:pi-intercom",
+    "npm:pi-web-access",
+    "npm:@fitchmultz/pi-stash"
   ],
   "hideThinkingBlock": true,
   "enabledModels": [
     "github-copilot/claude-opus-4.7",
-    "openai-codex/gpt-5.4",
-    "openai-codex/gpt-5.4-mini"
+    "openai-codex/gpt-5.4-mini",
+    "openai-codex/gpt-5.5"
   ]
 }
