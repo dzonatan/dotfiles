@@ -7,7 +7,6 @@
     "npm:@tmustier/pi-files-widget",
     "npm:@tmustier/pi-code-actions",
     "npm:@plannotator/pi-extension",
-    "git:github.com/SamuelLHuber/pi-fff",
     "npm:pi-mono-simplify",
     "npm:pi-mono-btw",
     "npm:pi-mono-ask-user-question",
