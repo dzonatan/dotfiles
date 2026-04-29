@@ -3,28 +3,6 @@ import { existsSync, promises as fs } from "node:fs";
 import * as path from "node:path";
 import { randomUUID } from "node:crypto";
 
-const GHOSTTY_SPLIT_SCRIPT = `on run argv
-	set targetCwd to item 1 of argv
-	set startupInput to item 2 of argv
-	tell application "Ghostty"
-		set cfg to new surface configuration
-		set initial working directory of cfg to targetCwd
-		set initial input of cfg to startupInput
-		if (count of windows) > 0 then
-			try
-				set frontWindow to front window
-				set targetTerminal to focused terminal of selected tab of frontWindow
-				split targetTerminal direction right with configuration cfg
-			on error
-				new window with configuration cfg
-			end try
-		else
-			new window with configuration cfg
-		end if
-		activate
-	end tell
-end run`;
-
 function shellQuote(value: string): string {
 	if (value.length === 0) return "''";
 	return `'${value.replace(/'/g, `'"'"'`)}'`;
@@ -45,7 +23,7 @@ function getPiInvocationParts(): string[] {
 	return ["pi"];
 }
 
-function buildPiStartupInput(sessionFile: string | undefined, prompt: string): string {
+function buildPiCommand(sessionFile: string | undefined, prompt: string, cwd: string): string {
 	const commandParts = [...getPiInvocationParts()];
 
 	if (sessionFile) {
@@ -56,7 +34,7 @@ function buildPiStartupInput(sessionFile: string | undefined, prompt: string): s
 		commandParts.push(prompt);
 	}
 
-	return `${commandParts.map(shellQuote).join(" ")}\n`;
+	return `cd ${shellQuote(cwd)} && exec ${commandParts.map(shellQuote).join(" ")}`;
 }
 
 async function createForkedSession(ctx: ExtensionCommandContext): Promise<string | undefined> {
@@ -91,40 +69,181 @@ async function createForkedSession(ctx: ExtensionCommandContext): Promise<string
 	return newSessionFile;
 }
 
+type CmuxFocusedTarget = {
+	workspace?: string;
+	surface?: string;
+};
+
+function parseCmuxIdentify(stdout: string): CmuxFocusedTarget {
+	try {
+		const identified = JSON.parse(stdout) as {
+			focused?: {
+				workspace_id?: string;
+				workspace_ref?: string;
+				surface_id?: string;
+				surface_ref?: string;
+			};
+		};
+		return {
+			workspace: identified.focused?.workspace_id ?? identified.focused?.workspace_ref,
+			surface: identified.focused?.surface_id ?? identified.focused?.surface_ref,
+		};
+	} catch {
+		return {};
+	}
+}
+
+function parseSurfaceRefs(stdout: string): string[] {
+	return [...new Set(stdout.match(/surface:\d+/g) ?? [])];
+}
+
+async function getFocusedCmuxTarget(pi: ExtensionAPI): Promise<CmuxFocusedTarget> {
+	const result = await pi.exec("cmux", ["identify", "--no-caller"]);
+	if (result.code !== 0) return {};
+	return parseCmuxIdentify(result.stdout ?? "");
+}
+
+async function listCmuxSurfaceRefs(pi: ExtensionAPI, workspace: string | undefined): Promise<string[]> {
+	const args = ["tree"];
+	if (workspace) args.push("--workspace", workspace);
+
+	const result = await pi.exec("cmux", args);
+	if (result.code !== 0) return [];
+	return parseSurfaceRefs(result.stdout ?? "");
+}
+
+async function sleep(ms: number): Promise<void> {
+	await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type CmuxSplitDirection = "right" | "down";
+
+async function createCmuxSplit(
+	pi: ExtensionAPI,
+	direction: CmuxSplitDirection
+): Promise<{ workspace?: string; surface?: string; error?: string }> {
+	const initialTarget = await getFocusedCmuxTarget(pi);
+	const workspace = process.env.CMUX_WORKSPACE_ID ?? initialTarget.workspace;
+	const sourceSurface = process.env.CMUX_SURFACE_ID ?? initialTarget.surface;
+	const beforeSurfaces = await listCmuxSurfaceRefs(pi, workspace);
+
+	const splitArgs = ["new-split", direction];
+	if (workspace) splitArgs.push("--workspace", workspace);
+	if (sourceSurface) splitArgs.push("--surface", sourceSurface);
+
+	const splitResult = await pi.exec("cmux", splitArgs);
+	if (splitResult.code !== 0) {
+		return { workspace, error: splitResult.stderr?.trim() || splitResult.stdout?.trim() || "unknown cmux error" };
+	}
+
+	await sleep(200);
+
+	const afterSurfaces = await listCmuxSurfaceRefs(pi, workspace);
+	const createdSurface = afterSurfaces.find((surface) => !beforeSurfaces.includes(surface));
+	if (createdSurface) {
+		return { workspace, surface: createdSurface };
+	}
+
+	const focusedTarget = await getFocusedCmuxTarget(pi);
+	if (focusedTarget.surface && focusedTarget.surface !== sourceSurface) {
+		return { workspace: workspace ?? focusedTarget.workspace, surface: focusedTarget.surface };
+	}
+
+	const outputSurface = parseSurfaceRefs(`${splitResult.stdout ?? ""}\n${splitResult.stderr ?? ""}`)[0];
+	if (outputSurface) {
+		return { workspace, surface: outputSurface };
+	}
+
+	return { workspace, error: "cmux created a split, but the new surface could not be identified" };
+}
+
+async function runCommandInCmuxSurface(
+	pi: ExtensionAPI,
+	workspace: string | undefined,
+	surface: string,
+	command: string
+): Promise<{ ok: true; method: "respawn" | "send" } | { ok: false; error: string }> {
+	const targetArgs: string[] = [];
+	if (workspace) targetArgs.push("--workspace", workspace);
+	targetArgs.push("--surface", surface);
+
+	const respawn = await pi.exec("cmux", ["respawn-pane", ...targetArgs, "--command", command]);
+	if (respawn.code === 0) {
+		return { ok: true, method: "respawn" };
+	}
+
+	const sent = await pi.exec("cmux", ["send", ...targetArgs, `${command}\n`]);
+	if (sent.code === 0) {
+		return { ok: true, method: "send" };
+	}
+
+	return {
+		ok: false,
+		error:
+			sent.stderr?.trim() ||
+			sent.stdout?.trim() ||
+			respawn.stderr?.trim() ||
+			respawn.stdout?.trim() ||
+			"unknown cmux error",
+	};
+}
+
+async function forkIntoCmuxSplit(
+	pi: ExtensionAPI,
+	direction: CmuxSplitDirection,
+	args: string,
+	ctx: ExtensionCommandContext
+): Promise<void> {
+	const wasBusy = !ctx.isIdle();
+	const prompt = args.trim();
+
+	const ping = await pi.exec("cmux", ["ping"]);
+	if (ping.code !== 0) {
+		ctx.ui.notify(`cmux is not available: ${ping.stderr?.trim() || ping.stdout?.trim() || "cmux ping failed"}`, "error");
+		return;
+	}
+
+	const forkedSessionFile = await createForkedSession(ctx);
+	const startupCommand = buildPiCommand(forkedSessionFile, prompt, ctx.cwd);
+
+	const split = await createCmuxSplit(pi, direction);
+	if (!split.surface) {
+		ctx.ui.notify(`Failed to create cmux ${direction} split: ${split.error ?? "unknown cmux error"}`, "error");
+		if (forkedSessionFile) {
+			ctx.ui.notify(`Forked session was created: ${forkedSessionFile}`, "info");
+		}
+		return;
+	}
+
+	const launched = await runCommandInCmuxSurface(pi, split.workspace, split.surface, startupCommand);
+	if (!launched.ok) {
+		ctx.ui.notify(`Created cmux ${direction} split, but failed to launch pi: ${launched.error}`, "error");
+		if (forkedSessionFile) {
+			ctx.ui.notify(`Forked session was created: ${forkedSessionFile}`, "info");
+		}
+		return;
+	}
+
+	if (forkedSessionFile) {
+		const fileName = path.basename(forkedSessionFile);
+		const suffix = prompt ? " and sent prompt" : "";
+		ctx.ui.notify(`Forked to ${fileName} in a new cmux ${direction} split${suffix}.`, "info");
+		if (wasBusy) {
+			ctx.ui.notify("Forked from current committed state (in-flight turn continues in original session).", "info");
+		}
+	} else {
+		ctx.ui.notify(`Opened a new cmux ${direction} split (no persisted session to fork).`, "warning");
+	}
+}
+
 export default function (pi: ExtensionAPI): void {
-	pi.registerCommand("split-fork", {
-		description: "Fork this session into a new pi process in a right-hand Ghostty split. Usage: /split-fork [optional prompt]",
-		handler: async (args, ctx) => {
-			if (process.platform !== "darwin") {
-				ctx.ui.notify("/split-fork currently requires macOS (Ghostty AppleScript).", "warning");
-				return;
-			}
+	pi.registerCommand("fork-right", {
+		description: "Fork this session into a new pi process in a right-hand cmux split. Usage: /fork-right [optional prompt]",
+		handler: async (args, ctx) => forkIntoCmuxSplit(pi, "right", args, ctx),
+	});
 
-			const wasBusy = !ctx.isIdle();
-			const prompt = args.trim();
-			const forkedSessionFile = await createForkedSession(ctx);
-			const startupInput = buildPiStartupInput(forkedSessionFile, prompt);
-
-			const result = await pi.exec("osascript", ["-e", GHOSTTY_SPLIT_SCRIPT, "--", ctx.cwd, startupInput]);
-			if (result.code !== 0) {
-				const reason = result.stderr?.trim() || result.stdout?.trim() || "unknown osascript error";
-				ctx.ui.notify(`Failed to launch Ghostty split: ${reason}`, "error");
-				if (forkedSessionFile) {
-					ctx.ui.notify(`Forked session was created: ${forkedSessionFile}`, "info");
-				}
-				return;
-			}
-
-			if (forkedSessionFile) {
-				const fileName = path.basename(forkedSessionFile);
-				const suffix = prompt ? " and sent prompt" : "";
-				ctx.ui.notify(`Forked to ${fileName} in a new Ghostty split${suffix}.`, "info");
-				if (wasBusy) {
-					ctx.ui.notify("Forked from current committed state (in-flight turn continues in original session).", "info");
-				}
-			} else {
-				ctx.ui.notify("Opened a new Ghostty split (no persisted session to fork).", "warning");
-			}
-		},
+	pi.registerCommand("fork-down", {
+		description: "Fork this session into a new pi process in a bottom cmux split. Usage: /fork-down [optional prompt]",
+		handler: async (args, ctx) => forkIntoCmuxSplit(pi, "down", args, ctx),
 	});
 }
