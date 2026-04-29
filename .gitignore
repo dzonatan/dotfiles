@@ -3,6 +3,10 @@
 .config/raycast
 .config/github-copilot
 .config/gh
-.config/containers/podman-connections.json.lock
-.config/containers/podman-connections.json
-.config/containers/podman/machine/applehv
+.config/containers
+/.config/lazyvim
+/.config/pgcli
+/.config/wireshark
+/.config/dcg/pending_exceptions.jsonl
+/.config/opencode/package-lock.json
+/.config/tanstack/cli.json
