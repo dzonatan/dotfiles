@@ -16,7 +16,8 @@
       "$HOME/.npm/_npx",
       "$HOME/.npm/_cacache",
       "$HOME/.cache/chrome-devtools-mcp/chrome-profile",
-      "$HOME/.pi/"
+      "$HOME/.pi/",
+      "$HOME/dotfiles/.pi"
     ],
     "read": [
       "$HOME/.npm-packages",

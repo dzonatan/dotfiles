@@ -15,7 +15,7 @@ type CodexUsage = {
 };
 
 const STATUS_KEY = "chatgpt-usage";
-const REFRESH_MS = 5 * 60 * 1000;
+const REFRESH_MS = 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const USAGE_ENDPOINT = "https://chatgpt.com/backend-api/wham/usage";
 
