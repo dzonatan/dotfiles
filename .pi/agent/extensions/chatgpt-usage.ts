@@ -160,7 +160,7 @@ function bar(value: number | null, width = 12): string {
 }
 
 function formatStatus(usage: CodexUsage): string {
-  const fiveHour = usage.primary.leftPercent == null ? "?" : `${usage.primary.leftPercent}%`;
+  const fiveHour = usage.primary.usedPercent == null ? "?" : `${usage.primary.usedPercent}% used`;
   const reset = usage.primary.resetsIn ? ` · ${usage.primary.resetsIn}` : "";
   return `Codex ${fiveHour}${reset}`;
 }
@@ -172,12 +172,12 @@ function formatWidget(usage: CodexUsage, theme?: Theme): string[] {
   const lines = [];
   if (usage.planType) lines.push(`${dim("Plan")}    ${usage.planType}`);
 
-  const primaryLabel = usage.primary.leftPercent == null ? "?" : `${usage.primary.leftPercent}% left`;
-  lines.push(`${accent("5h")}      ${bar(usage.primary.leftPercent)} ${primaryLabel}${usage.primary.resetsIn ? dim(` · resets in ${usage.primary.resetsIn}`) : ""}`);
+  const primaryLabel = usage.primary.usedPercent == null ? "?" : `${usage.primary.usedPercent}% used`;
+  lines.push(`${accent("5h")}      ${bar(usage.primary.usedPercent)} ${primaryLabel}${usage.primary.resetsIn ? dim(` · resets in ${usage.primary.resetsIn}`) : ""}`);
 
   if (usage.secondary) {
-    const secondaryLabel = usage.secondary.leftPercent == null ? "?" : `${usage.secondary.leftPercent}% left`;
-    lines.push(`${accent("Weekly")}  ${bar(usage.secondary.leftPercent)} ${secondaryLabel}${usage.secondary.resetsIn ? dim(` · resets in ${usage.secondary.resetsIn}`) : ""}`);
+    const secondaryLabel = usage.secondary.usedPercent == null ? "?" : `${usage.secondary.usedPercent}% used`;
+    lines.push(`${accent("Weekly")}  ${bar(usage.secondary.usedPercent)} ${secondaryLabel}${usage.secondary.resetsIn ? dim(` · resets in ${usage.secondary.resetsIn}`) : ""}`);
   }
 
   lines.push(dim(`Updated ${usage.updatedAt.toLocaleTimeString()} · wham/usage`));
@@ -291,7 +291,7 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("chatgpt-usage", {
-    description: "Refresh and show ChatGPT/Codex 5h and weekly usage left",
+    description: "Refresh and show ChatGPT/Codex 5h and weekly usage used",
     handler: async (args, ctx) => {
       const normalized = args.trim().toLowerCase();
       if (normalized === "hide" || normalized === "off") {
