@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.72.1",
+  "lastChangelogVersion": "0.73.0",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "medium",
   "packages": [
     "npm:@tmustier/pi-files-widget",
     "npm:@tmustier/pi-code-actions",
@@ -21,6 +21,8 @@
     "github-copilot/claude-opus-4.7",
     "openai-codex/gpt-5.4-mini",
     "openai-codex/gpt-5.5",
-    "github-copilot/claude-sonnet-4.6"
+    "github-copilot/claude-sonnet-4.6",
+    "github-copilot/gpt-5.4",
+    "github-copilot/gpt-5.5"
   ]
 }

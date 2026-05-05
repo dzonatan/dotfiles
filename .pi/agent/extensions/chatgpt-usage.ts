@@ -31,8 +31,15 @@ function clampPercent(value: number): number {
 
 function asPercent(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
-  // Most observed responses use 0..100, but tolerate 0..1 just in case.
-  return clampPercent(value <= 1 ? value * 100 : value);
+  // `used_percent`/`usage_percent` from wham/usage are percentage points (0..100).
+  // Do not treat `1` as a 0..1 fraction: at the beginning of a fresh window
+  // the endpoint can return 1, which means 1% used, not 100% used.
+  return clampPercent(value);
+}
+
+function asFractionOrPercent(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  return clampPercent(value >= 0 && value <= 1 ? value * 100 : value);
 }
 
 function formatDuration(totalSeconds: number): string {
@@ -56,6 +63,10 @@ function parseReset(window: any): string | undefined {
   }
 
   const resetAt = window?.reset_at ?? window?.resets_at;
+  if (typeof resetAt === "number") {
+    // wham/usage uses Unix seconds for reset_at.
+    return formatDuration(resetAt - Date.now() / 1000);
+  }
   if (typeof resetAt === "string") {
     const ms = new Date(resetAt).getTime();
     if (Number.isFinite(ms)) return formatDuration((ms - Date.now()) / 1000);
@@ -68,7 +79,7 @@ function parseWindow(window: any): WindowUsage {
   const usedPercent =
     asPercent(window?.used_percent) ??
     asPercent(window?.usage_percent) ??
-    asPercent(window?.utilization) ??
+    asFractionOrPercent(window?.utilization) ??
     null;
 
   return {
@@ -160,9 +171,9 @@ function bar(value: number | null, width = 12): string {
 }
 
 function formatStatus(usage: CodexUsage): string {
-  const fiveHour = usage.primary.usedPercent == null ? "?" : `${usage.primary.usedPercent}% used`;
-  const reset = usage.primary.resetsIn ? ` · ${usage.primary.resetsIn}` : "";
-  return `Codex ${fiveHour}${reset}`;
+  const fiveHour = usage.primary.usedPercent == null ? "? used" : `${usage.primary.usedPercent}% used`;
+  const reset = usage.primary.resetsIn ? ` reset ${usage.primary.resetsIn}` : "";
+  return `codex ${fiveHour}${reset}`;
 }
 
 function formatWidget(usage: CodexUsage, theme?: Theme): string[] {
@@ -230,9 +241,9 @@ function render(ctx: ExtensionContext) {
   if (lastUsage) {
     ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", formatStatus(lastUsage)));
   } else if (lastError) {
-    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "Codex usage unavailable"));
+    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "codex unavailable"));
   } else {
-    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "Codex usage loading…"));
+    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "codex loading…"));
   }
 }
 
