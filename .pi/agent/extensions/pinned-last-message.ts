@@ -59,16 +59,17 @@ function renderWidget(ctx: ExtensionContext): void {
 		(_tui, theme) => ({
 			render(width: number): string[] {
 				const oneLine = pinnedText.replace(/\n+/g, " ⏎ ");
-				const label = theme.fg("accent", expanded ? "Last message expanded: " : "Last message: ");
+				const label = expanded ? "Last message expanded: " : "Last message: ";
+				const muted = (text: string) => theme.fg("dim", text);
 
 				if (!expanded) {
 					const shortened = oneLine.length > MAX_CHARS ? `${oneLine.slice(0, MAX_CHARS - 1)}…` : oneLine;
-					return [truncateToWidth(label + theme.fg("userMessageText", shortened), width)];
+					return [truncateToWidth(muted(label + shortened), width)];
 				}
 
 				return [
-					truncateToWidth(label + theme.fg("dim", "ctrl+shift+o to collapse"), width),
-					...wrapTextWithAnsi(theme.fg("userMessageText", oneLine), Math.max(1, width)),
+					truncateToWidth(muted(`${label}ctrl+shift+o to collapse`), width),
+					...wrapTextWithAnsi(muted(oneLine), Math.max(1, width)),
 				];
 			},
 			invalidate() {},
