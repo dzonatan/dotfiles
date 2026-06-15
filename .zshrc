@@ -58,6 +58,9 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+# Initialize completion system (needed before any compdef calls)
+autoload -Uz compinit && compinit
+
 # Private stuff that shouldn't be public
 source ~/.zshrc_private
 
