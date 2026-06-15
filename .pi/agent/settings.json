@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.78.0",
+  "lastChangelogVersion": "0.78.1",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "low",
@@ -11,12 +11,12 @@
     "npm:pi-mono-btw",
     "npm:pi-mono-ask-user-question",
     "npm:pi-chrome-cdp",
-    "npm:pi-subagents",
     "npm:pi-intercom",
     "npm:pi-web-access",
-    "npm:@fitchmultz/pi-stash"
+    "npm:@fitchmultz/pi-stash",
+    "git:github.com/edxeth/pi-subagents"
   ],
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "enabledModels": [
     "github-copilot/claude-opus-4.7",
     "openai-codex/gpt-5.4-mini",

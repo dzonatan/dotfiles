@@ -46,6 +46,9 @@ eval "$(fzf --zsh)"
 ## homebrew integration
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+## fnm (node version manager) — auto-switch on cd via .nvmrc/.node-version
+eval "$(fnm env --use-on-cd --shell zsh)"
+
 ## yazi shorcut with support of current working directory change
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd

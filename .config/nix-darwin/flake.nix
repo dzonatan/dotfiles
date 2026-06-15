@@ -28,7 +28,7 @@
           pkgs.lazygit
           pkgs.bottom
           pkgs.gh
-          pkgs.nodejs_24
+          pkgs.fnm
           pkgs.bun
           pkgs.pnpm
           pkgs.bitwarden-desktop
@@ -86,6 +86,9 @@
       };
 
       nixpkgs.config.allowUnfree = true;
+      # Temporary: bitwarden-desktop still pins EOL Electron 39 upstream.
+      # Track https://github.com/NixOS/nixpkgs/issues/526914 and remove once fixed.
+      nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
