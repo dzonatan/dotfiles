@@ -10,3 +10,7 @@
 /.config/dcg/pending_exceptions.jsonl
 /.config/opencode/package-lock.json
 /.config/tanstack/cli.json
+/.config/herdr/herdr-client.log
+/.config/herdr/herdr-server.log
+/.config/herdr/release-notes.json
+/.config/herdr/session.json
