@@ -9,7 +9,7 @@ window-padding-x = 10,20
 
 # tmux like keymaps
 keybind = ctrl+z=toggle_split_zoom
-keybind = shift+enter=text:\n
+#keybind = shift+enter=text:\n
 keybind = cmd+ctrl+l=goto_split:right
 keybind = cmd+ctrl+h=goto_split:left
 keybind = cmd+ctrl+j=goto_split:bottom
