@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.78.1",
+  "lastChangelogVersion": "0.80.3",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "low",
@@ -24,5 +24,6 @@
     "github-copilot/claude-sonnet-4.6",
     "github-copilot/gpt-5.4",
     "github-copilot/gpt-5.5"
-  ]
+  ],
+  "theme": "dark"
 }
