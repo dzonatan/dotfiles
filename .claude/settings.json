@@ -1,9 +1,43 @@
 {
-  "alwaysThinkingEnabled": true,
-  "autoDreamEnabled": true,
-  "effortLevel": "high",
+  "env": {
+    "CLAUDE_CODE_CHROME_PATH": "/run/current-system/sw/bin/google-chrome-stable",
+    "CLAUDE_CODE_FORK_SUBAGENT": "1"
+  },
+  "permissions": {
+    "deny": [],
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "PostToolUseFailure": [
+      {
+        "matcher": "Read|Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/nono-hook.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/dzonatan/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh",
+    "padding": 0
+  },
   "enabledPlugins": {
-    "chrome-devtools-mcp@chrome-devtools-plugins": true,
     "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
@@ -11,55 +45,20 @@
     "gaia-prototyping@visma-software-nordic-marketplace": true,
     "skill-creator@claude-plugins-official": true
   },
-  "env": {
-    "CLAUDE_CODE_CHROME_PATH": "/run/current-system/sw/bin/google-chrome-stable",
-    "CLAUDE_CODE_FORK_SUBAGENT": "1"
-  },
   "extraKnownMarketplaces": {
     "chrome-devtools-plugins": {
       "source": {
-        "repo": "ChromeDevTools/chrome-devtools-mcp",
-        "source": "github"
+        "source": "github",
+        "repo": "ChromeDevTools/chrome-devtools-mcp"
       }
     }
   },
-  "hooks": {
-    "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "command": "$HOME/.claude/hooks/nono-hook.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "Read|Write|Edit|Bash"
-      }
-    ],
-    "PreToolUse": [],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "bash '/Users/dzonatan/.claude/hooks/herdr-agent-state.sh' session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "*"
-      }
-    ]
-  },
-  "permissions": {
-    "defaultMode": "auto",
-    "deny": []
-  },
-  "skipAutoPermissionPrompt": true,
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
-  "statusLine": {
-    "command": "~/.claude/statusline.sh",
-    "padding": 0,
-    "type": "command"
-  },
-  "voiceEnabled": true
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true,
+  "tui": "fullscreen"
 }
