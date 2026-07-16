@@ -7,6 +7,7 @@
     "deny": [],
     "defaultMode": "auto"
   },
+  "model": "opus[1m]",
   "hooks": {
     "PostToolUseFailure": [
       {
@@ -55,10 +56,14 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "tui": "fullscreen",
+  "voice": {
+    "enabled": false,
+    "mode": "hold"
+  },
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "skipAutoPermissionPrompt": true,
-  "voiceEnabled": true,
-  "tui": "fullscreen"
+  "voiceEnabled": false
 }
