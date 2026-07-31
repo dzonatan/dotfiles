@@ -39,12 +39,12 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "claude-code-setup@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "gaia-prototyping@visma-software-nordic-marketplace": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
     "chrome-devtools-plugins": {
