@@ -82,6 +82,7 @@
 	        "nikitabobko/tap/aerospace"
 	        "signal"
 	        "claude"
+	        "fluidvoice"
         ];
       };
 
