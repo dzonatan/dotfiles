@@ -4,7 +4,10 @@ onboarding = false
 name = "terminal"
 
 [ui.sound]
-enabled = false
+enabled = true
 
 [ui.toast]
-delivery = "off"
+delivery = "herdr"
+
+[ui]
+show_agent_labels_on_pane_borders = false
