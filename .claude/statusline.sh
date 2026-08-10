@@ -21,6 +21,12 @@ if cd "$CURRENT_DIR" 2>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; th
         GIT_BRANCH=$(git rev-parse --short HEAD 2>/dev/null)
     fi
 
+    # Trim long branch names
+    MAX_BRANCH_LEN=26
+    if [ "${#GIT_BRANCH}" -gt "$MAX_BRANCH_LEN" ]; then
+        GIT_BRANCH="${GIT_BRANCH:0:$MAX_BRANCH_LEN}..."
+    fi
+
     # Check for uncommitted changes (skip optional locks for performance)
     if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
         GIT_STATUS_FLAG="*"
