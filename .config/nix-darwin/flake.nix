@@ -42,10 +42,6 @@
           pkgs.podman
           pkgs.podman-compose
           pkgs.podman-tui
-          pkgs.colima
-          pkgs.docker
-          pkgs.docker-compose
-          pkgs.lazydocker
 
           #pi dependencies
           pkgs.bat
@@ -63,12 +59,10 @@
       homebrew = {
         enable = true;
         taps = [
-          "nikitabobko/tap"
         ];
         brews = [
 	        "ollama"
 	        "llmfit"
-	        "anomalyco/tap/opencode"
 	        "agavra/tap/tuicr"
         ];
         casks = [
@@ -79,8 +73,6 @@
 	        "yubico-authenticator"
 	        "shottr"
 	        "spotify"
-	        "nikitabobko/tap/aerospace"
-	        "signal"
 	        "claude"
 	        "fluidvoice"
         ];
