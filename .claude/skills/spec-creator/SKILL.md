@@ -1,5 +1,6 @@
 ---
 name: spec-creator
+disable-model-invocation: true
 description: This skill should be used when the user asks to "create a spec", "create a task", "brainstorm an idea", "develop a specification", "design a feature", "refine this spec", "iterate on the design", "continue brainstorming", "revisit the approach", or wants to turn an idea into a fully-formed specification through collaborative dialogue.
 ---
 
