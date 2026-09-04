@@ -7,8 +7,7 @@
     "deny": [],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
-  "outputStyle": "Peer",
+  "model": "fable[1m]",
   "hooks": {
     "PostToolUseFailure": [
       {
@@ -45,7 +44,8 @@
     "code-simplifier@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "gaia-prototyping@visma-software-nordic-marketplace": true,
-    "skill-creator@claude-plugins-official": false
+    "skill-creator@claude-plugins-official": false,
+    "paper-desktop@paper": true
   },
   "extraKnownMarketplaces": {
     "chrome-devtools-plugins": {
@@ -53,18 +53,45 @@
         "source": "github",
         "repo": "ChromeDevTools/chrome-devtools-mcp"
       }
+    },
+    "paper": {
+      "source": {
+        "source": "github",
+        "repo": "paper-design/agent-plugins"
+      }
     }
   },
+  "outputStyle": "Concise",
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-fable-5": {
+      "effortLevel": "xhigh"
+    }
+  },
+  "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "voice": {
     "enabled": false,
     "mode": "hold"
   },
-  "autoDreamEnabled": true,
+  "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "skipAutoPermissionPrompt": true,
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(npm run test:*)",
+      "Bash(npm run lint)",
+      "Bash(npx ng test:*)",
+      "Bash(gh pr view:*)"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(gh repo edit:*)",
+      "Bash(npm publish:*)"
+    ]
+  },
   "voiceEnabled": false
 }
