@@ -17,7 +17,7 @@ agent_panel_sort = "spaces"
 [keys]
 switch_tab = "ctrl+1..9"
 switch_workspace = "cmd+1..9"
-focus_agent = "cmd+shift+1..9"
+focus_agent = "ctrl+shift+1..9"
 new_workspace = "prefix+c"
 new_tab = "prefix+shift+n"
 
