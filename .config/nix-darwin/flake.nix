@@ -64,7 +64,7 @@
         brews = [
 	        "ollama"
 	        "llmfit"
-	        "agavra/tap/tuicr"
+	        "tuicr"
         ];
         casks = [
 	        "ghostty"
