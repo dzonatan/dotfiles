@@ -21,7 +21,7 @@ keybind = page_down=scroll_page_lines:5
 keybind = home=scroll_to_top
 keybind = end=scroll_to_bottom
 
-# let cmd+1..9 through to herdr (focus_agent)
+# let cmd+1..9 through to herdr (switch_workspace)
 keybind = cmd+digit_1=unbind
 keybind = cmd+digit_2=unbind
 keybind = cmd+digit_3=unbind

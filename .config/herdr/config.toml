@@ -15,7 +15,11 @@ show_agent_labels_on_pane_borders = false
 agent_panel_sort = "spaces"
 
 [keys]
-focus_agent = "cmd+1..9"
+switch_tab = "ctrl+1..9"
+switch_workspace = "cmd+1..9"
+focus_agent = "cmd+shift+1..9"
+new_workspace = "prefix+c"
+new_tab = "prefix+shift+n"
 
 [[keys.command]]
 key = "prefix+shift+b"
@@ -24,3 +28,9 @@ command = "~/.config/herdr/branch-session.sh"
 description = "branch the focused Claude session"
 width = 44
 height = 12
+
+[[keys.command]]
+key = "prefix+t"
+type = "shell"
+command = "\"$HERDR_BIN_PATH\" tab create --focus"
+description = "new tab without name prompt"
