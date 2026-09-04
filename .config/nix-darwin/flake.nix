@@ -42,6 +42,7 @@
           pkgs.podman
           pkgs.podman-compose
           pkgs.podman-tui
+          pkgs.lazydocker
 
           #pi dependencies
           pkgs.bat
