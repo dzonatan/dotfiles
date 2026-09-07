@@ -18,7 +18,7 @@ agent_panel_sort = "spaces"
 switch_tab = "ctrl+1..9"
 switch_workspace = "cmd+1..9"
 focus_agent = "ctrl+shift+1..9"
-new_workspace = "prefix+c"
+new_workspace = "prefix+n"
 new_tab = "prefix+shift+n"
 
 [[keys.command]]
@@ -30,7 +30,7 @@ width = 44
 height = 12
 
 [[keys.command]]
-key = "prefix+t"
+key = "prefix+c"
 type = "shell"
 command = "\"$HERDR_BIN_PATH\" tab create --focus"
 description = "new tab without name prompt"
