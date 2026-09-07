@@ -59,9 +59,6 @@ function y() {
 	rm -f -- "$tmp"
 }
 
-# Initialize completion system (needed before any compdef calls)
-autoload -Uz compinit && compinit
-
 # Private stuff that shouldn't be public
 source ~/.zshrc_private
 
@@ -80,9 +77,31 @@ source "${ZINIT_HOME}/zinit.zsh"
 
 # zinit plugins
 zinit light zsh-users/zsh-syntax-highlighting
-zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-completions   # only adds to fpath; must be loaded before compinit
+
+# Completion system.
+# nix-darwin's /etc/zshrc already ran compinit against ~/.zcompdump before this
+# file. We use a separate dump file so the two don't keep invalidating each
+# other's cache (that was rebuilding completions on every shell start, ~1s).
+# The full fpath scan runs only when our dump is older than 24h; otherwise the
+# cached dump is trusted as-is (-C).
+# NOTE: new completion files (e.g. after `brew install <tool>`, a nix rebuild or
+# a zinit plugin update) are only picked up on the next daily rebuild. To pick
+# them up immediately run `compinit-rebuild`.
+ZSH_COMPDUMP="$HOME/.zcompdump-user"
+ZINIT[ZCOMPDUMP_PATH]="$ZSH_COMPDUMP"
+autoload -Uz compinit
+compinit-rebuild() { rm -f "$ZSH_COMPDUMP"; compinit -d "$ZSH_COMPDUMP"; echo "completion dump rebuilt: $ZSH_COMPDUMP"; }
+_zsh_compdump_stale=( "$ZSH_COMPDUMP"(N.mh+24) )
+if (( $#_zsh_compdump_stale )); then
+  compinit -d "$ZSH_COMPDUMP"      # stale (>24h): full scan + rebuild
+else
+  compinit -C -d "$ZSH_COMPDUMP"   # trust the cached dump (or create it if missing)
+fi
+unset _zsh_compdump_stale
+
 zinit light zsh-users/zsh-autosuggestions
-zinit light Aloxaf/fzf-tab
+zinit light Aloxaf/fzf-tab   # must come after compinit
 
 # zinit configuration
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
