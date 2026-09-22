@@ -31,7 +31,6 @@
           pkgs.fnm
           pkgs.bun
           pkgs.pnpm
-          pkgs.bitwarden-desktop
           pkgs.keepassxc
           pkgs.openscad-unstable
 
@@ -76,6 +75,7 @@
 	        "spotify"
 	        "claude"
 	        "fluidvoice"
+	        "1password"
         ];
       };
 
