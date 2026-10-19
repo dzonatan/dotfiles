@@ -3,8 +3,8 @@
 
 input=$(cat)
 
-# Get current directory
-CURRENT_DIR=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "."')
+# Get the directory the session was started in (not the drifting cwd)
+CURRENT_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // "."')
 
 # Get folder name (basename of current directory)
 FOLDER_NAME=$(basename "$CURRENT_DIR")
