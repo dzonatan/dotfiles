@@ -67,7 +67,7 @@
         ];
         casks = [
 	        "ghostty"
-	        "arc"
+	        "zen"
 	        "raycast"
 	        "claude-code@latest"
 	        "yubico-authenticator"
