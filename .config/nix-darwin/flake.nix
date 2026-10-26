@@ -64,6 +64,7 @@
 	        "ollama"
 	        "llmfit"
 	        "tuicr"
+	        "nono"
         ];
         casks = [
 	        "ghostty"
