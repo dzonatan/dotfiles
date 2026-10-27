@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "1.4.0",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-sol",
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "high",
   "packages": [
     "npm:@tmustier/pi-files-widget",
     "npm:@tmustier/pi-code-actions",
@@ -14,7 +14,8 @@
     "npm:pi-intercom",
     "npm:pi-web-access",
     "npm:@fitchmultz/pi-stash",
-    "git:github.com/edxeth/pi-subagents"
+    "git:github.com/edxeth/pi-subagents",
+    "npm:pi-declutter"
   ],
   "hideThinkingBlock": true,
   "enabledModels": [
