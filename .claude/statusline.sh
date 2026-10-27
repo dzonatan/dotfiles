@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Code status line: shows current folder, git branch, latest commit, and status
+# Claude Code status line: shows current folder, git worktree, git branch, and status
 
 input=$(cat)
 
@@ -9,10 +9,23 @@ CURRENT_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.curren
 # Get folder name (basename of current directory)
 FOLDER_NAME=$(basename "$CURRENT_DIR")
 
+# Worktree info (set when the session runs in a --worktree / EnterWorktree worktree)
+WORKTREE=$(echo "$input" | jq -r '.worktree.name // empty')
+WORKTREE_PATH=$(echo "$input" | jq -r '.worktree.path // empty')
+GIT_DIR_PATH="${WORKTREE_PATH:-$CURRENT_DIR}"
+
 # Get git info
 GIT_BRANCH=""
 GIT_STATUS_FLAG=""
-if cd "$CURRENT_DIR" 2>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+if cd "$GIT_DIR_PATH" 2>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+    # Linked worktree: git dir differs from the common (main repo) git dir
+    if [ -z "$WORKTREE" ]; then
+        GIT_DIRS=$(git rev-parse --path-format=absolute --git-dir --git-common-dir 2>/dev/null)
+        if [ "$(echo "$GIT_DIRS" | sed -n 1p)" != "$(echo "$GIT_DIRS" | sed -n 2p)" ]; then
+            WORKTREE=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
+        fi
+    fi
+
     BRANCH=$(git branch --show-current 2>/dev/null)
     if [ -n "$BRANCH" ]; then
         GIT_BRANCH="$BRANCH"
@@ -45,6 +58,9 @@ BOLD=$'\e[1m'
 UNBOLD=$'\e[22m'
 
 OUTPUT="folder:${BOLD}${FOLDER_NAME}${UNBOLD}"
+if [ -n "$WORKTREE" ]; then
+    OUTPUT="${OUTPUT} worktree:${BOLD}${WORKTREE}${UNBOLD}"
+fi
 if [ -n "$GIT_BRANCH" ]; then
     OUTPUT="${OUTPUT} branch:${BOLD}${GIT_BRANCH}${GIT_STATUS_FLAG}${UNBOLD}"
 fi
