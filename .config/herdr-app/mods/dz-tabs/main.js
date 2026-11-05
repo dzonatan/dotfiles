@@ -1,6 +1,7 @@
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { spaces, panes, agents, terminals, run, openOverlay, theme, window, layout, settings, props } from "herdr";
+import { spaces, panes, agents, terminals, run, openOverlay, theme, window, layout, settings, props, focused, nextCommand } from "herdr";
+import { closeTab } from "./close.js";
 import { namer } from "./name.js";
 import { ownStatus, subAgents, treeStatus } from "./tree.js";
 
@@ -28,8 +29,15 @@ function find(node, id) {
 }
 
 export default class Tabs extends View {
-  init() {
+  init(_props, cx) {
     this.pressed = null;
+    // `dz-tabs.close` (⌘W in dz-projects): close the focused tab, asking only when something runs (close.js).
+    cx.spawn(async () => {
+      for (;;) {
+        const c = await nextCommand();
+        if (c === "close") closeTab(focused()?.tab, props()?.closeWith ?? "dz-close");
+      }
+    });
   }
 
   // With the sidebar hidden, its toggle also says how the agents are doing, with the sidebar's own marks.
@@ -88,7 +96,7 @@ export default class Tabs extends View {
         .child(div().max_w(170).truncate().child(c.zoomed ? `${name} Z` : name))
         .when(status != null, el => el.child(mark(t, status)))
         .when(c.active, el => el.child(div().id(`close-${c.id}`).text_color(t.dim).on_mouse_down("left", stop).on_click((_e, cx) => { cx.stop_propagation(); // Local addition: a layout's closeWith mod (dz-projects: dz-close) asks first, as its ⌘W does.
-          if (props()?.closeWith) run("mod.open", { name: props().closeWith }); else run("tab.close", { id: c.id }); }).child(svg("mods/pane/close.svg").size(12))));
+          if (props()?.closeWith) cx.spawn(() => closeTab(c.id, props().closeWith)); else run("tab.close", { id: c.id }); }).child(svg("mods/pane/close.svg").size(12))));
     };
     const root = layout(), sidebar = find(root, "sidebar"), w = window();
     // Old saved rails and a dragged-narrow sidebar can be smaller than the window buttons.

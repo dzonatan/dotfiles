@@ -103,7 +103,7 @@
     "cmd-shift-b": "dz-chrome.sidebar",
     "cmd-shift-s": "dz-inbox.settle",
     "cmd-n": "mod.open:dz-launch",
-    "cmd-w": "mod.open:dz-close",
+    "cmd-w": "dz-tabs.close",
     "cmd-1": "dz-chrome.go1",
     "cmd-2": "dz-chrome.go2",
     "cmd-3": "dz-chrome.go3",

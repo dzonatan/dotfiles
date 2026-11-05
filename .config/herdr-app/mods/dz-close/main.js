@@ -1,7 +1,8 @@
 // Close tab (⌘W and the tab's × in dz-projects). A tab where nothing runs (idle shells, mod panes) closes at
 // once; otherwise it asks. Claude sessions in it are settled first: kept past their terminal (session.js), shown
 // in the Inbox's Settled, and resumed from there with `claude --resume`.
-// mod.json opens it with frame "none": nothing shows while it looks, so an idle tab closes without a flash.
+// dz-tabs (close.js) opens it only when something runs: a dialog dims the window even while it draws nothing.
+// It checks again here (frame "none" until then), so a tab that went idle meanwhile still closes at once.
 import { View, div } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { theme, spaces, panes, agents, focused, run, props, closeOverlay, notify, hc } from "herdr";
