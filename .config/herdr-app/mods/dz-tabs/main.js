@@ -4,6 +4,7 @@ import { spaces, panes, agents, terminals, run, openOverlay, theme, window, layo
 import { closeTab } from "./close.js";
 import { namer } from "./name.js";
 import { ownStatus, subAgents, treeStatus } from "./tree.js";
+import { PullRequests, foldersOf, openUrl } from "./prs.js";
 
 // With the inbox showing (dz-inbox), an agent settled there isn't news: its done is left out.
 // One that works or gets stuck is unsettled there, so only done needs leaving out.
@@ -31,6 +32,14 @@ function find(node, id) {
 export default class Tabs extends View {
   init(_props, cx) {
     this.pressed = null;
+    // PRs of the active tab's folders (prs.js). A cheap 3s check; the work inside runs only when due.
+    this.prs = new PullRequests();
+    const tick = (cx) => cx.spawn(async (cx) => {
+      const space = spaces().find((p) => p.active);
+      if (await this.prs.tick(space, foldersOf(space, panes()))) cx.notify();
+    });
+    cx.timer.every(3000, tick);
+    tick(cx);
     // `dz-tabs.close` (⌘W in dz-projects): close the focused tab, asking only when something runs (close.js).
     cx.spawn(async () => {
       for (;;) {
@@ -38,6 +47,21 @@ export default class Tabs extends View {
         if (c === "close") closeTab(focused()?.tab, props()?.closeWith ?? "dz-close");
       }
     });
+  }
+
+  // One chip per PR: state mark, #number and title (repo name first when the folder has several repos).
+  prChips(t, stop, space) {
+    const list = this.prs.list(foldersOf(space, panes()));
+    const color = (p) => p.isDraft ? t.dim : p.state === "MERGED" ? t.ansi5 : p.state === "CLOSED" ? t.ansi1 : t.ansi2;
+    const word = (p) => p.isDraft ? "Draft" : p.state === "MERGED" ? "Merged" : p.state === "CLOSED" ? "Closed" : "Open";
+    const many = list.length > 1;
+    return list.map(({ repo, name, pr: p }) => h_flex().id(`pr-${repo}`).h(24).px(8).gap(6).flex_none().max_w(260).items_center().rounded(6)
+      .text_size(12).text_color(t.muted).hover((s) => s.bg(t.hover).text_color(t.foreground))
+      .tooltip(`${word(p)} · ${name} #${p.number}: ${p.title}`)
+      .on_mouse_down("left", stop).on_click(() => openUrl(p.url))
+      .child(svg("mods/dz-tabs/git-pull-request.svg").size(13).flex_none().text_color(color(p)))
+      .child(div().flex_none().text_color(t.dim).child(many ? `${name} #${p.number}` : `#${p.number}`))
+      .child(div().min_w(0).truncate().child(p.title)));
   }
 
   // With the sidebar hidden, its toggle also says how the agents are doing, with the sidebar's own marks.
@@ -107,8 +131,11 @@ export default class Tabs extends View {
       .on_mouse_up("left", () => { this.pressed = null; })
       .on_scroll_wheel(e => { if (Math.abs(e.delta.y) >= 1) run(e.delta.y > 0 ? "tab.prev" : "tab.next"); })
       .when(Boolean(sidebar?.hidden), el => el.child(this.sidebarToggle(t, stop, live, st)))
-      .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(4).overflow_x_scroll().children(shown.map(item)))
+      // The strip is only as wide as its tabs (shrinking and scrolling when they don't fit), so + sits right
+      // after the last tab; the spacer takes the rest of the bar.
+      .child(h_flex().id("tab-scroll").flex_initial().min_w(0).h_full().items_center().gap(4).overflow_x_scroll().children(shown.map(item)))
       .child(button("tab-new", svg("mods/workspace-chrome/plus.svg").size(14), () => run("tab.new")))
+      .child(h_flex().id("prs").flex_1().min_w(0).h_full().gap(4).items_center().justify_end().overflow_hidden().children(this.prChips(t, stop, space)))
       .when(w?.buttons, el => el.child(button("minimize", w.platform === "windows" ? svg("mods/dz-tabs/win-min.svg").size(16) : "−", () => run("window.minimize")))
         .child(button("maximize", w.platform === "windows" ? svg(`mods/dz-tabs/${w.maximized ? "win-restore" : "win-max"}.svg`).size(16) : "□", () => run("window.maximize")))
         .child(button("close-window", w.platform === "windows" ? svg("mods/dz-tabs/win-close.svg").size(16) : svg("mods/pane/close.svg").size(13), () => run("window.close"))));
