@@ -122,33 +122,47 @@
             "type": "row",
             "children": [
               {
-                "id": "main",
-                "type": "block",
-                "content": {
-                  "tab": "active",
-                  "pane": {
-                    "header": {
-                      "content": {
-                        "mod": "dz-pane"
-                      },
-                      "reveal": "always",
-                      "height": 28.0,
-                      "position": "top"
-                    },
-                    "background": "background",
-                    "border": {
-                      "width": 2.0,
-                      "color": "background"
-                    },
-                    "focus": {
-                      "width": 2.0,
-                      "color": "background"
-                    },
-                    "radius": 8.0,
-                    "gap": 8.0,
-                    "lone": true
+                "id": "main-stack",
+                "type": "stack",
+                "children": [
+                  {
+                    "id": "main",
+                    "type": "block",
+                    "content": {
+                      "tab": "active",
+                      "pane": {
+                        "header": {
+                          "content": {
+                            "mod": "dz-pane"
+                          },
+                          "reveal": "always",
+                          "height": 28.0,
+                          "position": "top"
+                        },
+                        "background": "background",
+                        "border": {
+                          "width": 2.0,
+                          "color": "background"
+                        },
+                        "focus": {
+                          "width": 2.0,
+                          "color": "background"
+                        },
+                        "radius": 8.0,
+                        "gap": 8.0,
+                        "lone": true
+                      }
+                    }
+                  },
+                  {
+                    "id": "empty",
+                    "type": "block",
+                    "content": {
+                      "mod": "dz-empty"
+                    }
                   }
-                }
+                ],
+                "active": "main"
               }
             ],
             "padding": [

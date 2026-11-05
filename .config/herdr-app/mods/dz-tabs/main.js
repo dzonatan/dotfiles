@@ -76,7 +76,12 @@ export default class Tabs extends View {
         .on_mouse_up("left", () => {
           const from = this.pressed; this.pressed = null;
           if (from !== null && from !== i) run("tab.move", { id: shown[from].id, index: space.tabs.findIndex(x => x.id === c.id) + 1 });
-          else run("tab.select", { id: c.id });
+          else {
+            // Local addition: a tab click also leaves dz-inbox's empty state (dz-projects' "main-stack").
+            const stack = (n) => n?.id === "main-stack" ? n : (n?.children ?? []).map(stack).find(Boolean);
+            if (stack(layout())?.active === "empty") run("layout.select", { stack: "main-stack", child: "main" });
+            run("tab.select", { id: c.id });
+          }
         })
         .on_mouse_down("right", (_e, cx) => { cx.stop_propagation(); openOverlay({ mod: "menu", kind: "popup", width: 200, props: { tab: "tab", target: { id: c.id, space: space.id } } }); })
         .when(Boolean(program?.icon), el => el.child(program.tint ? svg(program.icon).size(14).text_color(t.muted) : image(program.icon).size(14)))

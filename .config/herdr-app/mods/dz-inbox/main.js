@@ -306,6 +306,34 @@ export default class Inbox extends View {
     const jump = [...pinned, ...out, ...busyRows].map((a) => a.address).slice(0, 9);
     if (find(layout())?.active !== "lists" && JSON.stringify(shared("agents.jump") ?? []) !== JSON.stringify(jump)) setShared("agents.jump", jump);
 
+    // Local addition: closing what's in view (a tab, a space, an agent's pane) moves on to the top Active agent
+    // (pinned first, never Working, Snoozed or Settled); with none left, the work area shows dz-empty
+    // (dz-projects' "main-stack"). Only while the inbox shows. Any later focus change puts the tab back.
+    const stackOf = (n, id) => n?.id === id ? n : (n?.children ?? []).map((c) => stackOf(c, id)).find(Boolean);
+    const mainStack = stackOf(layout(), "main-stack");
+    const f = focused(), here = f ? `${f.tab}|${f.pane}|${inView}` : null;
+    const showMain = () => cx.spawn(async () => run("layout.select", { stack: "main-stack", child: "main" }));
+    if (mainStack && find(layout())?.active !== "lists") {
+      const was = this.inViewPane;
+      if (was && !ps.some((p) => p.pane === was)) {
+        const next = [...pinned.filter((a) => !working(a)), ...out][0];
+        if (next) {
+          if (mainStack.active === "empty") showMain();
+          cx.spawn(async () => run("agent.focus", { terminal: next.address }));
+        } else if (mainStack.active !== "empty") {
+          this.emptyAt = null;
+          cx.spawn(async () => run("layout.select", { stack: "main-stack", child: "empty" }));
+        }
+      } else if (mainStack.active === "empty") {
+        // Noted once it shows; a different focus after that (a click, ⌘T, ⌘N) brings the tab back.
+        if (this.emptyAt == null) this.emptyAt = here;
+        else if (this.emptyAt !== here) { this.emptyAt = null; showMain(); }
+      }
+    }
+    this.inViewPane = f?.pane ?? null;
+    // Clicking a card brings the tab back even when that agent is the one already focused behind the empty state.
+    this.showMain = mainStack?.active === "empty" ? () => { this.emptyAt = null; run("layout.select", { stack: "main-stack", child: "main" }); } : null;
+
     const hover = (a) => (on, cx) => {
       if (on) this.hovered = a.address;
       else if (this.hovered === a.address) this.hovered = null;
@@ -488,6 +516,7 @@ export default class Inbox extends View {
     const justDropped = () => this.drag?.moved || this.sweep?.moved || Date.now() - (this.dropped ?? 0) < 250;
     const open = (a) => () => {
       if (justDropped()) return;
+      this.showMain?.();
       run("agent.focus", { terminal: a.address });
     };
     // Says whether it moved on to another agent.
