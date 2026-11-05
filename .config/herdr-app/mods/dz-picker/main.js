@@ -9,8 +9,8 @@ import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { agents, spaces, terminals, panes, run, hc, theme, settings, props, closeOverlay, openOverlay, shared, setShared } from "herdr";
 // Tabs read as in the t3 sidebar and tab bar: a named tab by its name, else its lead pane's title (name.js).
 import { namer } from "./name.js";
+import { spaceMark, projectOfSpace } from "./mark.js";
 
-const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
 
 // Space colors, kept by space id in shared "space.colors": a theme
 // color name ("ansi6") or a picked #rrggbb. A space seen without one gets
@@ -30,10 +30,11 @@ function spaceColors() {
   if (changed) setShared("space.colors", kept);
   return kept;
 }
-function spaceColor(t, p) {
-  if (p.name === "~") return t.dim;
-  const c = spaceColors()[p.id] ?? PROJECT_COLORS[0];
-  return c.startsWith("#") ? c : (MARK[c] ?? t[c]);
+// Its project's letter and color (dz-projects), else its own.
+function avatarOf(t, p) {
+  spaceColors();
+  const m = spaceMark(p, t);
+  return p.name === "~" && !projectOfSpace(p) ? { ...m, fill: t.dim } : m;
 }
 
 export default class Picker extends View {
@@ -162,7 +163,7 @@ export default class Picker extends View {
           .text_size(11)
           .font_semibold()
           .text_color(t.dim)
-          .child(h_flex().size(18).rounded(5).bg(spaceColor(t, r.w)).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child([...r.w.name][0]?.toUpperCase() ?? "?"))
+          .child(h_flex().size(18).rounded(5).bg(avatarOf(t, r.w).fill).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child(avatarOf(t, r.w).letter))
           .child(r.w.name);
       }
       if (r.kind === "earlier") {

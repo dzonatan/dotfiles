@@ -6,6 +6,7 @@
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window } from "herdr";
+import { spaceMark } from "./mark.js";
 
 // Where a space is now: its first terminal's live folder, else where it was made.
 // `ps`: panes(), read once by the caller (each read copies every pane).
@@ -20,9 +21,6 @@ const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 // for this often, in repos the list shows, while the window is in front.
 const FALLBACK = 60000;
 
-// What a stored color name looks like on an avatar (the same in every mod
-// that draws space avatars): one strong color per hue, light and dark alike.
-const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
 
 export default class Spaces extends View {
   init(_props, cx) {
@@ -277,9 +275,8 @@ export default class Spaces extends View {
 
   row({ w, i, g, tree, kids = 0 }, t) {
     const on = w.active;
-    const colors = shared("space.colors") ?? {};
-    const color = colors[w.id] ?? "ansi6";
-    const fill = color.startsWith("#") ? color : (MARK[color] ?? t[color]);
+    // Its project's letter and color (dz-projects), else its own.
+    const { letter, fill } = spaceMark(w, t);
     // A checkout with worktrees folds them as an agent folds its sub-agents: an arrow at the
     // end, and folded, the count; dim, brightening when hovered.
     const folded = kids > 0 && this.foldedRepos.has(g.repo);
@@ -334,7 +331,7 @@ export default class Spaces extends View {
           .items_center()
           .when(Boolean(tree), el => el.pl(20).child(h_flex().size(18).flex_none().items_center().justify_center()
             .child(svg("mods/workspace-chrome/branch.svg").size(16).text_color(t.dim))))
-          .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).items_center().justify_center().text_size(11).font_bold().text_color("#ffffff").child([...w.name][0]?.toUpperCase() ?? "?")))
+          .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).items_center().justify_center().text_size(11).font_bold().text_color("#ffffff").child(letter)))
           .child(div().min_w(0).max_w(150).truncate().text_color(t.foreground).child(w.name))
           .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1())
           .when(kids > 0, el => el.child(div().id(foldId).h(20).min_w(20).px(4).gap(3).flex_none().flex().items_center().justify_center().rounded(4)
