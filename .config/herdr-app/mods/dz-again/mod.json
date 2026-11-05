@@ -1,0 +1,5 @@
+{
+  "place": "none",
+  "title": "New Claude session here",
+  "overlay": { "kind": "dialog", "width": 200, "height": 80, "frame": "none" }
+}

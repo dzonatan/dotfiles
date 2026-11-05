@@ -1,0 +1,18 @@
+#!/bin/sh
+# Pulls the Herdr app's personal files into .config/herdr-app before each commit, so changes made in the
+# app (settings screen, agents editing ~/.config/herdr-app) are never left out. If the pull brought in
+# anything new, the commit stops so you can review and stage it.
+root="$(git rev-parse --show-toplevel)"
+[ -d "${HERDR_APP_HOME:-$HOME/.config/herdr-app}" ] || exit 0
+
+snap() { (cd "$root" && find .config/herdr-app -type f -exec shasum {} + 2>/dev/null | sort | shasum); }
+before="$(snap)"
+"$root/scripts/herdr-app-sync.sh" pull >/dev/null || { echo "pre-commit: herdr-app-sync pull failed" >&2; exit 1; }
+after="$(snap)"
+
+if [ "$before" != "$after" ]; then
+  echo "pre-commit: pulled new Herdr app changes into .config/herdr-app:" >&2
+  git -C "$root" status --short -- .config/herdr-app >&2
+  echo "Review them, 'git add .config/herdr-app' if you want them, and commit again." >&2
+  exit 1
+fi

@@ -1,0 +1,5 @@
+{
+  "place": "none",
+  "title": "Actions",
+  "overlay": { "kind": "popup", "at": "top", "offset": 40, "width": 520, "height": 380 }
+}

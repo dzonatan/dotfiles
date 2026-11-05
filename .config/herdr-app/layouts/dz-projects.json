@@ -1,0 +1,189 @@
+{
+  "id": "root",
+  "cloned_from": {
+    "name": "herdr-t3",
+    "version": "0.1.12"
+  },
+  "type": "row",
+  "children": [
+    {
+      "id": "sidebar",
+      "type": "column",
+      "children": [
+        {
+          "id": "brand",
+          "type": "block",
+          "content": {
+            "mod": "dz-chrome"
+          },
+          "size": {
+            "px": 40
+          },
+          "window_drag": true
+        },
+        {
+          "id": "sidebar-lists",
+          "type": "stack",
+          "children": [
+            {
+              "id": "lists",
+              "type": "column",
+              "children": [
+                {
+                  "id": "spaces",
+                  "type": "block",
+                  "content": {
+                    "mod": "dz-spaces"
+                  },
+                  "size": {
+                    "weight": 1
+                  },
+                  "min": 90
+                },
+                {
+                  "id": "agents",
+                  "type": "block",
+                  "content": {
+                    "mod": "dz-agents"
+                  },
+                  "size": {
+                    "weight": 1
+                  },
+                  "min": 90
+                }
+              ]
+            },
+            {
+              "id": "inbox",
+              "type": "block",
+              "content": {
+                "mod": "dz-inbox",
+                "props": {
+                  "newMenu": "dz-launch"
+                }
+              }
+            }
+          ],
+          "active": "lists"
+        },
+        {
+          "id": "sidebar-footer",
+          "type": "block",
+          "content": {
+            "mod": "dz-chrome",
+            "props": {
+              "footer": true,
+              "projects": true
+            }
+          },
+          "size": {
+            "px": 72
+          }
+        }
+      ],
+      "size": {
+        "px": 256
+      },
+      "min": 208,
+      "max": 480,
+      "background": "chrome",
+      "resizable": false
+    },
+    {
+      "id": "work",
+      "type": "column",
+      "children": [
+        {
+          "id": "tabs",
+          "type": "block",
+          "content": {
+            "mod": "dz-tabs",
+            "props": {
+              "closeWith": "dz-close"
+            }
+          },
+          "size": {
+            "px": 40
+          },
+          "window_drag": true
+        },
+        {
+          "id": "work-body",
+          "type": "row",
+          "children": [
+            {
+              "id": "main",
+              "type": "block",
+              "content": {
+                "tab": "active",
+                "pane": {
+                  "header": {
+                    "content": {
+                      "mod": "dz-pane"
+                    },
+                    "reveal": "always",
+                    "height": 28,
+                    "position": "top"
+                  },
+                  "background": "background",
+                  "border": {
+                    "width": 2,
+                    "color": "background"
+                  },
+                  "focus": {
+                    "width": 2,
+                    "color": "background"
+                  },
+                  "radius": 8,
+                  "gap": 8,
+                  "lone": true
+                }
+              }
+            }
+          ],
+          "padding": [
+            2,
+            8
+          ],
+          "gap": 8
+        },
+        {
+          "id": "work-bottom-inset",
+          "type": "row",
+          "children": [],
+          "size": {
+            "px": 6
+          }
+        },
+        {
+          "id": "status",
+          "type": "block",
+          "content": {
+            "mod": "workspace-status"
+          },
+          "size": {
+            "px": 28
+          },
+          "hidden": true
+        }
+      ],
+      "resizable": false
+    }
+  ],
+  "background": "canvas",
+  "terminal_padding": [
+    8,
+    0
+  ],
+  "terminal_opacity": 0,
+  "divider": {
+    "width": 1,
+    "color": "border"
+  },
+  "titlebar": "none",
+  "traffic_lights": [
+    16,
+    13
+  ],
+  "preview": "layouts/dz-projects.svg"
+}
