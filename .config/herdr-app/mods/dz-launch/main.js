@@ -4,7 +4,7 @@
 // No project: Claude starts in a fresh temporary folder, in a new space of its own ("Scratch <id>").
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex, InputState, Input } from "gpui-base";
-import { theme, spaces, panes, run, closeOverlay, openOverlay, props, shared, home, exec, readTextFile, focused } from "herdr";
+import { theme, spaces, panes, run, closeOverlay, openOverlay, props, shared, home, exec, readTextFile } from "herdr";
 
 const NONE = { id: "none", name: "No project" };
 const SCRATCH = "Scratch";
@@ -51,18 +51,15 @@ export default class Launch extends View {
     this.wtName = InputState.new({ placeholder: "worktree name (blank: Claude picks one)" });
     this.wtName.on("change", (_e, cx) => { this.error = ""; cx.notify(); });
     this.wtName.on("submit", (_e, cx) => this.start(cx));
-    // Start on the project the focused terminal is in, else the first.
-    const cwd = focused()?.cwd;
-    const list = this.items();
-    const here = list.findIndex((p) => p !== NONE && inside(cwd, p.path));
-    this.at = here >= 0 ? here : 0;
+    // Always start on "No project" (first in the list).
+    this.at = 0;
     this.search.focus();
     this.load(cx);
   }
 
   items() {
     const q = this.filter.toLowerCase();
-    return [...projects(), NONE].filter((p) => `${p.name} ${p.path ?? ""}`.toLowerCase().includes(q));
+    return [NONE, ...projects()].filter((p) => `${p.name} ${p.path ?? ""}`.toLowerCase().includes(q));
   }
 
   project() {
