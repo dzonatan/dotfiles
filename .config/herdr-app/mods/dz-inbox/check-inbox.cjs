@@ -76,7 +76,7 @@ function fixture() {
   // tree.js, the shared status rule, is inlined as each mod's own copy is.
   // Local additions too: session.js (kept sessions) and snooze.js.
   const own = (f) => fs.readFileSync(path.join(__dirname, f), "utf8").replace(/^import .*;\r?\n/gm, "").replace(/export (async function|function|const) /g, "$1 ");
-  const tree = own("tree.js") + own("session.js") + own("snooze.js");
+  const tree = own("tree.js") + own("session.js") + own("snooze.js") + own("mark.js");
   const src = tree + fs.readFileSync(path.join(__dirname, "main.js"), "utf8")
     .replace(/^import .*;\r?\n/gm, "").replace("export default class", "globalThis.Mod = class");
   const context = vm.createContext(env);

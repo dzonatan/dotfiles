@@ -7,15 +7,14 @@ import { View, div, image, svg } from "gpui-kit";
 import { v_flex, h_flex, Popover, InputState, Input } from "gpui-base";
 import { agents, terminals, panes, spaces, focused, run, hc, notify, theme, shared, setShared, setAgentOrder, props, nextCommand, settings, layout } from "herdr";
 import { namer } from "./name.js";
+import { spaceMark, projectAt } from "./mark.js";
 import { kidStatus, descendants, ownStatus, treeStatus } from "./tree.js";
 // Local addition: settled Claude sessions kept past their terminal, resumed with `claude --resume` (session.js).
-import { keep, forget, sessions, liveIn, resume } from "./session.js";
+import { keep, forget, sessions, liveIn, resume, prune } from "./session.js";
 // Local addition: Snooze, put away until a time (snooze.js); the Snoozed shelf sits above Settled.
 import { presets, parse, when, snoozedUntil, snooze, wake } from "./snooze.js";
 
 const BUSY = new Set(["working", "blocked"]);
-// Space avatar colors, as the Herdr T3 layout's dz-spaces draws them (shared "space.colors").
-const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
 // The settled tail opens on this many, then grows by MORE.
 const FIRST = 10, MORE = 25;
 // A run that stops stays on the Working shelf this long (ms), as in T3: a quick continuation doesn't move it twice.
@@ -74,6 +73,14 @@ export default class Inbox extends View {
     this.keys = cx.focus_handle();
     // "Working 9s" counts up only while such a card shows.
     cx.timer.every(1000, (cx) => { if (this.ticking) cx.notify(); });
+    // Scratch leftovers (session.js prune): untouched scratch sessions out of Settled, their empty folders gone.
+    const tidy = (cx) => cx.spawn(async () => {
+      const ts = terminals(), term = new Map(ts.map((k) => [k.address, k]));
+      const cwds = [...panes().map((p) => p.cwd), ...ts.filter((k) => k.state === "live").flatMap((k) => [k.cwd, k.foreground?.cwd])].filter(Boolean);
+      await prune({ term, cwds }).catch(() => null);
+    });
+    tidy(cx);
+    cx.timer.every(10 * 60 * 1000, tidy);
     // The cards' times (5m, 2h) move on by the minute, as T3's do.
     cx.timer.every(60000, (cx) => cx.notify());
     // `dz-inbox.settle` (cmd-shift-s in keys.json): see settleKey in render.
@@ -150,7 +157,9 @@ export default class Inbox extends View {
 
   // Local change: settling ends the agent. Its terminal goes (its pane closes, so Herdr closes an emptied tab);
   // a space left empty gets a fresh shell tab first, as Clear does, and the view stays where it was.
-  end(addrs) {
+  // `empty`: addresses of untouched scratch sessions (session.js keep): a space left with only those closes
+  // instead of getting a fresh shell, since its folder is gone.
+  end(addrs, empty = new Set()) {
     if (!addrs.length) return;
     const sp = spaces(), ps = panes();
     const spaceNow = sp.find((s) => s.active), tabNow = spaceNow?.tabs.find((c) => c.active)?.id;
@@ -161,11 +170,16 @@ export default class Inbox extends View {
       const s = sp.find((s) => s.id === id), tabs = s?.tabs.map((c) => c.id) ?? [];
       const mine = ps.filter((p) => tabs.includes(p.tab));
       if (mine.length && mine.every((p) => gone.has(p.pane))) {
+        if (doomed.filter((a) => a.space === id).every((a) => empty.has(a.address))) {
+          run("space.close", { id, confirmed: true });
+          for (const a of doomed) if (a.space === id) gone.delete(a.pane), (a.closed = true);
+          continue;
+        }
         run("tab.new", { space: id, folder: mine.find((p) => p.cwd)?.cwd || s.folder });
         opened = true;
       }
     }
-    for (const a of doomed) run(a.pane ? "pane.close" : "terminal.kill", a.pane ? { pane: a.pane } : { terminal: a.address });
+    for (const a of doomed.filter((a) => !a.closed)) run(a.pane ? "pane.close" : "terminal.kill", a.pane ? { pane: a.pane } : { terminal: a.address });
     // tab.new shows the new tab; go back to where the person was (unless that tab just closed).
     if (opened && tabNow && !doomed.some((a) => a.tab === tabNow)) { run("space.select", { id: spaceNow.id }); run("tab.select", { id: tabNow }); }
   }
@@ -304,12 +318,15 @@ export default class Inbox extends View {
       cx.notify();
     };
     const lit = (id, color) => (this.hot === id ? t.foreground : color);
-    // A space's avatar, as dz-spaces draws it.
-    const avatar = (id, name, size) => {
-      const color = (shared("space.colors") ?? {})[id] ?? "ansi6";
-      return h_flex().size(size).flex_none().rounded(4).bg(color.startsWith("#") ? color : MARK[color] ?? t[color])
+    // A space's avatar, as dz-spaces draws it: its project's letter and color (dz-projects), else its own.
+    // `project`: the project an agent's own folder is in, which wins over its space's.
+    // No project: an empty dashed box where the letter would be.
+    const noProject = (size) => div().size(size).flex_none().rounded(4).border_1().border_dashed().border_color(t.dim);
+    const avatar = (id, name, size, project) => {
+      const { letter, fill } = spaceMark(id, t, { project, name, ps });
+      return h_flex().size(size).flex_none().rounded(4).bg(fill)
         .items_center().justify_center().text_size(size * 0.64).font_bold().text_color("#ffffff")
-        .child([...(name ?? "")][0]?.toUpperCase() ?? "?");
+        .child(letter);
     };
     // Brought back, it's news again: the top of the list.
     const unsettle = (a, cx) => {
@@ -333,7 +350,7 @@ export default class Inbox extends View {
         const missed = xs.filter((a) => !ended.has(a.address));
         for (const a of missed) this.setSettled(a.address, at[a.address], cx);
         if (missed.length) notify({ title: "Settled, still running", body: `${missed.map((a) => title(a)).join(", ")}: no Claude session to resume, so it wasn't ended.`, level: "warning" });
-        this.end([...ended]);
+        this.end([...ended], new Set(kept.filter((k) => k.empty).map((k) => k.address)));
         cx.notify();
       });
       return moveOn(xs);
@@ -567,7 +584,10 @@ export default class Inbox extends View {
       const machine = a.address.includes("/") ? a.address.split("/")[0] : null;
       const branch = ps.find((p) => p.pane === a.pane)?.branch;
       // Local addition: the project it works in (dz-projects' bookmarks), so a worktree's space reads as its project.
-      const where = projectOf(a)?.name ?? a.space_name;
+      const project = projectOf(a);
+      // A local agent outside every bookmarked project (Scratch included) says so, rather than its space's name.
+      const none = !project && !a.address.includes("/");
+      const where = project?.name ?? (none ? "No project" : a.space_name);
       const going = kids.get(a.address).filter((s) => s === "working").length;
       const meta = [branch, going ? `${going} sub-agent${going > 1 ? "s" : ""} working` : null].filter(Boolean).join(" · ");
       const pic = icon(a.program, 16, t.muted);
@@ -615,7 +635,7 @@ export default class Inbox extends View {
         .when(on, (el) => el.bg(t.selected))
         .when(!on && !ghost && !dragging && !this.sweep?.moved, (el) => el.hover((s) => s.bg(t.hover)))
         .child(h_flex().h(20).gap(6).items_center().text_size(12).text_color(t.dim)
-          .child(avatar(a.space, where, 14))
+          .child(none ? noProject(14) : avatar(a.space, where, 14, project && projectAt(project.path)))
           // Lifted, a pin keeps its glyph only while it stays among the pins.
           .when(pins.includes(a.address) && (!ghost || plan?.section === "pinned" || !plan), (el) => el.child(svg("mods/workspace-chrome/pin.svg").size(12).flex_none().text_color(t.dim)))
           .child(div().flex_1().min_w(0).truncate().child(machine ? `${where} · ${machine}` : where ?? ""))

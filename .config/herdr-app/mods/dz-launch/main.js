@@ -1,7 +1,7 @@
 // New Claude session (⌘N): pick a project (dz-projects' bookmarks) or none, then where in it:
 // the checkout as it is, one of its worktrees, or a new worktree (`claude -w`). Starts Claude
 // in a new tab of the space already working in that project, else in a new space named after it.
-// No project: Claude starts in a fresh temporary folder, in the "Scratch" space.
+// No project: Claude starts in a fresh temporary folder, in a new space of its own ("Scratch <id>").
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex, InputState, Input } from "gpui-base";
 import { theme, spaces, panes, run, closeOverlay, openOverlay, props, shared, home, exec, readTextFile, focused } from "herdr";
@@ -74,7 +74,7 @@ export default class Launch extends View {
     const p = this.project();
     if (!p || p === NONE) return [];
     const info = this.info[p.path];
-    return [{ kind: "current" }, ...(info?.worktrees ?? []).map((w) => ({ kind: "existing", w })), { kind: "new" }];
+    return [{ kind: "current" }, { kind: "new" }, ...(info?.worktrees ?? []).map((w) => ({ kind: "existing", w }))];
   }
 
   load(cx) {
@@ -181,11 +181,14 @@ export default class Launch extends View {
         let { cwd } = plan;
         let space = null, name = p.name;
         if (p === NONE) {
-          const tmp = await exec("mktemp", ["-d", "-t", "claude"]);
+          // Scratch sessions live in ~/.scratches/<date>-<random>; trust ~/.scratches once to skip the trust prompt.
+          const tmp = await exec("sh", ["-c",
+            'mkdir -p "$HOME/.scratches" && mktemp -d "$HOME/.scratches/$(date +%Y-%m-%d)-XXXXXX"']);
           cwd = tmp.stdout.trim();
           if (tmp.code !== 0 || !cwd) throw new Error(tmp.stderr.trim() || "mktemp failed.");
-          name = SCRATCH;
-          space = spaces().find((s) => !s.machine && s.named && s.name === SCRATCH) ?? null;
+          // Each scratch gets its own space, named after its folder's random suffix.
+          name = `${SCRATCH} ${base(cwd).split("-").pop()}`;
+          space = null;
         } else {
           space = this.spaceFor(p, plan.checkout);
           // A worktree's space is named after it; the main checkout's after the project; an unnamed new worktree's
@@ -247,10 +250,10 @@ export default class Launch extends View {
     const optRows = [];
     if (none) {
       optRows.push(label("Checkout"));
-      for (const [k, n] of [["current", "Current checkout"], ["existing", "Existing worktree"], ["new", "New worktree"]])
+      for (const [k, n] of [["current", "Current checkout"], ["new", "New worktree"], ["existing", "Existing worktree"]])
         optRows.push(row(`opt-${k}`, false, radio(false), n, null, "", null, true));
       optRows.push(div().px(10).pt(10).text_size(12).text_color(t.dim)
-        .child("No project: Claude starts in a fresh temporary folder, in the Scratch space."));
+        .child("No project: Claude starts in a fresh temporary folder, in a new Scratch space of its own."));
     } else if (!info || info.loading) {
       optRows.push(div().p(10).text_color(t.dim).child("Reading the project…"));
     } else if (info.error) {
@@ -263,18 +266,18 @@ export default class Launch extends View {
           optRows.push(label("Checkout"));
           optRows.push(row("opt-current", mark, radio(on), "Current checkout", info.branch, "", pick));
         } else if (o.kind === "existing") {
-          if (i === 1) optRows.push(label("Existing worktrees"));
+          if (i === 2) optRows.push(label("Existing worktrees"));
           const name = this.claudeName(p, o.w);
           optRows.push(row(`opt-wt-${o.w.path}`, mark, radio(on), o.w.name,
             `${o.w.branch ?? ""} · ${short(o.w.path)}`, name ? "claude -w" : "", pick));
         } else {
-          if (opts.length === 2) optRows.push(label("Existing worktrees"), div().px(10).pb(4).text_size(12).text_color(t.dim).child("None yet."));
           optRows.push(label("New worktree"));
           optRows.push(row("opt-new", mark, radio(on), "New worktree", info.hook ? "made by this project's WorktreeCreate hook" : "under .claude/worktrees", "claude -w", pick));
           if (on) optRows.push(h_flex().id("opt-new-name").mx(10).mt(4).h(32).px(8).items_center().rounded(6).flex_none()
             .border(1).border_color(this.col === "options" ? t.accent : t.input).bg(t.background)
             .on_click((_e, cx) => { this.col = "options"; this.wtName.focus(); cx.notify(); })
             .child(Input.new(this.wtName).flex_1().h_full().text_size(13).text_color(t.foreground)));
+          if (opts.length === 2) optRows.push(label("Existing worktrees"), div().px(10).pb(4).text_size(12).text_color(t.dim).child("None yet."));
         }
       });
     }

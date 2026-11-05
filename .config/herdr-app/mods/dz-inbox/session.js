@@ -22,15 +22,43 @@ export async function capture(address) {
   return { id: s.sessionId, address, created: k.created_ms ?? null, cwd: s.cwd || k.foreground.cwd || k.cwd };
 }
 
+// Scratch sessions (dz-launch's "No project") live in ~/.scratches/<date>-<random>, one folder each.
+export const isScratch = (cwd) => {
+  const root = `${home()}/.scratches/`;
+  return Boolean(cwd) && cwd.startsWith(root) && cwd.length > root.length && !cwd.slice(root.length).includes("/");
+};
+
+// Whether anything was ever sent in a Claude session: Claude writes ~/.claude/projects/<cwd>/<id>.jsonl from the
+// first message on, with a "user" entry per message. A failed check counts as used, so nothing is lost by mistake.
+export async function used(id) {
+  const r = await exec("sh", ["-c", 'grep -qs \'"type":"user"\' "$HOME"/.claude/projects/*/"$1".jsonl', "sh", id]).catch(() => null);
+  return !r || (r.code !== 1 && r.code !== 2);
+}
+
+// Whether a folder's Claude project has any session with a message, by Claude's folder naming (/ and . become -).
+async function folderUsed(cwd) {
+  const dir = `${home()}/.claude/projects/${cwd.replace(/[/.]/g, "-")}`;
+  const r = await exec("sh", ["-c", 'grep -qs \'"type":"user"\' "$1"/*.jsonl', "sh", dir]).catch(() => null);
+  return !r || (r.code !== 1 && r.code !== 2);
+}
+
+// An empty scratch folder goes; rmdir leaves one with anything in it.
+const drop = (cwd) => exec("rmdir", [cwd]).catch(() => null);
+
 // Captures and keeps each agent's session ({ address, title, space, spaceName }); resolves with what it kept.
+// A scratch session nobody wrote in isn't kept: it's returned with `empty: true` (so callers still end it),
+// left out of Settled, and its folder removed.
 export async function keep(agents) {
   const found = (await Promise.all(agents.map(async (a) => {
     const s = await capture(a.address);
+    if (s && isScratch(s.cwd) && !(await used(s.id))) return { ...s, empty: true };
     return s && { ...s, title: a.title, space: a.space, spaceName: a.spaceName, at: Date.now() };
   }))).filter(Boolean);
-  if (found.length) {
+  for (const s of found) if (s.empty) await drop(s.cwd);
+  const kept = found.filter((s) => !s.empty);
+  if (kept.length) {
     const all = sessions();
-    for (const s of found) {
+    for (const s of kept) {
       // One record per terminal: a /clear or /resume inside it replaced the session.
       for (const [id, o] of Object.entries(all)) if (o.address === s.address && o.created === s.created) delete all[id];
       all[s.id] = s;
@@ -38,6 +66,23 @@ export async function keep(agents) {
     setShared(KEY, all);
   }
   return found;
+}
+
+// Clears out scratch leftovers: closed sessions in a scratch nobody wrote in (dropped from Settled), and empty
+// ~/.scratches folders no live terminal is in and no session with a message came from.
+export async function prune(live) {
+  const all = sessions();
+  const empty = (await Promise.all(Object.values(all)
+    .filter((s) => isScratch(s.cwd) && !liveIn(s, live.term))
+    .map(async (s) => ((await used(s.id)) ? null : s)))).filter(Boolean);
+  if (empty.length) forget((o) => empty.some((s) => s.id === o.id));
+  for (const s of empty) await drop(s.cwd);
+  const r = await exec("sh", ["-c", 'find "$HOME/.scratches" -mindepth 1 -maxdepth 1 -type d -empty 2>/dev/null']).catch(() => null);
+  const keepers = new Set(Object.values(sessions()).map((s) => s.cwd));
+  for (const dir of (r?.stdout ?? "").split("\n").filter(Boolean)) {
+    if (!isScratch(dir) || keepers.has(dir) || live.cwds.some((c) => c === dir || c.startsWith(dir + "/"))) continue;
+    if (!(await folderUsed(dir))) await drop(dir);
+  }
 }
 
 export function forget(pred) {
