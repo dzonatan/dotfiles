@@ -57,6 +57,7 @@ export default class Actions extends View {
     if (!menu) {
       return ACTIONS.map((a) => ({ a, r: rank(q, a) })).filter((x) => x.r !== null)
         .map(({ a, r }) => { const ok = a.when ? a.when(ctx) : true; return { ...a, rank: r, off: ok === true ? null : ok }; })
+        .filter((x) => x.off !== false)
         .sort((x, y) => Number(Boolean(x.off)) - Number(Boolean(y.off)) || x.rank - y.rank);
     }
     const typed = q && menu.typed ? menu.typed(q, ctx) : null;

@@ -1,7 +1,7 @@
 // The ⌘K actions (keys.json: mod.open:dz-actions). To add one, add an entry here; main.js only draws the list.
 //
 //   { id, title, icon, words?,
-//     when(ctx)  → true to offer it, or a short reason it's off ("No agent in view.")
+//     when(ctx)  → true to offer it, a short reason it's off ("No agent in view."), or false to hide it
 //     run(ctx)   → does it; the popup closes
 //     menu(ctx)  → opens a second list instead: { title, placeholder, items: [{ id, title, hint?, run(ctx) }],
 //                  typed?(text, ctx) → an extra first item for what was typed ({ title, hint, run }) or null } }
@@ -33,7 +33,7 @@ export const ACTIONS = [
   },
   {
     id: "wake", title: "Wake agent", icon: "mods/dz-inbox/undo.svg", words: "unsnooze back now",
-    when: (ctx) => (!ctx.agent ? "No agent in view." : ctx.snoozed ? true : "Not snoozed."),
+    when: (ctx) => Boolean(ctx.agent && ctx.snoozed),
     run: (ctx) => wake(ctx.agent.address).catch(fail),
   },
   {
