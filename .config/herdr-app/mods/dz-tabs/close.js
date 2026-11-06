@@ -2,6 +2,7 @@
 // closeWith dialog (dz-projects: dz-close), which lists what runs and settles Claude sessions first.
 // Checked here, not inside the dialog: a dialog dims the window even while it draws nothing.
 import { hc, panes, agents, run } from "herdr";
+import { closeAndGoBack } from "./back.js";
 
 const SHELL = /(^|\/)-?(zsh|bash|fish|sh|dash|ksh|tcsh|nu|pwsh|xonsh)$/;
 
@@ -19,5 +20,5 @@ export async function closeTab(tabId, dialog) {
   const busy = agents().some((a) => a.tab === tabId)
     || (await Promise.all(panes().filter((p) => p.tab === tabId && p.terminal).map((p) => running(p.terminal)))).some(Boolean);
   if (busy) run("mod.open", { name: dialog });
-  else run("tab.close", { id: tabId, confirmed: true });
+  else closeAndGoBack(tabId);
 }

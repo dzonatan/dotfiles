@@ -334,7 +334,7 @@ export default class Inbox extends View {
       if (JSON.stringify(shared("inbox.order") ?? null) !== JSON.stringify(order)) setShared("inbox.order", order);
     }
 
-    // Local addition: closing what's in view (a tab, a space, an agent's pane) moves on to the top Active agent
+    // Local addition: closing what's in view (the last tab, a space, an agent's pane) moves on to the top Active agent
     // (pinned first, never Working, Snoozed or Settled); with none left, the work area shows dz-empty
     // (dz-projects' "main-stack"). Only while the inbox shows. Any later focus change puts the tab back.
     const stackOf = (n, id) => n?.id === id ? n : (n?.children ?? []).map((c) => stackOf(c, id)).find(Boolean);
@@ -343,7 +343,10 @@ export default class Inbox extends View {
     const showMain = () => cx.spawn(async () => run("layout.select", { stack: "main-stack", child: "main" }));
     if (mainStack && find(layout())?.active !== "lists") {
       const was = this.inViewPane;
-      if (was && !ps.some((p) => p.pane === was)) {
+      // A closed tab whose space has more tabs stays in that space (dz-tabs/back.js picks the previous tab).
+      const tabClosed = this.inViewTab && f?.space === this.inViewSpace && f?.tab !== this.inViewTab
+        && !spaces().some((s) => s.tabs.some((c) => c.id === this.inViewTab));
+      if (was && !ps.some((p) => p.pane === was) && !tabClosed) {
         const next = [...pinned.filter((a) => !working(a)), ...out][0];
         if (next) {
           if (mainStack.active === "empty") showMain();
@@ -359,6 +362,8 @@ export default class Inbox extends View {
       }
     }
     this.inViewPane = f?.pane ?? null;
+    this.inViewTab = f?.tab ?? null;
+    this.inViewSpace = f?.space ?? null;
     // Clicking a card brings the tab back even when that agent is the one already focused behind the empty state.
     this.showMain = mainStack?.active === "empty" ? () => { this.emptyAt = null; run("layout.select", { stack: "main-stack", child: "main" }); } : null;
 

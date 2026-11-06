@@ -8,6 +8,7 @@ import { h_flex, v_flex } from "gpui-base";
 import { theme, spaces, panes, agents, focused, run, props, closeOverlay, notify, hc } from "herdr";
 import { namer } from "./name.js";
 import { keep } from "./session.js";
+import { closeAndGoBack } from "./back.js";
 
 const SHELL = /(^|\/)-?(zsh|bash|fish|sh|dash|ksh|tcsh|nu|pwsh|xonsh)$/;
 const isClaude = (a) => a.app === "claude-code" || a.program?.key === "claude";
@@ -45,7 +46,7 @@ export default class Close extends View {
       }))).filter(Boolean);
       if (!items.length) {
         this.done();
-        run("tab.close", { id: tg.tab.id, confirmed: true });
+        closeAndGoBack(tg.tab.id);
         return;
       }
       this.items = items;
@@ -75,7 +76,7 @@ export default class Close extends View {
       const missed = claude.filter((i) => !kept.some((k) => k.address === i.agent.address));
       if (missed.length) notify({ title: "Session not kept", body: `${missed.map((i) => i.name).join(", ")}: no Claude session id found.`, level: "warning" });
       this.done();
-      run("tab.close", { id: tg.tab.id, confirmed: true });
+      closeAndGoBack(tg.tab.id);
     });
   }
 
