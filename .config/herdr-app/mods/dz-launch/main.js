@@ -151,26 +151,27 @@ export default class Launch extends View {
     cx.notify();
   }
 
-  // What to run and where: { cwd, argv, tab } or an error string.
+  // What to run and where: { cwd, checkout, argv } or an error string. The tab stays unnamed, so it shows
+  // the title Claude gives the session after the first message (the space already names the checkout).
   plan(p) {
-    if (p === NONE) return { argv: ["claude"], tab: null };
+    if (p === NONE) return { argv: ["claude"] };
     const info = this.info[p.path];
     if (!info || info.loading) return "Still reading the project…";
     if (info.error) return info.error;
     const o = this.options()[this.opt] ?? { kind: "current" };
     // `checkout`: the folder the session ends up working in, which picks its space (null: not known yet).
-    if (o.kind === "current") return { cwd: p.path, checkout: p.path, argv: ["claude"], tab: info.branch.startsWith("detached") ? null : info.branch };
+    if (o.kind === "current") return { cwd: p.path, checkout: p.path, argv: ["claude"] };
     if (o.kind === "existing") {
       const name = this.claudeName(p, o.w);
-      return name ? { cwd: p.path, checkout: o.w.path, argv: ["claude", "-w", name], tab: name }
-        : { cwd: o.w.path, checkout: o.w.path, argv: ["claude"], tab: o.w.name };
+      return name ? { cwd: p.path, checkout: o.w.path, argv: ["claude", "-w", name] }
+        : { cwd: o.w.path, checkout: o.w.path, argv: ["claude"] };
     }
     const name = this.wtName.value().trim();
     if (name && !NAME_OK.test(name)) return "Worktree names use letters, digits, '.', '_' and '-'.";
     const existing = name && info.worktrees.find((w) => this.claudeName(p, w) === name);
     // Where `claude -w <name>` puts it: the project's WorktreeCreate hook's .worktrees/, else Claude's own place.
     const checkout = !name ? null : existing ? existing.path : `${p.path}/${info.hook ? ".worktrees" : ".claude/worktrees"}/${name}`;
-    return { cwd: p.path, checkout, argv: name ? ["claude", "-w", name] : ["claude", "-w"], tab: name || null };
+    return { cwd: p.path, checkout, argv: name ? ["claude", "-w", name] : ["claude", "-w"] };
   }
 
   // One space per checkout: the main checkout's, or a worktree's. A space is in the checkout its first
@@ -213,12 +214,11 @@ export default class Launch extends View {
           name = plan.checkout === p.path ? p.name : plan.checkout ? base(plan.checkout) : null;
         }
         closeOverlay(props().overlay);
-        const tab = plan.tab ?? undefined;
         if (space) {
           run("space.select", { id: space.id });
-          run("tab.new", { space: space.id, folder: cwd, argv: plan.argv, ...(tab ? { name: tab } : {}) });
+          run("tab.new", { space: space.id, folder: cwd, argv: plan.argv });
         } else {
-          run("space.new", { ...(name ? { name } : {}), folder: cwd, argv: plan.argv, machine: "", ...(tab ? { tab } : {}) });
+          run("space.new", { ...(name ? { name } : {}), folder: cwd, argv: plan.argv, machine: "" });
         }
       } catch (e) {
         this.error = String(e?.message ?? e);
