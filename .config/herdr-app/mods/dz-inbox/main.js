@@ -7,7 +7,7 @@ import { View, div, image, svg } from "gpui-kit";
 import { v_flex, h_flex, Popover, InputState, Input } from "gpui-base";
 import { agents, terminals, panes, spaces, focused, run, hc, notify, theme, shared, setShared, setAgentOrder, props, nextCommand, settings, layout } from "herdr";
 import { namer } from "./name.js";
-import { spaceMark, projectAt } from "./mark.js";
+import { spaceMark, projectAt, projectMarks, fillOf } from "./mark.js";
 import { kidStatus, descendants, ownStatus, treeStatus } from "./tree.js";
 // Local addition: settled Claude sessions kept past their terminal, resumed with `claude --resume` (session.js).
 import { keep, forget, sessions, liveIn, resume, prune } from "./session.js";
@@ -15,6 +15,8 @@ import { keep, forget, sessions, liveIn, resume, prune } from "./session.js";
 import { presets, parse, when, snoozedUntil, snooze, wake } from "./snooze.js";
 
 const BUSY = new Set(["working", "blocked"]);
+// The project filter's entry for local agents outside every bookmarked project (Scratch included).
+const NONE = "none";
 // The settled tail opens on this many, then grows by MORE.
 const FIRST = 10, MORE = 25;
 // A run that stops stays on the Working shelf this long (ms), as in T3: a quick continuation doesn't move it twice.
@@ -63,10 +65,11 @@ export default class Inbox extends View {
     this.snoozeInput.on("change", (_e, cx) => cx.notify());
     this.snoozeInput.on("submit", (_e, cx) => this.snoozeSubmit?.(cx));
     this.hovered = null;
-    // The spaces shown, as T3 scopes threads to projects; none: all of them.
-    this.scope = JSON.parse(localStorage.getItem("scope") ?? "[]");
+    // The projects shown (dz-projects' ids, or NONE for agents outside every project), as T3 scopes threads to
+    // projects; empty: all of them.
+    this.scope = JSON.parse(localStorage.getItem("project-scope") ?? "[]");
     this.scopeOpen = false;
-    this.search = InputState.new({ placeholder: "Search spaces…" });
+    this.search = InputState.new({ placeholder: "Search projects…" });
     this.search.on("change", (_e, cx) => cx.notify());
     this.search.on("submit", (_e, cx) => this.pick(this.matches()[0], false, cx));
     // Takes the keyboard while a row is lifted, so Esc can put it back.
@@ -94,14 +97,15 @@ export default class Inbox extends View {
 
   matches() {
     const q = this.search.value().toLowerCase();
-    return [{ id: null, name: "All spaces" }, ...spaces()].filter((s) => s.name.toLowerCase().includes(q));
+    return [{ id: null, name: "All projects" }, { id: NONE, name: "No project" }, ...projectMarks()]
+      .filter((s) => s.name.toLowerCase().includes(q));
   }
 
-  // A click shows that space alone; shift-click adds or removes it and keeps the menu open, as in T3.
+  // A click shows that project alone; shift-click adds or removes it and keeps the menu open, as in T3.
   pick(s, shift, cx) {
     if (!s) return;
     this.scope = !s.id ? [] : !shift ? [s.id] : this.scope.includes(s.id) ? this.scope.filter((id) => id !== s.id) : [...this.scope, s.id];
-    localStorage.setItem("scope", JSON.stringify(this.scope));
+    localStorage.setItem("project-scope", JSON.stringify(this.scope));
     // A new scope starts the settled tail over, as T3's does.
     this.limit = FIRST;
     if (!shift) this.scopeOpen = false;
@@ -212,9 +216,19 @@ export default class Inbox extends View {
   render(cx) {
     const t = theme(), now = Date.now();
     const every = agents(), all = terminals(), ps = panes(), sp = spaces();
-    // A space that's gone reads as all; its id stays stored, so the scope returns with it.
-    const scope = this.scope.filter((id) => sp.some((s) => s.id === id));
-    const list = scope.length ? every.filter((a) => scope.includes(a.space)) : every;
+    // The bookmarked project holding the agent's folder (its pane's, else its space's), deepest first; null: none.
+    const bookmarks = projectMarks().sort((x, y) => y.path.length - x.path.length);
+    const projectOf = (a) => {
+      if (a.address.includes("/")) return null;
+      const s = sp.find((x) => x.id === a.space), tabs = new Set((s?.tabs ?? []).map((c) => c.id));
+      const dir = ps.find((p) => p.pane === a.pane)?.cwd || ps.find((p) => tabs.has(p.tab) && p.cwd)?.cwd || s?.folder;
+      return dir ? bookmarks.find((q) => dir === q.path || dir.startsWith(q.path.replace(/\/+$/, "") + "/")) ?? null : null;
+    };
+    // Its entry in the project filter: the project's id, NONE for a local agent outside them all, null (remote) for neither.
+    const scopeKey = (a) => projectOf(a)?.id ?? (a.address.includes("/") ? null : NONE);
+    // A project that's gone reads as all; its id stays stored, so the scope returns with it.
+    const scope = this.scope.filter((id) => id === NONE || bookmarks.some((q) => q.id === id));
+    const list = scope.length ? every.filter((a) => scope.includes(scopeKey(a))) : every;
     const listed = new Map(every.map((a) => [a.address, a.status]));
     const term = new Map(all.map((k) => [k.address, k]));
     for (const [k, v] of Object.entries(this.pending)) if (!term.has(k) || (term.get(k).labels?.settled ?? "") === v) delete this.pending[k];
@@ -460,7 +474,7 @@ export default class Inbox extends View {
     const page = this.open ? put.slice(0, size) : [];
     const rows = [...page, ...put.filter((a) => a.focused && !page.includes(a))];
     // Closed sessions: settled, their terminal gone. After the live ones, newest first, in the same page.
-    const closed = Object.values(sessions()).filter((s) => !liveIn(s, term) && (!scope.length || scope.includes(s.space)))
+    const closed = Object.values(sessions()).filter((s) => !liveIn(s, term) && (!scope.length || scope.includes(projectAt(s.cwd)?.id ?? NONE)))
       .sort((x, y) => y.at - x.at);
     const closedRows = this.open ? closed.slice(0, Math.max(0, size - page.length)) : [];
     const settledCount = put.length + closed.length;
@@ -596,15 +610,6 @@ export default class Inbox extends View {
               this.snoozeInput.focus();
             }),
           ]));
-    };
-
-    // The bookmarked project holding the agent's folder (its pane's, else its space's), deepest first; null: none.
-    const bookmarks = (Array.isArray(shared("projects")) ? shared("projects") : []).slice().sort((x, y) => y.path.length - x.path.length);
-    const projectOf = (a) => {
-      if (a.address.includes("/")) return null;
-      const s = sp.find((x) => x.id === a.space), tabs = new Set((s?.tabs ?? []).map((c) => c.id));
-      const dir = ps.find((p) => p.pane === a.pane)?.cwd || ps.find((p) => tabs.has(p.tab) && p.cwd)?.cwd || s?.folder;
-      return dir ? bookmarks.find((q) => dir === q.path || dir.startsWith(q.path.replace(/\/+$/, "") + "/")) ?? null : null;
     };
 
     // `ghost`: the copy that follows the pointer, drawn without handlers or ids the list already uses.
@@ -845,13 +850,17 @@ export default class Inbox extends View {
         .child(svg("mods/workspace-chrome/chevron-down.svg").size(12).flex_none())
         .child(`Show ${Math.min(MORE, settledCount - this.limit)} more`)));
 
-    // T3's top row: search on the left, then the space filter, new space and new tab.
+    // T3's top row: search on the left, then the project filter and new tab.
     const tool = (id, label, icon, fn) => div().id(id).size(26).flex_none().flex().items_center().justify_center().rounded(6)
       .hover((s) => s.bg(t.hover)).on_hover(glow(id))
       .role("button").accessibility_label(label).on_click(fn)
       .child(svg(`mods/workspace-chrome/${icon}.svg`).size(14).text_color(lit(id, t.dim)));
     // The filter shows what it filters to: one avatar, two overlapping, or the plain filter icon.
-    const scoped = sp.filter((s) => scope.includes(s.id));
+    const scoped = [...(scope.includes(NONE) ? [{ id: NONE, name: "No project" }] : []), ...bookmarks.filter((q) => scope.includes(q.id))];
+    // A project's avatar, as dz-projects draws it; No project: the cards' dashed box.
+    const projectMark = (q, size) => q.id === NONE ? noProject(size)
+      : h_flex().size(size).flex_none().rounded(4).bg(fillOf(q.color, t))
+        .items_center().justify_center().text_size(size * 0.64).font_bold().text_color("#ffffff").child(q.letter);
     const choice = (s) => {
       const on = s.id ? scope.includes(s.id) : scope.length === 0;
       // Selection is a check badge on the icon, as in T3.
@@ -860,7 +869,7 @@ export default class Inbox extends View {
         .role("button").accessibility_label(s.name)
         .on_click((e, cx) => this.pick(s, e.modifiers.shift, cx))
         .child(div().relative().flex_none()
-          .child(s.id ? avatar(s.id, s.name, 16) : svg("mods/workspace-chrome/folder.svg").size(16).text_color(t.muted))
+          .child(s.id ? projectMark(s, 16) : svg("mods/workspace-chrome/folder.svg").size(16).text_color(t.muted))
           .when(on, (el) => el.child(h_flex().absolute().right(-4).bottom(-4).size(12).rounded_full().bg(t.accent)
             .border(2).border_color(t.popover).items_center().justify_center()
             .child(svg("mods/workspace-chrome/check.svg").size(7).text_color("#ffffff")))))
@@ -877,11 +886,11 @@ export default class Inbox extends View {
       })
       .trigger(h_flex().id("inbox-scope").size(26).flex_none().items_center().justify_center().rounded(6)
         .hover((s) => s.bg(t.hover)).on_hover(glow("inbox-scope"))
-        .role("button").accessibility_label(scoped.length ? `Filter by space: ${scoped.map((s) => s.name).join(", ")}` : "Filter by space")
+        .role("button").accessibility_label(scoped.length ? `Filter by project: ${scoped.map((s) => s.name).join(", ")}` : "Filter by project")
         .child(scoped.length > 1
-          ? h_flex().children(scoped.slice(0, 2).map((s, i) => avatar(s.id, s.name, 14).when(i > 0, (el) => el.ml(-6))))
+          ? h_flex().children(scoped.slice(0, 2).map((s, i) => projectMark(s, 14).when(i > 0, (el) => el.ml(-6))))
           : scoped.length
-            ? avatar(scoped[0].id, scoped[0].name, 16)
+            ? projectMark(scoped[0], 16)
             : svg("mods/dz-inbox/list-filter.svg").size(14).text_color(lit("inbox-scope", t.dim))))
       .content(v_flex().id("inbox-scope-panel").w(260).max_h(360).mt(4).p(6).gap(2).rounded(10)
         .bg(t.popover).border_1().border_color(t.border).text_size(13)
@@ -890,7 +899,7 @@ export default class Inbox extends View {
           .child(Input.new(this.search).flex_1().h_full().text_size(13).text_color(t.foreground)))
         .child(v_flex().id("inbox-scope-list").min_h(0).pt(4).gap(2).overflow_y_scroll()
           .children(this.matches().map(choice))
-          .when(this.matches().length === 0, (el) => el.child(div().px(8).py(6).text_color(t.dim).child("No matching spaces.")))));
+          .when(this.matches().length === 0, (el) => el.child(div().px(8).py(6).text_color(t.dim).child("No matching projects.")))));
     // Right edge as the brand bar's above (pr 10), so the two rows of icons line up.
     const top = h_flex().id("inbox-top").h(32).pl(8).pr(10).gap(2).flex_none().items_center()
       .child(h_flex().id("inbox-search").flex_1().h(26).px(10).gap(8).items_center().rounded(6)
