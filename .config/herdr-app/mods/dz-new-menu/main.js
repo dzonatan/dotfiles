@@ -81,9 +81,11 @@ export default class NewMenu extends View {
     });
     return v_flex().id("new-menu").size_full().min_h(0).p(8).gap(4).bg(t.popover).text_size(13)
       .on_key_down((e, cx) => {
+        // ctrl-j/k and ctrl-n/p move like ↓/↑.
+        const key = e.modifiers.control ? ({ j: "down", k: "up", n: "down", p: "up" }[e.key] ?? e.key) : e.key;
         if (e.key === "escape") return closeOverlay(props().overlay);
-        if (e.key === "down") this.at = (this.at + 1) % items.length;
-        else if (e.key === "up") this.at = (this.at + items.length - 1) % items.length;
+        if (key === "down") this.at = (this.at + 1) % items.length;
+        else if (key === "up") this.at = (this.at + items.length - 1) % items.length;
         else if (/^[1-9]$/.test(e.key) && e.modifiers.platform) { cx.stop_propagation(); return this.choose(bySpace[Number(e.key) - 1]); }
         else return;
         cx.stop_propagation();

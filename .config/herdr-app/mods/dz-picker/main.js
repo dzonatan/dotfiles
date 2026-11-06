@@ -222,11 +222,12 @@ export default class Picker extends View {
       .bg(t.popover)
       .text_size(13)
       .on_key_down((e, cx) => {
-        const k = e.key, ctrl = e.modifiers.control;
+        // ctrl-j/k and ctrl-n/p move like ↓/↑.
+        const k = e.modifiers.control ? ({ j: "down", k: "up", n: "down", p: "up" }[e.key] ?? e.key) : e.key;
         if (k === "escape") return this.close();
         if (!pickable.length) return;
-        if (k === "down" || (ctrl && k === "n")) return step(1, cx);
-        if (k === "up" || (ctrl && k === "p")) return step(-1, cx);
+        if (k === "down") return step(1, cx);
+        if (k === "up") return step(-1, cx);
       })
       .child(bar(t, { body: field(Input, this.input).text_color(t.foreground) }))
       .child(pickable.length

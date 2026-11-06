@@ -109,10 +109,12 @@ export default class Actions extends View {
       .track_focus(this.keys)
       .on_key_down((e, cx) => {
         const n = rows.length;
+        // ctrl-j/k and ctrl-n/p move like ↓/↑.
+        const key = e.modifiers.control ? ({ j: "down", k: "up", n: "down", p: "up" }[e.key] ?? e.key) : e.key;
         if (e.key === "escape") { cx.stop_propagation(); return this.back(cx); }
         if (e.key === "backspace" && !this.input.value() && this.stack.length) { cx.stop_propagation(); return this.back(cx); }
-        if (e.key === "down" && n) this.at = (this.at + 1) % n;
-        else if (e.key === "up" && n) this.at = (this.at - 1 + n) % n;
+        if (key === "down" && n) this.at = (this.at + 1) % n;
+        else if (key === "up" && n) this.at = (this.at - 1 + n) % n;
         else return;
         cx.stop_propagation();
         cx.notify();

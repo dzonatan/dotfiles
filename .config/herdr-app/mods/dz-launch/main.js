@@ -331,21 +331,23 @@ export default class Launch extends View {
     return v_flex().id("launch").w_full().h(440).flex_none().bg(t.popover).text_size(13)
       .track_focus(this.keys)
       .on_key_down((e, cx) => {
+        // ctrl-j/k and ctrl-n/p move like ↓/↑.
+        const key = e.modifiers.control ? ({ j: "down", k: "up", n: "down", p: "up" }[e.key] ?? e.key) : e.key;
         if (e.key === "escape") {
           cx.stop_propagation();
           return checkout ? this.back(cx) : closeOverlay(props().overlay);
         }
         if (!checkout) {
-          if (e.key !== "down" && e.key !== "up") return;
-          const n = list.length, d = e.key === "down" ? 1 : -1;
+          if (key !== "down" && key !== "up") return;
+          const n = list.length, d = key === "down" ? 1 : -1;
           cx.stop_propagation();
           if (n) this.select((this.at + d + n) % n, cx);
           return;
         }
         const opts = this.options();
         if (e.key === "enter" && opts[this.opt]?.kind !== "new") { cx.stop_propagation(); return this.start(cx); }
-        if ((e.key === "down" || e.key === "up") && opts.length) {
-          const d = e.key === "down" ? 1 : -1;
+        if ((key === "down" || key === "up") && opts.length) {
+          const d = key === "down" ? 1 : -1;
           cx.stop_propagation();
           this.opt = (this.opt + d + opts.length) % opts.length;
           this.error = "";
