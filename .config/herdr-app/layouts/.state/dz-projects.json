@@ -69,7 +69,8 @@
                 "content": {
                   "mod": "dz-inbox",
                   "props": {
-                    "newMenu": "dz-launch"
+                    "newMenu": "dz-launch",
+                    "picker": "dz-picker"
                   }
                 }
               }

@@ -904,7 +904,7 @@ export default class Inbox extends View {
     const top = h_flex().id("inbox-top").h(32).pl(8).pr(10).gap(2).flex_none().items_center()
       .child(h_flex().id("inbox-search").flex_1().h(26).px(10).gap(8).items_center().rounded(6)
         .text_color(lit("inbox-search", t.dim)).hover((s) => s.bg(t.hover)).on_hover(glow("inbox-search"))
-        .role("button").accessibility_label("Search").on_click(() => run("mod.open", { name: "picker" }))
+        .role("button").accessibility_label("Search").on_click(() => run("mod.open", { name: props()?.picker ?? "picker" }))
         .child(svg("mods/workspace-chrome/search.svg").size(14).flex_none().text_color(lit("inbox-search", t.dim)))
         .child(div().child("Search")))
       .child(filter)
