@@ -1,6 +1,7 @@
 // Dirty repos (⌘M, ctrl-b m): the child repos of a mani workspace that have uncommitted changes, commits ahead
-// of the default branch, or unpushed commits. Pick one to open it from the focused pane.
-//   ↑/↓ or j/k  move    ↵  cd here (idle shell) or new tab    t  new tab    v  split right    h  split down    esc/q  close
+// of the default branch, or unpushed commits. Type to filter (repo or branch), ↑/↓ to move, ↵ to open it from the
+// focused pane: cd there when it's an idle shell, else a new tab. ctrl-t new tab, ctrl-v split right, ctrl-h split
+// down (the old popup's t/v/h, on ctrl so typing still filters). Esc closes.
 //
 // The workspace is the nearest folder holding a mani.yaml at or above the focused pane's folder. Outside one, it
 // falls back to the "root" in LOCAL_CONFIG, a file that stays on this machine (the dotfiles sync never copies it),
@@ -8,9 +9,9 @@
 // Everything scanned (repo names, branches, counts) stays in memory while the popup is open; nothing is saved.
 
 import { View, div } from "gpui-kit";
-import { v_flex, h_flex } from "gpui-base";
+import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { exec, hc, run, theme, props, closeOverlay, focused, panes, home, appHome, readTextFile } from "herdr";
-import { bar, footer, rowFrame, empty, ROW_H } from "./panel.js";
+import { bar, field, footer, rowFrame, empty, ROW_H } from "./panel.js";
 
 const LOCAL_CONFIG = "local/dz-dirty.json"; // under appHome()
 const LIST_MAX = 440;
@@ -94,9 +95,13 @@ export default class Dirty extends View {
     // The pane the popup was opened from: the one Enter, v and h act on.
     const f = focused();
     this.from = f?.pane ? panes().find((p) => p.pane === f.pane) ?? null : null;
+    this.filter = "";
+    this.input = InputState.new({ placeholder: "Filter dirty repos…" });
+    this.input.on("change", (_e, cx) => { this.filter = this.input.value(); this.at = 0; this.scroll = 0; cx.notify(); });
+    this.input.on("submit", () => this.open(this.picked));
+    this.input.focus();
+    cx.timer.after(600, () => this.input.focus());
     this.handle = cx.focus_handle();
-    this.handle.focus();
-    cx.timer.after(600, () => this.handle.focus());
     cx.spawn(async (cx) => {
       const root = await findRoot(this.from?.cwd ?? f?.cwd ?? "");
       if (!root) {
@@ -115,27 +120,28 @@ export default class Dirty extends View {
     closeOverlay(props().overlay);
   }
 
-  open(r, how) {
+  // how: "enter" (cd in an idle shell, else a tab), "tab", "right" or "down" (a split beside the pane it opened from).
+  open(r, how = "enter") {
     if (!r) return;
     this.close();
     if (how === "enter") {
       // A shell at its prompt gets a cd; anything else running keeps its pane and the repo opens in a new tab.
       const idle = this.from?.terminal && this.from.program?.shell && !this.from.status;
       if (idle) return hc(["send", this.from.terminal, `cd ${quote(r.dir)}`]);
-      how = "t";
     }
-    if (how === "t") run("tab.new", { folder: r.dir, name: base(r.dir) });
-    else if (this.from?.terminal) {
+    if ((how === "right" || how === "down") && this.from?.terminal) {
       run("pane.focus", { pane: this.from.pane });
-      run("terminal.open", { folder: r.dir, place: how === "v" ? "right" : "down" });
-    } else run("tab.new", { folder: r.dir, name: base(r.dir) });
+      return run("terminal.open", { folder: r.dir, place: how });
+    }
+    run("tab.new", { folder: r.dir, name: base(r.dir) });
   }
 
   render() {
     const t = theme();
-    const rows = this.rows ?? [];
+    const words = this.filter.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const rows = (this.rows ?? []).filter((r) => words.every((w) => `${r.path} ${r.branch}`.toLowerCase().includes(w)));
     this.at = Math.max(0, Math.min(this.at, rows.length - 1));
-    const sel = rows[this.at];
+    const sel = (this.picked = rows[this.at]);
 
     const height = Math.min(LIST_MAX, rows.length * ROW_H);
     const maxScroll = Math.max(0, rows.length * ROW_H - height);
@@ -151,7 +157,7 @@ export default class Dirty extends View {
       const on = r === sel;
       return rowFrame(t, on).id(`dd-${r.path}`).mx(6).cursor_pointer()
         .when(fixed, (el) => el.absolute().left(0).right(0).top(i * ROW_H - this.scroll))
-        .on_click(() => this.open(r, "enter"))
+        .on_click(() => this.open(r))
         .child(div().flex_1().min_w(0).truncate().text_size(13.5).text_color(t.foreground).child(r.path))
         .child(div().w(200).flex_none().truncate().text_size(12).text_color(t.muted).child(r.branch))
         .child(count(r.ahead, "↑", t.accent, "commits ahead of the default branch"))
@@ -172,7 +178,9 @@ export default class Dirty extends View {
     const body = this.rows == null
       ? v_flex().h(96).flex_none().justify_center().child(empty(t, "Scanning repos…"))
       : !rows.length
-        ? v_flex().h(96).flex_none().justify_center().child(empty(t, this.error?.[0] ?? "Nothing here", this.error?.[1]))
+        ? v_flex().h(96).flex_none().justify_center().child(this.error
+          ? empty(t, this.error[0], this.error[1])
+          : empty(t, `Nothing matches “${this.filter.trim()}”`))
         : v_flex().id("dd-list").flex_none().py(6)
           .child(v_flex().id("dd-strip").relative().h(height).w_full().flex_none()
             .when(fixed, (el) => el.overflow_hidden().on_scroll_wheel((e, cx) => {
@@ -191,16 +199,16 @@ export default class Dirty extends View {
       .bg(t.popover)
       .text_size(13)
       .on_key_down((e, cx) => {
-        const k = e.key, ctrl = e.modifiers.control, plain = !ctrl && !e.modifiers.platform && !e.modifiers.alt;
-        if (k === "escape" || (plain && k === "q")) return this.close();
-        if (k === "down" || (plain && k === "j") || (ctrl && k === "n")) return step(1, cx);
-        if (k === "up" || (plain && k === "k") || (ctrl && k === "p")) return step(-1, cx);
-        if (k === "enter") return this.open(sel, "enter");
-        if (plain && ["t", "v", "h"].includes(k)) return this.open(sel, k);
+        const k = e.key, ctrl = e.modifiers.control;
+        if (k === "escape") return this.close();
+        if (k === "down" || (ctrl && k === "n")) return step(1, cx);
+        if (k === "up" || (ctrl && k === "p")) return step(-1, cx);
+        const how = ctrl && { t: "tab", v: "right", h: "down" }[k];
+        if (how) { cx.stop_propagation(); return this.open(sel, how); }
       })
-      .child(bar(t, { lead: null, body: div().flex_1().text_size(14).text_color(t.foreground).child("Dirty repos"),
-        trail: this.rows ? div().text_size(12).text_color(t.dim).child(`${rows.length}`) : null }))
+      .child(bar(t, { body: field(Input, this.input).text_color(t.foreground),
+        trail: this.rows?.length ? div().text_size(12).text_color(t.dim).child(`${rows.length}`) : null }))
       .child(body)
-      .child(footer(t, [[["↑", "↓"], "move"], [["↵"], "cd / tab"], [["t"], "tab"], [["v"], "right"], [["h"], "down"], [["esc"], "close"]]));
+      .child(footer(t, [[["↑", "↓"], "move"], [["↵"], "open"], [["⌃T"], "tab"], [["⌃V"], "right"], [["⌃H"], "down"], [["esc"], "close"]]));
   }
 }
