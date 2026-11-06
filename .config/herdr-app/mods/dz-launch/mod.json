@@ -1,5 +1,5 @@
 {
   "place": "none",
   "title": "New Claude session",
-  "overlay": { "kind": "popup", "at": "top", "offset": 40, "width": 720, "height": 470 }
+  "overlay": { "kind": "popup", "at": "top", "offset": 40, "width": 600, "height": 440 }
 }

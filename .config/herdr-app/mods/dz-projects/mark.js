@@ -2,7 +2,7 @@
 // (dz-projects, shared "projects": { letter?, color? }), else the space's own color
 // (shared "space.colors") and the first letter of its name.
 // The same file is copied into every dz-* mod that draws avatars: dz-projects, dz-spaces,
-// dz-inbox, dz-picker, dz-new-menu. Change one, copy it to the others.
+// dz-inbox, dz-picker, dz-new-menu, dz-launch. Change one, copy it to the others.
 import { shared, spaces, panes } from "herdr";
 
 // What a stored color name looks like on an avatar: one strong color per hue, light and dark alike.
