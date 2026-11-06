@@ -1,0 +1,11 @@
+{
+  "place": "none",
+  "title": "Dirty repos",
+  "overlay": {
+    "kind": "popup",
+    "at": "top",
+    "offset": 40,
+    "width": 720,
+    "height": 0.8
+  }
+}

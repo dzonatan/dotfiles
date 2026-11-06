@@ -1,4 +1,4 @@
-// The look shared by the palette popups: ⌘P go to (dz-picker), ⌘K actions (dz-actions), ⌘N new session (dz-launch).
+// The look shared by the palette popups: ⌘P go to (dz-picker), ⌘K actions (dz-actions), ⌘N new session (dz-launch), dirty repos (dz-dirty).
 // Search bar on top, rows in the middle, a footer of key hints at the bottom.
 // The same file is copied into each of those mods (a mod can't import outside its folder). Change one, copy it to the others.
 import { div, svg } from "gpui-kit";

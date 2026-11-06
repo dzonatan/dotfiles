@@ -76,7 +76,8 @@
     "ctrl-b -": "pane.split:down",
     "ctrl-b x": "pane.close",
     "ctrl-b z": "pane.zoom",
-    "ctrl-b b": "layout.toggle:sidebar"
+    "ctrl-b b": "layout.toggle:sidebar",
+    "ctrl-b m": "mod.open:dz-dirty"
   },
   "terminal": {
     "cmd-c": "terminal.copy",
@@ -115,6 +116,7 @@
     "cmd-9": "dz-chrome.go9",
     "cmd-p": "mod.open:dz-picker",
     "cmd-k": "mod.open:dz-actions",
-    "cmd-shift-n": "mod.open:dz-again"
+    "cmd-shift-n": "mod.open:dz-again",
+    "cmd-m": "mod.open:dz-dirty"
   }
 }
