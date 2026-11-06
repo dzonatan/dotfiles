@@ -5,6 +5,7 @@
 // No project: Claude starts in a fresh temporary folder, in a new space of its own ("Scratch <id>").
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex, InputState, Input } from "gpui-base";
+import { bar, field, footer as footerBar, button, groupLabel, empty } from "./panel.js";
 import { theme, spaces, panes, run, closeOverlay, openOverlay, props, home, exec, readTextFile } from "herdr";
 import { projectMarks, fillOf } from "./mark.js";
 
@@ -248,7 +249,7 @@ export default class Launch extends View {
         .child(div().truncate().text_color(t.foreground).child(name))
         .when(Boolean(sub), (el) => el.child(div().truncate().text_size(11.5).text_color(t.dim).child(sub))))
       .when(Boolean(hint), (el) => el.child(hint));
-    const label = (text) => div().px(10).pt(8).pb(2).text_size(11).text_color(t.dim).child(text);
+    const label = (text) => groupLabel(t, text);
     const ico = (name, color, size = 15) => svg(`mods/workspace-chrome/${name}.svg`).size(size).text_color(color ?? t.muted);
     const radio = (on) => div().size(14).rounded_full().border(on ? 4 : 1).border_color(on ? t.accent : t.input);
     // The project's avatar, as dz-projects draws it.
@@ -267,24 +268,21 @@ export default class Launch extends View {
             NONE.name, "Claude in a temporary folder · starts at once", on ? hintText("↵ start") : null, pick)
           : row(`project-${q.id}`, on, avatar(q, 22), q.name, short(q.path), ico("chevron-right", on ? t.muted : t.dim, 14), pick);
       });
-      header = h_flex().h(46).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
-        .child(ico("search", t.dim, 14))
-        .child(Input.new(this.search).flex_1().h_full().text_size(13).text_color(t.foreground))
-        .child(hintText("1 / 2 · Project"));
+      header = bar(t, { body: field(Input, this.search).text_color(t.foreground), trail: hintText("1 / 2 · Project") });
       body = v_flex().flex_1().min_h(0)
         .child(v_flex().id("launch-projects").flex_1().min_h(0).px(6).pt(6).gap(1).overflow_y_scroll()
           .children(rows)
-          .when(!list.length, (el) => el.child(div().px(10).py(6).text_size(12).text_color(t.dim).child("No matching projects.")))
-          .when(list.length && !projects().length, (el) => el.child(div().px(10).py(6).text_size(12).text_color(t.dim).child("No projects yet."))))
+          .when(!list.length, (el) => el.child(empty(t, "No matching projects.")))
+          .when(list.length && !projects().length, (el) => el.child(empty(t, "No projects yet."))))
         .child(h_flex().id("launch-manage").h(34).mx(6).mb(6).px(10).gap(10).items_center().rounded(8).flex_none()
           .text_color(t.muted).hover((s) => s.bg(t.hover).text_color(t.foreground))
           .role("button").accessibility_label("Manage projects")
           .on_click(() => this.manage())
           .child(h_flex().size(22).flex_none().items_center().justify_center().child(svg("mods/dz-chrome/settings.svg").size(14)))
           .child(div().child("Manage projects…")));
-      footer = "↑↓ choose · ↵ next · esc close";
+      footer = [[["↑", "↓"], "move"], [["↵"], p === NONE ? "start" : "next"], [["esc"], "close"]];
       canStart = Boolean(p) && !this.busy;
-      primary = this.busy ? "Starting…" : p === NONE ? "Start Claude ↵" : "Next ↵";
+      primary = this.busy ? "Starting…" : p === NONE ? "Start Claude" : "Next";
     } else {
       // Step 2: where in the project.
       const info = this.info[p.path], opts = this.options();
@@ -313,7 +311,7 @@ export default class Launch extends View {
           if (opts.length === 2) optRows.push(label("Existing worktrees"), div().px(10).pb(4).text_size(12).text_color(t.dim).child("None yet."));
         }
       });
-      header = h_flex().h(46).flex_none().px(8).gap(8).items_center().border_b(1).border_color(t.border)
+      header = bar(t, { lead: null, trail: hintText("2 / 2 · Checkout"), body: h_flex().flex_1().min_w(0).gap(10).items_center()
         .child(h_flex().id("launch-back").size(28).flex_none().items_center().justify_center().rounded(6)
           .text_color(t.muted).hover((s) => s.bg(t.hover).text_color(t.foreground))
           .role("button").accessibility_label("Back to projects")
@@ -322,12 +320,11 @@ export default class Launch extends View {
         .child(avatar(p, 22))
         .child(h_flex().flex_1().min_w(0).gap(8).items_baseline()
           .child(div().flex_none().font_semibold().text_color(t.foreground).child(p.name))
-          .child(div().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(short(p.path))))
-        .child(div().pr(6).child(hintText("2 / 2 · Checkout")));
+          .child(div().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(short(p.path)))) }).pl(10);
       body = v_flex().id("launch-options").flex_1().min_h(0).px(6).pb(6).gap(1).overflow_y_scroll().children(optRows);
-      footer = "↑↓ choose · ↵ start · esc back";
+      footer = [[["↑", "↓"], "move"], [["↵"], "start"], [["esc"], "back"]];
       canStart = ready && !this.busy;
-      primary = this.busy ? "Starting…" : "Start Claude ↵";
+      primary = this.busy ? "Starting…" : "Start Claude";
     }
 
     // A popup is as tall as its content: a fixed height keeps it still between steps.
@@ -358,19 +355,12 @@ export default class Launch extends View {
       })
       .child(header)
       .child(body)
-      .child(h_flex().h(46).flex_none().px(14).gap(10).items_center().border_t(1).border_color(t.border)
-        .child(div().flex_1().min_w(0).truncate().text_size(12)
-          .text_color(this.error ? t.blocked : t.dim)
-          .child(this.error || footer))
-        .when(checkout, (el) => el.child(h_flex().id("launch-back-btn").h(30).px(12).items_center().rounded(7).flex_none()
-          .role("button").accessibility_label("Back")
-          .bg(t.raised).text_color(t.foreground).hover((s) => s.opacity(0.85))
-          .on_click((_e, cx) => this.back(cx)).child("Back")))
-        .child(h_flex().id("launch-start").h(30).px(14).items_center().rounded(7).flex_none()
-          .role("button").accessibility_label(primary)
-          .bg(t.solid).text_color(t.solid_foreground)
-          .when(!canStart, (el) => el.opacity(0.5))
-          .when(canStart, (el) => el.hover((s) => s.opacity(0.85)).on_click((_e, cx) => (checkout ? this.start(cx) : this.choose(cx))))
-          .child(primary)));
+      .child(footerBar(t, footer, {
+        note: this.error || null, noteColor: t.blocked,
+        extra: [
+          ...(checkout ? [button(t, "launch-back-btn", "Back", (_e, cx) => this.back(cx))] : []),
+          button(t, "launch-start", primary, (_e, cx) => (checkout ? this.start(cx) : this.choose(cx)), { primary: true, disabled: !canStart }),
+        ],
+      }));
   }
 }

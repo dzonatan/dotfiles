@@ -7,8 +7,9 @@ import { agents, terminals, focused, shared, theme, props, closeOverlay } from "
 import { namer } from "./name.js";
 import { snoozedUntil } from "./snooze.js";
 import { ACTIONS } from "./actions.js";
+import { bar, field, footer, rowFrame, empty, ROW_H, BAR_H, FOOTER_H } from "./panel.js";
 
-const ROW_H = 34, LIST_H = 380 - 52 - 34;
+const LIST_H = 380 - BAR_H - FOOTER_H;
 
 // Each typed word must start a word, not sit inside one. Title matches rank above keyword-only matches.
 const wordsOf = (s) => (s ?? "").toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
@@ -97,12 +98,11 @@ export default class Actions extends View {
     const shown = Math.floor(LIST_H / ROW_H), first = Math.max(0, Math.min(this.at - shown + 1, rows.length - shown));
     const row = (r, i) => {
       const on = i === this.at;
-      return h_flex().id(`act-${r.id}`).h(ROW_H).flex_none().mx(6).px(10).gap(10).items_center().rounded(7)
-        .when(on && !r.off, (el) => el.bg(t.selected))
+      return rowFrame(t, on && !r.off).id(`act-${r.id}`).mx(6)
         .when(Boolean(r.off), (el) => el.opacity(0.45))
-        .when(!r.off, (el) => el.hover((s) => s.bg(on ? t.selected : t.hover)).on_click((_e, cx) => this.pick(r, cx)))
+        .when(!r.off, (el) => el.on_click((_e, cx) => this.pick(r, cx)))
         .when(Boolean(r.icon), (el) => el.child(svg(r.icon).size(15).flex_none().text_color(on ? t.foreground : t.muted)))
-        .child(div().flex_1().min_w(0).truncate().text_color(on ? t.foreground : t.muted).child(r.title))
+        .child(div().flex_1().min_w(0).truncate().text_size(13.5).text_color(on ? t.foreground : t.muted).child(r.title))
         .when(Boolean(r.off || r.hint), (el) => el.child(div().flex_none().text_size(12).text_color(t.dim).child(r.off || r.hint)));
     };
     return v_flex().id("actions").w_full().h(380).flex_none().bg(t.popover).text_size(13)
@@ -117,17 +117,16 @@ export default class Actions extends View {
         cx.stop_propagation();
         cx.notify();
       })
-      .child(h_flex().h(52).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
-        .when(Boolean(menu), (el) => el.child(h_flex().h(22).px(8).flex_none().items_center().rounded(5).bg(t.raised)
-          .text_size(12).text_color(t.foreground).child(menu.title)))
-        .when(!menu, (el) => el.child(svg("mods/workspace-chrome/search.svg").size(14).flex_none().text_color(t.dim)))
-        .child(Input.new(this.input).flex_1().h_full().text_size(13).text_color(t.foreground)))
+      .child(bar(t, {
+        lead: menu ? h_flex().h(22).px(8).flex_none().items_center().rounded(5).bg(t.raised).text_size(12).text_color(t.foreground).child(menu.title) : undefined,
+        body: field(Input, this.input).text_color(t.foreground),
+      }))
       .child(v_flex().id("actions-list").h(LIST_H).flex_none().pt(6).gap(0).overflow_hidden()
         .children(rows.slice(first, first + shown).map((r, i) => row(r, first + i)))
-        .when(!rows.length, (el) => el.child(div().px(16).py(10).text_color(t.dim)
-          .child(menu?.typed ? "Can't read that time. Try 45m, 2h, 17:30, tomorrow 10:00 or fri." : "No matching action."))))
-      .child(h_flex().h(34).flex_none().px(14).gap(8).items_center().border_t(1).border_color(t.border).text_size(12).text_color(t.dim)
-        .child(div().flex_1().min_w(0).truncate().child(ctx.agent ? ctx.title : "No agent in view"))
-        .child(div().flex_none().child(menu ? "↵ pick · esc back" : "↑↓ choose · ↵ run · esc close")));
+        .when(!rows.length, (el) => el.child(empty(t, menu?.typed ? "Can't read that time. Try 45m, 2h, 17:30, tomorrow 10:00 or fri." : "No matching action."))))
+      .child(footer(t, menu
+        ? [[["↑", "↓"], "move"], [["↵"], "pick"], [["esc"], "back"]]
+        : [[["↑", "↓"], "move"], [["↵"], "run"], [["esc"], "close"]],
+        { note: ctx.agent ? ctx.title : "No agent in view" }));
   }
 }

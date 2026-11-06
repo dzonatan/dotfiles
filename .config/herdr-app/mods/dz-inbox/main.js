@@ -319,6 +319,20 @@ export default class Inbox extends View {
     // cmd-1…9 (dz-chrome.goN): the first nine cards top to bottom (pinned, active, shown working); settled rows aren't numbered.
     const jump = [...pinned, ...out, ...busyRows].map((a) => a.address).slice(0, 9);
     if (find(layout())?.active !== "lists" && JSON.stringify(shared("agents.jump") ?? []) !== JSON.stringify(jump)) setShared("agents.jump", jump);
+    // Local addition: the shelves as this list reads them, for the go-to panel (dz-picker): every agent, whatever the
+    // project scope, so the panel's groups and their order match the sidebar and follow it live.
+    {
+      const free = every.filter((a) => !pins.includes(a.address) && !snoozedAt(a));
+      const ids = (xs) => xs.map((a) => a.address);
+      const order = {
+        pinned: pins.filter((p) => every.some((a) => a.address === p)),
+        active: ids(free.filter((a) => !settledAt(a) && !working(a)).sort(newest)),
+        working: ids(free.filter((a) => !settledAt(a) && working(a)).sort((x, y) => begun(y) - begun(x) || byAddress(x, y))),
+        snoozed: ids(every.filter((a) => !pins.includes(a.address) && snoozedAt(a)).sort((x, y) => snoozedAt(x) - snoozedAt(y) || byAddress(x, y))),
+        settled: ids(free.filter(settledAt).sort((x, y) => settledAt(y)[0] - settledAt(x)[0] || byAddress(x, y))),
+      };
+      if (JSON.stringify(shared("inbox.order") ?? null) !== JSON.stringify(order)) setShared("inbox.order", order);
+    }
 
     // Local addition: closing what's in view (a tab, a space, an agent's pane) moves on to the top Active agent
     // (pinned first, never Working, Snoozed or Settled); with none left, the work area shows dz-empty
