@@ -1,8 +1,10 @@
 // ⌘⇧N: a new Claude session in a new tab of the space in view, in that space's checkout (the project's main
 // checkout or one of its worktrees, as ⌘N's dz-launch groups spaces). Nothing to ask: it opens, starts, closes.
-// mod.json opens it with frame "none", so nothing shows.
+// mod.json opens it with frame "none", so nothing shows. MCP servers: the project's default from ⌘N
+// (mcp.js), else No project's; a folder never listed yet is listed first (~10s).
 import { View, div } from "gpui-kit";
-import { spaces, panes, shared, focused, run, exec, props, closeOverlay, notify } from "herdr";
+import { spaces, panes, shared, focused, run, exec, props, closeOverlay, notify, home } from "herdr";
+import { ANY, cached, refresh, onByDefault, denyArgs } from "./mcp.js";
 
 const inside = (path, dir) => Boolean(path && dir) && (path === dir || path.startsWith(dir.replace(/\/+$/, "") + "/"));
 const projects = () => (Array.isArray(shared("projects")) ? shared("projects") : []);
@@ -31,7 +33,16 @@ export default class Again extends View {
         if (!space) return notify({ title: "No space in view", level: "warning" });
         const dir = place(space, panes());
         if (!dir) return notify({ title: "Can't tell this space's folder", level: "warning" });
-        run("tab.new", { space: space.id, folder: await checkout(dir), argv: ["claude"] });
+        const p = projects().filter((q) => inside(dir, q.path)).sort((x, y) => y.path.length - x.path.length)[0];
+        const key = p ? p.path : ANY, listIn = p ? p.path : home();
+        // A cached list now (refreshed for next time), else wait for the first one: an unlisted server can't be turned off.
+        let servers = cached(listIn)?.servers;
+        if (servers) refresh(listIn).catch(() => {});
+        else servers = await refresh(listIn);
+        const argv = ["claude", ...denyArgs(servers, onByDefault(key, servers))];
+        run("tab.new", { space: space.id, folder: await checkout(dir), argv });
+      } catch (e) {
+        notify({ title: "Couldn't start Claude", body: String(e?.message ?? e), level: "error" });
       } finally {
         closeOverlay(props().overlay);
       }

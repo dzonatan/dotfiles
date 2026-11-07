@@ -1,13 +1,16 @@
-// New Claude session (⌘N), a two-step wizard. Step 1: pick a project (dz-projects' bookmarks, with
-// their avatars) or none; "No project" starts at once. Step 2: where in the project: the checkout as
-// it is, one of its worktrees, or a new worktree (`claude -w`); esc goes back to step 1. Starts Claude
-// in a new tab of the space already working in that project, else in a new space named after it.
+// New Claude session (⌘N), a wizard. Step 1: pick a project (dz-projects' bookmarks, with their
+// avatars) or none. Step 2 (projects only): where in the project: the checkout as it is, one of its
+// worktrees, or a new worktree (`claude -w`). Last step: which MCP servers the session gets, ticked from
+// the project's default (mcp.js); "Save as default" keeps the ticks for that project (No project: for
+// scratch sessions and projects without their own). Esc goes back a step. Starts Claude in a new tab of
+// the space already working in that project, else in a new space named after it.
 // No project: Claude starts in a fresh temporary folder, in a new space of its own ("Scratch <id>").
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex, InputState, Input } from "gpui-base";
 import { bar, field, footer as footerBar, button, groupLabel, empty } from "./panel.js";
 import { theme, spaces, panes, run, closeOverlay, openOverlay, props, home, exec, readTextFile } from "herdr";
 import { projectMarks, fillOf } from "./mark.js";
+import { ANY, cached, fresh, refresh, ownDefault, onByDefault, saveDefault, denyArgs, hiddenSet, setHidden, label as serverLabel } from "./mcp.js";
 
 const NONE = { id: "none", name: "No project" };
 const SCRATCH = "Scratch";
@@ -43,7 +46,7 @@ export default class Launch extends View {
   init(_props, cx) {
     this.keys = cx.focus_handle();
     this.filter = "";
-    this.step = "project"; // or "checkout"
+    this.step = "project"; // or "checkout", "servers"
     this.opt = 0;
     this.info = {}; // project path -> { branch, worktrees, hook } | { error } | { loading }
     this.error = "";
@@ -53,11 +56,104 @@ export default class Launch extends View {
     this.search.on("submit", (_e, cx) => this.choose(cx));
     this.wtName = InputState.new({ placeholder: "worktree name (blank: Claude picks one)" });
     this.wtName.on("change", (_e, cx) => { this.error = ""; cx.notify(); });
-    this.wtName.on("submit", (_e, cx) => this.start(cx));
+    this.wtName.on("submit", (_e, cx) => this.openServers(cx));
+    // The servers step: the ticks (null: the default's), the highlighted row, folders being listed.
+    this.mcpOn = null;
+    this.mcpAt = 0;
+    this.mcpLoading = new Set();
+    this.mcpError = "";
+    this.mcpNote = "";
+    this.showHidden = false;
     // Always start on "No project" (first in the list).
     this.at = 0;
     this.search.focus();
     this.load(cx);
+    this.listServers(home(), 10 * 60_000, cx);
+
+  }
+
+  // Whose default the servers step uses, and the folder it lists servers in.
+  mcpOf(p) {
+    return p === NONE ? { key: ANY, dir: home() } : { key: p.path, dir: p.path };
+  }
+
+  servers(p) {
+    return cached(this.mcpOf(p).dir)?.servers ?? null;
+  }
+
+  onSet(p, servers) {
+    return this.mcpOn ?? onByDefault(this.mcpOf(p).key, servers);
+  }
+
+  // Lists a folder's servers in the background, unless it was listed within `ms`.
+  listServers(dir, ms, cx) {
+    if (!dir || this.mcpLoading.has(dir) || fresh(dir, ms)) return;
+    this.mcpLoading.add(dir);
+    cx.spawn(async (cx) => {
+      try { await refresh(dir); this.mcpError = ""; } catch (e) { this.mcpError = String(e?.message ?? e); }
+      this.mcpLoading.delete(dir);
+      cx.notify();
+    });
+  }
+
+  // The last step. From a project's checkout step the chosen checkout must be valid first.
+  openServers(cx) {
+    const p = this.project();
+    if (!p) return;
+    if (p !== NONE) {
+      const plan = this.plan(p);
+      if (typeof plan === "string") { this.error = plan; cx.notify(); return; }
+    }
+    this.from = this.step;
+    this.step = "servers";
+    this.mcpOn = null;
+    this.mcpAt = 0;
+    this.mcpNote = "";
+    this.error = "";
+    this.listServers(this.mcpOf(p).dir, 60_000, cx);
+    this.keys.focus();
+    cx.notify();
+  }
+
+  toggleServer(p, name, cx) {
+    const list = this.servers(p);
+    if (!list) return;
+    const on = new Set(this.onSet(p, list));
+    if (on.has(name)) on.delete(name); else on.add(name);
+    this.mcpOn = on;
+    this.mcpNote = "";
+    cx.notify();
+  }
+
+  // The servers step's rows: the shown servers, then the hidden ones while "show" is on.
+  serverRows(p) {
+    const list = this.servers(p) ?? [], hidden = hiddenSet();
+    const shown = list.filter((s) => !hidden.has(s.name)), hid = list.filter((s) => hidden.has(s.name));
+    return { shown, hid, rows: this.showHidden ? [...shown, ...hid] : shown };
+  }
+
+  // Hides a server everywhere (always off), or brings it back.
+  hideServer(p, name, cx) {
+    if (!name) return;
+    setHidden(name, !hiddenSet().has(name));
+    const n = this.serverRows(p).rows.length;
+    this.mcpAt = Math.max(0, Math.min(this.mcpAt, n - 1));
+    cx.notify();
+  }
+
+  setAllServers(p, all, cx) {
+    if (!this.servers(p)) return;
+    this.mcpOn = new Set(all ? this.serverRows(p).shown.map((s) => s.name) : []);
+    this.mcpNote = "";
+    cx.notify();
+  }
+
+  saveServers(p, cx) {
+    const list = this.servers(p);
+    if (!list) return;
+    saveDefault(this.mcpOf(p).key, this.onSet(p, list));
+    this.mcpNote = p === NONE ? "· saved: also for projects without their own" : "· saved as project default";
+    cx.notify();
   }
 
   items() {
@@ -120,23 +216,29 @@ export default class Launch extends View {
     cx.notify();
   }
 
-  // Step 1 -> 2. "No project" has nothing to choose: it starts at once.
+  // Step 1 -> 2. "No project" has no checkout to choose: it goes straight to its servers.
   choose(cx) {
     const p = this.project();
     if (!p) return;
-    if (p === NONE) return this.start(cx);
+    if (p === NONE) return this.openServers(cx);
     this.step = "checkout";
     this.opt = 0;
     this.error = "";
     this.load(cx);
+    this.listServers(p.path, 60_000, cx);
     this.focusOption();
     cx.notify();
   }
 
   back(cx) {
-    this.step = "project";
     this.error = "";
-    this.search.focus();
+    if (this.step === "servers" && this.from === "checkout") {
+      this.step = "checkout";
+      this.focusOption();
+    } else {
+      this.step = "project";
+      this.search.focus();
+    }
     cx.notify();
   }
 
@@ -194,6 +296,14 @@ export default class Launch extends View {
     if (!p) return;
     const plan = this.plan(p);
     if (typeof plan === "string") { this.error = plan; cx.notify(); return; }
+    // Never start with servers unknown: an unlisted server can't be turned off.
+    const list = this.servers(p);
+    if (!list) {
+      this.error = this.mcpError ? `Couldn't list MCP servers: ${this.mcpError}` : "Still reading MCP servers…";
+      cx.notify();
+      return;
+    }
+    plan.argv = [...plan.argv, ...denyArgs(list, this.onSet(p, list))];
     this.busy = true;
     cx.spawn(async (cx) => {
       try {
@@ -238,7 +348,8 @@ export default class Launch extends View {
     const t = theme(), h = home();
     const short = (p) => (p && h && p.startsWith(h) ? "~" + p.slice(h.length) : p ?? "");
     const list = this.items(), p = this.project();
-    const checkout = this.step === "checkout" && p && p !== NONE;
+    const step = p && !(this.step === "checkout" && p === NONE) ? this.step : "project";
+    const steps = p && p !== NONE ? 3 : 2;
 
     const row = (id, on, icon, name, sub, hint, pick) => h_flex().id(id).min_h(sub ? 46 : 34).px(10).py(4).gap(10)
       .rounded(8).items_center().flex_none()
@@ -256,19 +367,35 @@ export default class Launch extends View {
     const avatar = (q, size) => h_flex().size(size).flex_none().rounded(5).bg(fillOf(q.color, t))
       .items_center().justify_center().text_size(size * 0.6).font_bold().text_color("#ffffff").child(q.letter);
     const hintText = (text) => div().flex_none().text_size(11).text_color(t.dim).child(text);
+    const check = (on) => h_flex().size(14).flex_none().rounded(4).items_center().justify_center()
+      .border(1).border_color(on ? t.accent : t.input).when(on, (el) => el.bg(t.accent))
+      .when(on, (el) => el.child(svg("mods/workspace-chrome/check.svg").size(10).text_color(t.accent_foreground)));
+    // Steps 2 and 3: back, the project, the step.
+    const head = (trail) => bar(t, { lead: null, trail: hintText(trail), body: h_flex().flex_1().min_w(0).gap(10).items_center()
+      .child(h_flex().id("launch-back").size(28).flex_none().items_center().justify_center().rounded(6)
+        .text_color(t.muted).hover((s) => s.bg(t.hover).text_color(t.foreground))
+        .role("button").accessibility_label("Back")
+        .on_click((_e, cx) => this.back(cx))
+        .child(svg("mods/workspace-chrome/chevron-left.svg").size(15)))
+      .child(p === NONE
+        ? h_flex().size(22).flex_none().rounded(5).bg(t.raised).items_center().justify_center().child(ico("terminal", t.muted, 13))
+        : avatar(p, 22))
+      .child(h_flex().flex_1().min_w(0).gap(8).items_baseline()
+        .child(div().flex_none().font_semibold().text_color(t.foreground).child(p.name))
+        .child(div().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(p === NONE ? "temporary folder" : short(p.path)))) }).pl(10);
 
-    let header, body, footer, canStart, primary;
-    if (!checkout) {
+    let header, body, footer, canStart, primary, canSave = false;
+    if (step === "project") {
       // Step 1: projects.
       const rows = list.map((q, i) => {
         const on = i === this.at;
         const pick = (_e, cx) => { this.at = i; this.choose(cx); };
         return q === NONE
           ? row("project-none", on, h_flex().size(22).rounded(5).bg(t.raised).items_center().justify_center().child(ico("terminal", t.muted, 13)),
-            NONE.name, "Claude in a temporary folder · starts at once", on ? hintText("↵ start") : null, pick)
+            NONE.name, "Claude in a temporary folder", on ? hintText("↵ next") : null, pick)
           : row(`project-${q.id}`, on, avatar(q, 22), q.name, short(q.path), ico("chevron-right", on ? t.muted : t.dim, 14), pick);
       });
-      header = bar(t, { body: field(Input, this.search).text_color(t.foreground), trail: hintText("1 / 2 · Project") });
+      header = bar(t, { body: field(Input, this.search).text_color(t.foreground), trail: hintText(`1 / ${steps} · Project`) });
       body = v_flex().flex_1().min_h(0)
         .child(v_flex().id("launch-projects").flex_1().min_h(0).px(6).pt(6).gap(1).overflow_y_scroll()
           .children(rows)
@@ -280,10 +407,10 @@ export default class Launch extends View {
           .on_click(() => this.manage())
           .child(h_flex().size(22).flex_none().items_center().justify_center().child(svg("mods/dz-chrome/settings.svg").size(14)))
           .child(div().child("Manage projects…")));
-      footer = [[["↑", "↓"], "move"], [["↵"], p === NONE ? "start" : "next"], [["esc"], "close"]];
+      footer = [[["↑", "↓"], "move"], [["↵"], "next"], [["esc"], "close"]];
       canStart = Boolean(p) && !this.busy;
-      primary = this.busy ? "Starting…" : p === NONE ? "Start Claude" : "Next";
-    } else {
+      primary = "Next";
+    } else if (step === "checkout") {
       // Step 2: where in the project.
       const info = this.info[p.path], opts = this.options();
       const ready = Boolean(info && !info.loading && !info.error);
@@ -311,19 +438,74 @@ export default class Launch extends View {
           if (opts.length === 2) optRows.push(label("Existing worktrees"), div().px(10).pb(4).text_size(12).text_color(t.dim).child("None yet."));
         }
       });
-      header = bar(t, { lead: null, trail: hintText("2 / 2 · Checkout"), body: h_flex().flex_1().min_w(0).gap(10).items_center()
-        .child(h_flex().id("launch-back").size(28).flex_none().items_center().justify_center().rounded(6)
-          .text_color(t.muted).hover((s) => s.bg(t.hover).text_color(t.foreground))
-          .role("button").accessibility_label("Back to projects")
-          .on_click((_e, cx) => this.back(cx))
-          .child(svg("mods/workspace-chrome/chevron-left.svg").size(15)))
-        .child(avatar(p, 22))
-        .child(h_flex().flex_1().min_w(0).gap(8).items_baseline()
-          .child(div().flex_none().font_semibold().text_color(t.foreground).child(p.name))
-          .child(div().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(short(p.path)))) }).pl(10);
+      header = head("2 / 3 · Checkout");
       body = v_flex().id("launch-options").flex_1().min_h(0).px(6).pb(6).gap(1).overflow_y_scroll().children(optRows);
-      footer = [[["↑", "↓"], "move"], [["↵"], "start"], [["esc"], "back"]];
+      footer = [[["↑", "↓"], "move"], [["↵"], "next"], [["esc"], "back"]];
       canStart = ready && !this.busy;
+      primary = "Next";
+    } else {
+      // Last step: the MCP servers this session gets.
+      const servers = this.servers(p), on = servers ? this.onSet(p, servers) : null;
+      const { shown, hid } = this.serverRows(p);
+      const { key, dir } = this.mcpOf(p);
+      const loading = this.mcpLoading.has(dir);
+      const own = ownDefault(key), inherited = !own && p !== NONE && ownDefault(ANY);
+      const same = (a, b) => a.size === b.size && [...a].every((n) => b.has(n));
+      const changed = Boolean(servers && this.mcpOn && !same(this.mcpOn, onByDefault(key, servers)));
+      // Saving does nothing when the ticks already are this project's own saved default.
+      canSave = Boolean(servers) && !(own && same(on, new Set(own)));
+      const note = this.mcpNote || ["",
+        own ? (p === NONE ? "default" : "project default") : inherited ? "No project's default" : "no default: all on",
+        changed ? "changed" : null,
+      ].filter((x) => x !== null).join(" · ").trim();
+      const rows = [];
+      if (!servers) {
+        rows.push(this.mcpError && !loading
+          ? div().p(10).text_color(t.blocked).child(`Couldn't list MCP servers: ${this.mcpError}`)
+          : div().p(10).text_color(t.dim).child("Reading MCP servers…"));
+      } else {
+        const link = (id, text, pick) => div().id(id).px(4).rounded(4).text_color(t.muted)
+          .hover((s) => s.text_color(t.foreground)).on_click(pick).child(text);
+        rows.push(h_flex().px(10).pt(10).pb(4).gap(8).flex_none().items_end().text_size(11).text_color(t.dim)
+          .child(div().font_medium().child("MCP servers"))
+          .child(div().opacity(0.6).child(`${shown.filter((s) => on.has(s.name)).length} of ${shown.length} on`))
+          .when(loading, (el) => el.child(div().opacity(0.6).child("· refreshing…")))
+          .child(div().min_w(0).truncate().text_color(this.mcpNote ? t.accent : t.dim).child(note))
+          .child(div().flex_1())
+          .child(link("mcp-all", "All", (_e, cx) => this.setAllServers(p, true, cx)))
+          .child(link("mcp-none", "None", (_e, cx) => this.setAllServers(p, false, cx))));
+        if (!servers.length) rows.push(empty(t, "No MCP servers installed."));
+        const hideLink = (s, text) => div().id(`mcp-hide-${s.name}`).flex_none().px(4).rounded(4).text_size(11).text_color(t.dim)
+          .hover((st) => st.text_color(t.foreground))
+          .on_click((_e, cx) => { cx.stop_propagation(); this.hideServer(p, s.name, cx); }).child(text);
+        const serverRow = (s, i, isHidden) => {
+          const sel = i === this.mcpAt, lit = !isHidden && on.has(s.name), l = serverLabel(s);
+          return h_flex().id(`mcp-${s.name}`).h(30).px(10).gap(10).items_center().rounded(8).flex_none()
+            .when(sel, (el) => el.bg(t.selected))
+            .hover((st) => st.bg(sel ? t.selected : t.hover))
+            .on_click((_e, cx) => { this.mcpAt = i; if (!isHidden) this.toggleServer(p, s.name, cx); else cx.notify(); })
+            .child(h_flex().size(22).flex_none().items_center().justify_center().child(isHidden ? div().size(14) : check(lit)))
+            .child(div().flex_none().text_color(lit ? t.foreground : t.muted).child(l.name))
+            .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(isHidden ? "hidden · always off" : l.sub))
+            .when(sel || isHidden, (el) => el.child(hideLink(s, isHidden ? "h · unhide" : "h · hide")));
+        };
+        shown.forEach((s, i) => rows.push(serverRow(s, i, false)));
+        // Hidden servers never vanish without a trace: this line names them.
+        if (hid.length) {
+          rows.push(h_flex().id("mcp-hidden").h(30).mt(4).px(10).gap(8).items_center().rounded(8).flex_none()
+            .text_size(11.5).text_color(t.dim).hover((st) => st.bg(t.hover))
+            .on_click((_e, cx) => { this.showHidden = !this.showHidden; this.mcpAt = Math.min(this.mcpAt, shown.length - 1); cx.notify(); })
+            .child(div().w(22).flex_none())
+            .child(div().flex_none().font_medium().child(`${hid.length} hidden`))
+            .child(div().flex_1().min_w(0).truncate().child(this.showHidden ? "always off" : hid.map((s) => serverLabel(s).name).join(", ")))
+            .child(div().flex_none().text_color(t.muted).child(this.showHidden ? "collapse" : "show")));
+          if (this.showHidden) hid.forEach((s, i) => rows.push(serverRow(s, shown.length + i, true)));
+        }
+      }
+      header = head(`${steps} / ${steps} · MCP servers`);
+      body = v_flex().id("launch-servers").flex_1().min_h(0).px(6).pb(6).gap(1).overflow_y_scroll().children(rows);
+      footer = [[["↑", "↓"], "move"], [["space"], "toggle"], [["⌃A"], "all"], [["↵"], "start"], [["esc"], "back"]];
+      canStart = Boolean(servers) && !this.busy;
       primary = this.busy ? "Starting…" : "Start Claude";
     }
 
@@ -331,25 +513,40 @@ export default class Launch extends View {
     return v_flex().id("launch").w_full().h(440).flex_none().bg(t.popover).text_size(13)
       .track_focus(this.keys)
       .on_key_down((e, cx) => {
-        // ctrl-j/k and ctrl-n/p move like ↓/↑.
-        const key = e.modifiers.control ? ({ j: "down", k: "up", n: "down", p: "up" }[e.key] ?? e.key) : e.key;
         if (e.key === "escape") {
           cx.stop_propagation();
-          return checkout ? this.back(cx) : closeOverlay(props().overlay);
+          return step === "project" ? closeOverlay(props().overlay) : this.back(cx);
         }
-        if (!checkout) {
-          if (key !== "down" && key !== "up") return;
-          const n = list.length, d = key === "down" ? 1 : -1;
+        const ctrl = e.modifiers.control;
+        const move = e.key === "down" || (ctrl && e.key === "j") ? 1 : e.key === "up" || (ctrl && e.key === "k") ? -1 : 0;
+        if (step === "project") {
+          if (!move) return;
+          const n = list.length;
           cx.stop_propagation();
-          if (n) this.select((this.at + d + n) % n, cx);
+          if (n) this.select((this.at + move + n) % n, cx);
+          return;
+        }
+        if (step === "servers") {
+          const { shown, rows } = this.serverRows(p), n = rows.length, cur = rows[this.mcpAt];
+          if (e.key === "enter") { cx.stop_propagation(); return this.start(cx); }
+          if (ctrl && e.key === "a" && shown.length) {
+            cx.stop_propagation();
+            const on = this.onSet(p, this.servers(p));
+            return this.setAllServers(p, !shown.every((s) => on.has(s.name)), cx);
+          }
+          if (e.key === "space" && cur) {
+            cx.stop_propagation();
+            return this.mcpAt < shown.length ? this.toggleServer(p, cur.name, cx) : undefined;
+          }
+          if (e.key === "h" && !ctrl && !e.modifiers.platform && cur) { cx.stop_propagation(); return this.hideServer(p, cur.name, cx); }
+          if (move && n) { cx.stop_propagation(); this.mcpAt = (this.mcpAt + move + n) % n; cx.notify(); }
           return;
         }
         const opts = this.options();
-        if (e.key === "enter" && opts[this.opt]?.kind !== "new") { cx.stop_propagation(); return this.start(cx); }
-        if ((key === "down" || key === "up") && opts.length) {
-          const d = key === "down" ? 1 : -1;
+        if (e.key === "enter" && opts[this.opt]?.kind !== "new") { cx.stop_propagation(); return this.openServers(cx); }
+        if (move && opts.length) {
           cx.stop_propagation();
-          this.opt = (this.opt + d + opts.length) % opts.length;
+          this.opt = (this.opt + move + opts.length) % opts.length;
           this.error = "";
           this.focusOption();
           cx.notify();
@@ -360,8 +557,10 @@ export default class Launch extends View {
       .child(footerBar(t, footer, {
         note: this.error || null, noteColor: t.blocked,
         extra: [
-          ...(checkout ? [button(t, "launch-back-btn", "Back", (_e, cx) => this.back(cx))] : []),
-          button(t, "launch-start", primary, (_e, cx) => (checkout ? this.start(cx) : this.choose(cx)), { primary: true, disabled: !canStart }),
+          ...(step === "checkout" ? [button(t, "launch-back-btn", "Back", (_e, cx) => this.back(cx))] : []),
+          ...(step === "servers" ? [button(t, "launch-save", "Save default", (_e, cx) => this.saveServers(p, cx), { disabled: !canSave })] : []),
+          button(t, "launch-start", primary, (_e, cx) => (step === "project" ? this.choose(cx) : step === "checkout" ? this.openServers(cx) : this.start(cx)),
+            { primary: true, disabled: !canStart }),
         ],
       }));
   }
