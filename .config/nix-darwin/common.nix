@@ -49,6 +49,7 @@
       "llmfit"
       "tuicr"
       "nono"
+      "mole"
     ];
     casks = [
       "ghostty"
