@@ -1,4 +1,7 @@
 --ignore=.stowrc
 --ignore=DS_Store
---ignore=.gitignore
---ignore=.git
+--ignore=^\.gitignore
+--ignore=^\.git
+--ignore=^scripts
+--ignore=^\.githooks
+--ignore=^\.config/herdr-app
