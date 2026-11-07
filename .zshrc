@@ -2,20 +2,15 @@
 alias v="NVIM_APPNAME=astronvim nvim"
 alias avim="NVIM_APPNAME=astronvim nvim"
 alias lvim="NVIM_APPNAME=lazyvim nvim"
-alias conf="cd ~/dotfiles && v ./"
 alias lg="lazygit"
-alias nnn="yazi"
 alias ya="yazi"
 alias cr="tuicr"
-alias oc="opencode"
 alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 alias cl="claude"
-alias ncl="nono run --profile claude-default -- claude --dangerously-skip-permissions"
+alias c0='cd "$(mktemp -d)" && claude'
+alias ncl="nono run --profile claude --allow . -- claude"
 alias npi="nono run --profile pi -- pi"
 alias lazypodman='DOCKER_HOST="unix://$(podman machine inspect --format "{{.ConnectionInfo.PodmanSocket.Path}}")" lazydocker'
-clt() {
-  CLAUDE_CODE_TASK_LIST_ID="$1" claude "${@:2}"
-}
 
 # Set default editor
 export EDITOR="env NVIM_APPNAME=astronvim nvim"
