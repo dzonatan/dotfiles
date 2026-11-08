@@ -68,6 +68,16 @@
           "active": "lists"
         },
         {
+          "id": "usage",
+          "type": "block",
+          "content": {
+            "mod": "dz-usage"
+          },
+          "size": {
+            "px": 84
+          }
+        },
+        {
           "id": "sidebar-footer",
           "type": "block",
           "content": {

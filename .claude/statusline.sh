@@ -3,6 +3,13 @@
 
 input=$(cat)
 
+# Save the latest rate limits for the Herdr sidebar's dz-usage mod
+RATE_LIMITS=$(echo "$input" | jq -c '.rate_limits // empty')
+if [ -n "$RATE_LIMITS" ]; then
+    RATE_LIMITS_FILE="$HOME/.claude/cache/rate-limits.json"
+    printf '%s\n' "$RATE_LIMITS" > "$RATE_LIMITS_FILE.$$" && mv "$RATE_LIMITS_FILE.$$" "$RATE_LIMITS_FILE"
+fi
+
 # Get the directory the session was started in (not the drifting cwd)
 CURRENT_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // "."')
 
