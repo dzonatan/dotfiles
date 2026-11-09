@@ -8,12 +8,13 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex, InputState, Input } from "gpui-base";
 import { bar, field, footer as footerBar, button, groupLabel, empty } from "./panel.js";
-import { theme, spaces, panes, run, closeOverlay, openOverlay, props, home, exec, readTextFile } from "herdr";
+import { settings, theme, spaces, panes, run, closeOverlay, openOverlay, props, home, exec, readTextFile } from "herdr";
 import { projectMarks, fillOf } from "./mark.js";
 import { ANY, cached, fresh, refresh, ownDefault, onByDefault, saveDefault, denyArgs, hiddenSet, setHidden, label as serverLabel } from "./mcp.js";
 
 const NONE = { id: "none", name: "No project" };
 const SCRATCH = "Scratch";
+const ROW_H = 31; // a server row (30) plus the list's gap (1)
 const NAME_OK = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
 
 const projects = () => projectMarks();
@@ -60,6 +61,12 @@ export default class Launch extends View {
     // The servers step: the ticks (null: the default's), the highlighted row, folders being listed.
     this.mcpOn = null;
     this.mcpAt = 0;
+    // The server list scrolls by whole rows so the highlighted one can be kept on screen:
+    // mcpTop is the first row shown, mcpViewH the list's height, mcpWheel unspent wheel pixels.
+    this.mcpTop = 0;
+    this.mcpViewH = 0;
+    this.mcpWheel = 0;
+    this.mcpRowH = 0; // a server row's measured height: sizes come back zoomed, rows are written unzoomed
     this.mcpLoading = new Set();
     this.mcpError = "";
     this.mcpNote = "";
@@ -108,6 +115,7 @@ export default class Launch extends View {
     this.step = "servers";
     this.mcpOn = null;
     this.mcpAt = 0;
+    this.mcpTop = 0;
     this.mcpNote = "";
     this.error = "";
     this.listServers(this.mcpOf(p).dir, 60_000, cx);
@@ -132,12 +140,33 @@ export default class Launch extends View {
     return { shown, hid, rows: this.showHidden ? [...shown, ...hid] : shown };
   }
 
+  // The servers list as drawn: shown rows, the "n hidden" line, then hidden rows while open.
+  serverLayout(p) {
+    const { shown, hid } = this.serverRows(p);
+    const count = shown.length + (hid.length ? 1 : 0) + (this.showHidden ? hid.length : 0);
+    // Rows are 30px plus a 1px gap, times the zoom (measured from a row, else the setting);
+    // the hidden line's 4px top margin costs one less row when present.
+    const k = this.mcpRowH ? this.mcpRowH / (ROW_H - 1) : Number(settings().zoom) || 1;
+    const fit = Math.max(1, Math.floor((this.mcpViewH + k - (hid.length ? 4 * k : 0)) / (ROW_H * k)));
+    const item = (at) => (at < shown.length ? at : at + 1); // highlighted row -> drawn index
+    return { count, fit: this.mcpViewH ? fit : count, item };
+  }
+
+  // Scrolls so the highlighted server row is on screen.
+  revealServer(p) {
+    const { count, fit, item } = this.serverLayout(p), at = item(this.mcpAt);
+    if (at < this.mcpTop) this.mcpTop = at;
+    else if (at >= this.mcpTop + fit) this.mcpTop = at - fit + 1;
+    this.mcpTop = Math.max(0, Math.min(this.mcpTop, count - fit));
+  }
+
   // Hides a server everywhere (always off), or brings it back.
   hideServer(p, name, cx) {
     if (!name) return;
     setHidden(name, !hiddenSet().has(name));
     const n = this.serverRows(p).rows.length;
     this.mcpAt = Math.max(0, Math.min(this.mcpAt, n - 1));
+    this.revealServer(p);
     cx.notify();
   }
 
@@ -458,7 +487,7 @@ export default class Launch extends View {
         own ? (p === NONE ? "default" : "project default") : inherited ? "No project's default" : "no default: all on",
         changed ? "changed" : null,
       ].filter((x) => x !== null).join(" · ").trim();
-      const rows = [];
+      const rows = [], items = [];
       if (!servers) {
         rows.push(this.mcpError && !loading
           ? div().p(10).text_color(t.blocked).child(`Couldn't list MCP servers: ${this.mcpError}`)
@@ -483,27 +512,46 @@ export default class Launch extends View {
           return h_flex().id(`mcp-${s.name}`).h(30).px(10).gap(10).items_center().rounded(8).flex_none()
             .when(sel, (el) => el.bg(t.selected))
             .hover((st) => st.bg(sel ? t.selected : t.hover))
+            .on_size_change((size, cx) => {
+              if (Math.abs(size.height - this.mcpRowH) < 0.5) return;
+              this.mcpRowH = size.height; this.revealServer(p); cx.notify();
+            })
             .on_click((_e, cx) => { this.mcpAt = i; if (!isHidden) this.toggleServer(p, s.name, cx); else cx.notify(); })
             .child(h_flex().size(22).flex_none().items_center().justify_center().child(isHidden ? div().size(14) : check(lit)))
             .child(div().flex_none().text_color(lit ? t.foreground : t.muted).child(l.name))
             .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(isHidden ? "hidden · always off" : l.sub))
             .when(sel || isHidden, (el) => el.child(hideLink(s, isHidden ? "h · unhide" : "h · hide")));
         };
-        shown.forEach((s, i) => rows.push(serverRow(s, i, false)));
+        shown.forEach((s, i) => items.push(serverRow(s, i, false)));
         // Hidden servers never vanish without a trace: this line names them.
         if (hid.length) {
-          rows.push(h_flex().id("mcp-hidden").h(30).mt(4).px(10).gap(8).items_center().rounded(8).flex_none()
+          items.push(h_flex().id("mcp-hidden").h(30).mt(4).px(10).gap(8).items_center().rounded(8).flex_none()
             .text_size(11.5).text_color(t.dim).hover((st) => st.bg(t.hover))
             .on_click((_e, cx) => { this.showHidden = !this.showHidden; this.mcpAt = Math.min(this.mcpAt, shown.length - 1); cx.notify(); })
             .child(div().w(22).flex_none())
             .child(div().flex_none().font_medium().child(`${hid.length} hidden`))
             .child(div().flex_1().min_w(0).truncate().child(this.showHidden ? "always off" : hid.map((s) => serverLabel(s).name).join(", ")))
             .child(div().flex_none().text_color(t.muted).child(this.showHidden ? "collapse" : "show")));
-          if (this.showHidden) hid.forEach((s, i) => rows.push(serverRow(s, shown.length + i, true)));
+          if (this.showHidden) hid.forEach((s, i) => items.push(serverRow(s, shown.length + i, true)));
         }
       }
       header = head(`${steps} / ${steps} · MCP servers`);
-      body = v_flex().id("launch-servers").flex_1().min_h(0).px(6).pb(6).gap(1).overflow_y_scroll().children(rows);
+      const { count, fit } = this.serverLayout(p);
+      const top = Math.max(0, Math.min(this.mcpTop, count - fit));
+      body = v_flex().id("launch-servers").flex_1().min_h(0).px(6).pb(6).gap(1).children(rows)
+        // The rows sit in an absolute layer so the list's measured height is the room it has, not its rows'.
+        .child(div().id("launch-servers-list").relative().flex_1().min_h(0).overflow_hidden()
+          .on_size_change((size, cx) => { this.mcpViewH = size.height; this.revealServer(p); cx.notify(); })
+          .on_scroll_wheel((e, cx) => {
+            const rowPx = this.mcpRowH ? this.mcpRowH + this.mcpRowH / (ROW_H - 1) : ROW_H;
+            this.mcpWheel += e.delta_lines ? -e.delta_lines.y * rowPx : -e.delta.y;
+            const step = Math.trunc(this.mcpWheel / rowPx);
+            if (!step) return;
+            this.mcpWheel -= step * rowPx;
+            const next = Math.max(0, Math.min(top + step, count - fit));
+            if (next !== this.mcpTop) { this.mcpTop = next; cx.notify(); }
+          })
+          .child(v_flex().absolute().top(0).left(0).right(0).gap(1).children(items.slice(top, top + fit))));
       footer = [[["↑", "↓"], "move"], [["space"], "toggle"], [["⌃A"], "all"], [["↵"], "start"], [["esc"], "back"]];
       canStart = Boolean(servers) && !this.busy;
       primary = this.busy ? "Starting…" : "Start Claude";
@@ -539,7 +587,7 @@ export default class Launch extends View {
             return this.mcpAt < shown.length ? this.toggleServer(p, cur.name, cx) : undefined;
           }
           if (e.key === "h" && !ctrl && !e.modifiers.platform && cur) { cx.stop_propagation(); return this.hideServer(p, cur.name, cx); }
-          if (move && n) { cx.stop_propagation(); this.mcpAt = (this.mcpAt + move + n) % n; cx.notify(); }
+          if (move && n) { cx.stop_propagation(); this.mcpAt = (this.mcpAt + move + n) % n; this.revealServer(p); cx.notify(); }
           return;
         }
         const opts = this.options();
