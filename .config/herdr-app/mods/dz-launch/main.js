@@ -133,28 +133,40 @@ export default class Launch extends View {
     cx.notify();
   }
 
-  // The servers step's rows: the shown servers, then the hidden ones while "show" is on.
+  // The servers step's rows as drawn, each one selectable (mcpAt indexes `items`): the shown servers,
+  // the "n hidden" line, then the hidden servers while it's open.
+  // claude.ai connectors go last, each group keeping `claude mcp list`'s order.
   serverRows(p) {
-    const list = this.servers(p) ?? [], hidden = hiddenSet();
+    const web = (s) => (s.name.startsWith("claude.ai ") ? 1 : 0);
+    const list = [...(this.servers(p) ?? [])].sort((a, b) => web(a) - web(b)), hidden = hiddenSet();
     const shown = list.filter((s) => !hidden.has(s.name)), hid = list.filter((s) => hidden.has(s.name));
-    return { shown, hid, rows: this.showHidden ? [...shown, ...hid] : shown };
+    const items = [...shown.map((s) => ({ s })), ...(hid.length ? [{ line: true }] : []),
+      ...(this.showHidden ? hid.map((s) => ({ s, hidden: true })) : [])];
+    return { shown, hid, items };
   }
 
-  // The servers list as drawn: shown rows, the "n hidden" line, then hidden rows while open.
+  // Opens or folds the hidden servers; folding moves a highlight inside them onto the line.
+  toggleHidden(p, cx) {
+    this.showHidden = !this.showHidden;
+    const line = this.serverRows(p).shown.length;
+    if (!this.showHidden && this.mcpAt > line) this.mcpAt = line;
+    this.revealServer(p);
+    cx.notify();
+  }
+
+  // The servers list as drawn, and how many rows fit.
   serverLayout(p) {
-    const { shown, hid } = this.serverRows(p);
-    const count = shown.length + (hid.length ? 1 : 0) + (this.showHidden ? hid.length : 0);
+    const { hid, items } = this.serverRows(p), count = items.length;
     // Rows are 30px plus a 1px gap, times the zoom (measured from a row, else the setting);
     // the hidden line's 4px top margin costs one less row when present.
     const k = this.mcpRowH ? this.mcpRowH / (ROW_H - 1) : Number(settings().zoom) || 1;
     const fit = Math.max(1, Math.floor((this.mcpViewH + k - (hid.length ? 4 * k : 0)) / (ROW_H * k)));
-    const item = (at) => (at < shown.length ? at : at + 1); // highlighted row -> drawn index
-    return { count, fit: this.mcpViewH ? fit : count, item };
+    return { count, fit: this.mcpViewH ? fit : count };
   }
 
   // Scrolls so the highlighted server row is on screen.
   revealServer(p) {
-    const { count, fit, item } = this.serverLayout(p), at = item(this.mcpAt);
+    const { count, fit } = this.serverLayout(p), at = this.mcpAt;
     if (at < this.mcpTop) this.mcpTop = at;
     else if (at >= this.mcpTop + fit) this.mcpTop = at - fit + 1;
     this.mcpTop = Math.max(0, Math.min(this.mcpTop, count - fit));
@@ -164,7 +176,7 @@ export default class Launch extends View {
   hideServer(p, name, cx) {
     if (!name) return;
     setHidden(name, !hiddenSet().has(name));
-    const n = this.serverRows(p).rows.length;
+    const n = this.serverRows(p).items.length;
     this.mcpAt = Math.max(0, Math.min(this.mcpAt, n - 1));
     this.revealServer(p);
     cx.notify();
@@ -525,14 +537,17 @@ export default class Launch extends View {
         shown.forEach((s, i) => items.push(serverRow(s, i, false)));
         // Hidden servers never vanish without a trace: this line names them.
         if (hid.length) {
+          const line = shown.length, sel = this.mcpAt === line;
           items.push(h_flex().id("mcp-hidden").h(30).mt(4).px(10).gap(8).items_center().rounded(8).flex_none()
-            .text_size(11.5).text_color(t.dim).hover((st) => st.bg(t.hover))
-            .on_click((_e, cx) => { this.showHidden = !this.showHidden; this.mcpAt = Math.min(this.mcpAt, shown.length - 1); cx.notify(); })
+            .text_size(11.5).text_color(t.dim)
+            .when(sel, (el) => el.bg(t.selected))
+            .hover((st) => st.bg(sel ? t.selected : t.hover))
+            .on_click((_e, cx) => { this.mcpAt = line; this.toggleHidden(p, cx); })
             .child(div().w(22).flex_none())
             .child(div().flex_none().font_medium().child(`${hid.length} hidden`))
             .child(div().flex_1().min_w(0).truncate().child(this.showHidden ? "always off" : hid.map((s) => serverLabel(s).name).join(", ")))
-            .child(div().flex_none().text_color(t.muted).child(this.showHidden ? "collapse" : "show")));
-          if (this.showHidden) hid.forEach((s, i) => items.push(serverRow(s, shown.length + i, true)));
+            .child(div().flex_none().text_color(t.muted).child(`${sel ? "space · " : ""}${this.showHidden ? "collapse" : "show"}`)));
+          if (this.showHidden) hid.forEach((s, i) => items.push(serverRow(s, line + 1 + i, true)));
         }
       }
       header = head(`${steps} / ${steps} · MCP servers`);
@@ -575,7 +590,7 @@ export default class Launch extends View {
           return;
         }
         if (step === "servers") {
-          const { shown, rows } = this.serverRows(p), n = rows.length, cur = rows[this.mcpAt];
+          const { shown, items } = this.serverRows(p), n = items.length, cur = items[this.mcpAt];
           if (e.key === "enter") { cx.stop_propagation(); return this.start(cx); }
           if (ctrl && e.key === "a" && shown.length) {
             cx.stop_propagation();
@@ -584,9 +599,10 @@ export default class Launch extends View {
           }
           if (e.key === "space" && cur) {
             cx.stop_propagation();
-            return this.mcpAt < shown.length ? this.toggleServer(p, cur.name, cx) : undefined;
+            if (cur.line) return this.toggleHidden(p, cx);
+            return cur.hidden ? undefined : this.toggleServer(p, cur.s.name, cx);
           }
-          if (e.key === "h" && !ctrl && !e.modifiers.platform && cur) { cx.stop_propagation(); return this.hideServer(p, cur.name, cx); }
+          if (e.key === "h" && !ctrl && !e.modifiers.platform && cur?.s) { cx.stop_propagation(); return this.hideServer(p, cur.s.name, cx); }
           if (move && n) { cx.stop_propagation(); this.mcpAt = (this.mcpAt + move + n) % n; this.revealServer(p); cx.notify(); }
           return;
         }
