@@ -7,7 +7,16 @@ input=$(cat)
 RATE_LIMITS=$(echo "$input" | jq -c '.rate_limits // empty')
 if [ -n "$RATE_LIMITS" ]; then
     RATE_LIMITS_FILE="$HOME/.claude/cache/rate-limits.json"
-    printf '%s\n' "$RATE_LIMITS" > "$RATE_LIMITS_FILE.$$" && mv "$RATE_LIMITS_FILE.$$" "$RATE_LIMITS_FILE"
+    # All sessions share this file: an idle session's older numbers must not replace newer ones.
+    # resets_at within 60s counts as the same window, where usage only goes up.
+    MERGED=$(jq -c --argjson old "$(cat "$RATE_LIMITS_FILE" 2>/dev/null || echo null)" '
+        reduce ("five_hour", "seven_day") as $w (.;
+            $old[$w] as $o | .[$w] as $n
+            | if $o == null then .
+              elif $n == null or $o.resets_at > $n.resets_at + 60 then .[$w] = $o
+              elif $o.resets_at >= $n.resets_at - 60 and $o.used_percentage > $n.used_percentage then .[$w] = $o
+              else . end)' <<< "$RATE_LIMITS" 2>/dev/null)
+    printf '%s\n' "${MERGED:-$RATE_LIMITS}" > "$RATE_LIMITS_FILE.$$" && mv "$RATE_LIMITS_FILE.$$" "$RATE_LIMITS_FILE"
 fi
 
 # Get the directory the session was started in (not the drifting cwd)
