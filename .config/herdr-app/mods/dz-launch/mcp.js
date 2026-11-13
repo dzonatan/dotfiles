@@ -3,6 +3,9 @@
 //   connectors). Only whether a server is installed matters, not its status: MCP_TIMEOUT=1 cuts each
 //   health check short, so a listing takes ~2s (CLI start and the connector fetch). Cached per folder in
 //   shared "dz-launch.mcp" and refreshed in the background.
+// - Scopes: the listing doesn't say where a server comes from, so each one gets a `scope` read from the
+//   config files Claude reads: local (~/.claude.json projects[dir]), project (dir/.mcp.json), user
+//   (~/.claude.json mcpServers), else by name: plugin, connector. Same name in several: local wins, as in Claude.
 // - Defaults: per project path, the names of the servers left on; ANY ("*") is the default for No project
 //   and for projects without their own. No default at all: every server on. A server installed after a
 //   default was saved starts off in that project.
@@ -11,7 +14,7 @@
 // - Turning servers off: `--settings {"deniedMcpServers": [{"serverName": …}]}` for that session only. A
 //   denied server is never started or connected (unlike --disallowedTools, which only hides its tools).
 // Copied into dz-launch and dz-again. Change one, copy it to the other.
-import { shared, setShared, exec } from "herdr";
+import { shared, setShared, exec, readTextFile, home } from "herdr";
 
 const KEY = "dz-launch.mcp";
 export const ANY = "*";
@@ -32,7 +35,37 @@ export function parseList(text) {
   return out;
 }
 
-// { servers: [{ name, detail }], at } for a folder, or null before its first listing.
+const readJson = async (path) => { try { return JSON.parse((await readTextFile(path)) ?? "null"); } catch { return null; } };
+const names = (o) => new Set(Object.keys(o && typeof o === "object" ? o : {}));
+
+// The server names each config file gives a folder.
+async function scopes(dir) {
+  const [claude, project] = await Promise.all([readJson(`${home()}/.claude.json`), readJson(`${dir.replace(/\/+$/, "")}/.mcp.json`)]);
+  return {
+    local: names(claude?.projects?.[dir]?.mcpServers),
+    project: names(project?.mcpServers),
+    user: names(claude?.mcpServers),
+  };
+}
+
+function scopeOf(name, sc) {
+  if (sc.local.has(name)) return "local";
+  if (sc.project.has(name)) return "project";
+  if (sc.user.has(name)) return "user";
+  if (name.startsWith("plugin:")) return "plugin";
+  if (name.startsWith("claude.ai ")) return "connector";
+  return "other";
+}
+
+// The groups a list shows, in order, and their headings.
+export const SCOPES = [
+  ["local", "Local · this folder only"], ["project", "Project · .mcp.json"], ["user", "User · every folder"],
+  ["plugin", "Plugins"], ["connector", "claude.ai connectors"], ["other", "Other"],
+];
+// A listing cached before scopes were read: plugins and connectors by name, the rest "other" until it's listed again.
+export const scope = (s) => s.scope ?? scopeOf(s.name, { local: new Set(), project: new Set(), user: new Set() });
+
+// { servers: [{ name, detail, scope }], at } for a folder, or null before its first listing.
 export const cached = (dir) => state().lists?.[dir] ?? null;
 export const fresh = (dir, ms) => Date.now() - (cached(dir)?.at ?? 0) < ms;
 
@@ -43,7 +76,8 @@ export function refresh(dir) {
   const job = (async () => {
     const r = await exec("env", ["MCP_TIMEOUT=1", "claude", "mcp", "list"], { cwd: dir });
     if (r.code !== 0) throw new Error(r.stderr.trim() || "claude mcp list failed.");
-    const servers = parseList(r.stdout);
+    const sc = await scopes(dir);
+    const servers = parseList(r.stdout).map((s) => ({ ...s, scope: scopeOf(s.name, sc) }));
     save({ lists: { ...(state().lists ?? {}), [dir]: { servers, at: Date.now() } } });
     return servers;
   })().finally(() => inflight.delete(dir));

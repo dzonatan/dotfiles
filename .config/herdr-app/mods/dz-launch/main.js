@@ -10,7 +10,7 @@ import { h_flex, v_flex, InputState, Input } from "gpui-base";
 import { bar, field, footer as footerBar, button, groupLabel, empty } from "./panel.js";
 import { settings, theme, spaces, panes, run, closeOverlay, openOverlay, props, home, exec, readTextFile } from "herdr";
 import { projectMarks, fillOf } from "./mark.js";
-import { ANY, cached, fresh, refresh, ownDefault, onByDefault, saveDefault, denyArgs, hiddenSet, setHidden, label as serverLabel } from "./mcp.js";
+import { ANY, cached, fresh, refresh, ownDefault, onByDefault, saveDefault, denyArgs, hiddenSet, setHidden, label as serverLabel, SCOPES, scope } from "./mcp.js";
 
 const NONE = { id: "none", name: "No project" };
 const SCRATCH = "Scratch";
@@ -133,22 +133,37 @@ export default class Launch extends View {
     cx.notify();
   }
 
-  // The servers step's rows as drawn, each one selectable (mcpAt indexes `items`): the shown servers,
-  // the "n hidden" line, then the hidden servers while it's open.
-  // claude.ai connectors go last, each group keeping `claude mcp list`'s order.
+  // The servers step's rows as drawn (mcpAt indexes `items`): the shown servers by scope (SCOPES' order,
+  // each group under a heading row and keeping `claude mcp list`'s order), the "n hidden" line, then the
+  // hidden servers while it's open. Every row but a heading is selectable.
   serverRows(p) {
-    const web = (s) => (s.name.startsWith("claude.ai ") ? 1 : 0);
-    const list = [...(this.servers(p) ?? [])].sort((a, b) => web(a) - web(b)), hidden = hiddenSet();
+    const order = (s) => SCOPES.findIndex(([k]) => k === scope(s));
+    const list = [...(this.servers(p) ?? [])].sort((a, b) => order(a) - order(b)), hidden = hiddenSet();
     const shown = list.filter((s) => !hidden.has(s.name)), hid = list.filter((s) => hidden.has(s.name));
-    const items = [...shown.map((s) => ({ s })), ...(hid.length ? [{ line: true }] : []),
-      ...(this.showHidden ? hid.map((s) => ({ s, hidden: true })) : [])];
+    const items = [];
+    for (const [key, title] of SCOPES) {
+      const group = shown.filter((s) => scope(s) === key);
+      if (group.length) items.push({ head: title, count: group.length }, ...group.map((s) => ({ s })));
+    }
+    if (hid.length) items.push({ line: true });
+    if (this.showHidden) items.push(...hid.map((s) => ({ s, hidden: true })));
     return { shown, hid, items };
+  }
+
+  // The nearest selectable row from `at` going `dir` (1 or -1), wrapping; `at` itself if it's selectable.
+  selectable(items, at, dir) {
+    const n = items.length;
+    for (let k = 0; k < n; k++) {
+      const i = (((at + dir * k) % n) + n) % n;
+      if (!items[i].head) return i;
+    }
+    return 0;
   }
 
   // Opens or folds the hidden servers; folding moves a highlight inside them onto the line.
   toggleHidden(p, cx) {
     this.showHidden = !this.showHidden;
-    const line = this.serverRows(p).shown.length;
+    const line = this.serverRows(p).items.findIndex((x) => x.line);
     if (!this.showHidden && this.mcpAt > line) this.mcpAt = line;
     this.revealServer(p);
     cx.notify();
@@ -167,7 +182,9 @@ export default class Launch extends View {
   // Scrolls so the highlighted server row is on screen.
   revealServer(p) {
     const { count, fit } = this.serverLayout(p), at = this.mcpAt;
-    if (at < this.mcpTop) this.mcpTop = at;
+    // The first row of a group brings its heading into view too.
+    const lo = this.serverRows(p).items[at - 1]?.head ? at - 1 : at;
+    if (lo < this.mcpTop) this.mcpTop = lo;
     else if (at >= this.mcpTop + fit) this.mcpTop = at - fit + 1;
     this.mcpTop = Math.max(0, Math.min(this.mcpTop, count - fit));
   }
@@ -176,8 +193,8 @@ export default class Launch extends View {
   hideServer(p, name, cx) {
     if (!name) return;
     setHidden(name, !hiddenSet().has(name));
-    const n = this.serverRows(p).items.length;
-    this.mcpAt = Math.max(0, Math.min(this.mcpAt, n - 1));
+    const { items } = this.serverRows(p), n = items.length;
+    if (n) this.mcpAt = this.selectable(items, Math.max(0, Math.min(this.mcpAt, n - 1)), 1);
     this.revealServer(p);
     cx.notify();
   }
@@ -487,7 +504,9 @@ export default class Launch extends View {
     } else {
       // Last step: the MCP servers this session gets.
       const servers = this.servers(p), on = servers ? this.onSet(p, servers) : null;
-      const { shown, hid } = this.serverRows(p);
+      const { shown, hid, items: all } = this.serverRows(p);
+      // The highlight never rests on a heading (opening the step starts at row 0, one).
+      if (all.length && all[this.mcpAt]?.head) this.mcpAt = this.selectable(all, this.mcpAt, 1);
       const { key, dir } = this.mcpOf(p);
       const loading = this.mcpLoading.has(dir);
       const own = ownDefault(key), inherited = !own && p !== NONE && ownDefault(ANY);
@@ -534,10 +553,14 @@ export default class Launch extends View {
             .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(t.dim).child(isHidden ? "hidden · always off" : l.sub))
             .when(sel || isHidden, (el) => el.child(hideLink(s, isHidden ? "h · unhide" : "h · hide")));
         };
-        shown.forEach((s, i) => items.push(serverRow(s, i, false)));
+        // A heading is a full row (30px) so the list still scrolls by whole rows.
+        const headRow = (x, i) => h_flex().id(`mcp-head-${i}`).h(30).px(10).gap(6).items_end().pb(4).flex_none()
+          .text_size(11).font_medium().text_color(t.dim)
+          .child(div().child(x.head)).child(div().opacity(0.6).child(String(x.count)));
+        all.forEach((x, i) => { if (x.head) items.push(headRow(x, i)); else if (x.s && !x.hidden) items.push(serverRow(x.s, i, false)); });
         // Hidden servers never vanish without a trace: this line names them.
         if (hid.length) {
-          const line = shown.length, sel = this.mcpAt === line;
+          const line = all.findIndex((x) => x.line), sel = this.mcpAt === line;
           items.push(h_flex().id("mcp-hidden").h(30).mt(4).px(10).gap(8).items_center().rounded(8).flex_none()
             .text_size(11.5).text_color(t.dim)
             .when(sel, (el) => el.bg(t.selected))
@@ -603,7 +626,7 @@ export default class Launch extends View {
             return cur.hidden ? undefined : this.toggleServer(p, cur.s.name, cx);
           }
           if (e.key === "h" && !ctrl && !e.modifiers.platform && cur?.s) { cx.stop_propagation(); return this.hideServer(p, cur.s.name, cx); }
-          if (move && n) { cx.stop_propagation(); this.mcpAt = (this.mcpAt + move + n) % n; this.revealServer(p); cx.notify(); }
+          if (move && n) { cx.stop_propagation(); this.mcpAt = this.selectable(items, (this.mcpAt + move + n) % n, move); this.revealServer(p); cx.notify(); }
           return;
         }
         const opts = this.options();
