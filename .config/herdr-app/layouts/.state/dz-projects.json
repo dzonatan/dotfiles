@@ -6,7 +6,7 @@
   },
   "theme": {
     "light": "paper",
-    "dark": "graphite"
+    "dark": "atom-one-dark"
   },
   "file": {
     "id": "root",
