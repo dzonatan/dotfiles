@@ -14,7 +14,7 @@
 // - Turning servers off: `--settings {"deniedMcpServers": [{"serverName": …}]}` for that session only. A
 //   denied server is never started or connected (unlike --disallowedTools, which only hides its tools).
 // Copied into dz-launch and dz-again. Change one, copy it to the other.
-import { shared, setShared, exec, readTextFile, home } from "herdr";
+import { shared, setShared, exec, readTextFile, writeTextFile, home } from "herdr";
 
 const KEY = "dz-launch.mcp";
 export const ANY = "*";
@@ -69,12 +69,32 @@ export const scope = (s) => s.scope ?? scopeOf(s.name, { local: new Set(), proje
 export const cached = (dir) => state().lists?.[dir] ?? null;
 export const fresh = (dir, ms) => Date.now() - (cached(dir)?.at ?? 0) < ms;
 
+// MCP_TIMEOUT=1 fails every server, and Claude caches each failure here for 15 minutes, so the session
+// ⌘N then starts skips those servers ("recent failure cached"). Undo whatever entries the listing wrote,
+// putting back what was there before it. A write that loses a race with a real session is dropped.
+const FAILURES = `${home()}/.claude/mcp-needs-auth-cache.json`;
+const parse = (t) => { try { const o = JSON.parse(t ?? "{}"); return o && typeof o === "object" ? o : {}; } catch { return null; } };
+async function forgetFailures(beforeText) {
+  const afterText = await readTextFile(FAILURES);
+  if (afterText === beforeText || afterText === null) return;
+  const before = parse(beforeText), after = parse(afterText);
+  if (!before || !after) return;
+  const out = { ...after };
+  for (const k of Object.keys(after)) {
+    if (JSON.stringify(after[k]) === JSON.stringify(before[k])) continue;
+    if (k in before) out[k] = before[k]; else delete out[k];
+  }
+  try { await writeTextFile(FAILURES, JSON.stringify(out), afterText); } catch { /* stale: leave it */ }
+}
+
 // Lists a folder's servers again (one listing per folder at a time) and caches them.
 const inflight = new Map();
 export function refresh(dir) {
   if (inflight.has(dir)) return inflight.get(dir);
   const job = (async () => {
+    const before = await readTextFile(FAILURES);
     const r = await exec("env", ["MCP_TIMEOUT=1", "claude", "mcp", "list"], { cwd: dir });
+    await forgetFailures(before);
     if (r.code !== 0) throw new Error(r.stderr.trim() || "claude mcp list failed.");
     const sc = await scopes(dir);
     const servers = parseList(r.stdout).map((s) => ({ ...s, scope: scopeOf(s.name, sc) }));
