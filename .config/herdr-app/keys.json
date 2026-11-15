@@ -77,7 +77,8 @@
     "ctrl-b x": "pane.close",
     "ctrl-b z": "pane.zoom",
     "ctrl-b b": "layout.toggle:sidebar",
-    "ctrl-b m": "mod.open:dz-dirty"
+    "ctrl-b m": "mod.open:dz-dirty",
+    "ctrl-b t": "mod.open:dz-scratch"
   },
   "terminal": {
     "cmd-c": "terminal.copy",

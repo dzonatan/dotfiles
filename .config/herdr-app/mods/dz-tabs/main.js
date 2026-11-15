@@ -1,6 +1,6 @@
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { spaces, panes, agents, terminals, run, openOverlay, theme, window, layout, settings, props, focused, nextCommand } from "herdr";
+import { spaces, panes, agents, terminals, run, openOverlay, theme, window, layout, settings, props, focused, nextCommand, shared, setShared, hc } from "herdr";
 import { closeTab } from "./close.js";
 import { namer } from "./name.js";
 import { ownStatus, subAgents, treeStatus } from "./tree.js";
@@ -41,10 +41,19 @@ export default class Tabs extends View {
     cx.timer.every(3000, tick);
     tick(cx);
     // `dz-tabs.close` (⌘W in dz-projects): close the focused tab, asking only when something runs (close.js).
+    // While the ctrl-b t scratch shell (dz-scratch) has the keyboard, ⌘W ends that instead and leaves the tab alone.
     cx.spawn(async () => {
       for (;;) {
         const c = await nextCommand();
-        if (c === "close") closeTab(focused()?.tab, props()?.closeWith ?? "dz-close");
+        if (c !== "close") continue;
+        // The scratch shell has the keyboard while it shows: ending it closes its peek.
+        const scratch = shared("dz-scratch")?.terminal;
+        if (scratch && focused()?.terminal === scratch && !panes().some((p) => p.terminal === scratch)) {
+          setShared("dz-scratch", null);
+          hc(["kill", scratch]).catch(() => {});
+          continue;
+        }
+        closeTab(focused()?.tab, props()?.closeWith ?? "dz-close");
       }
     });
   }
