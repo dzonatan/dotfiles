@@ -5,7 +5,6 @@ alias lvim="NVIM_APPNAME=lazyvim nvim"
 alias lg="lazygit"
 alias ya="yazi"
 alias cr="tuicr"
-alias nix-rebuild="sudo darwin-rebuild switch --flake ~/.config/nix-darwin#dzonatan"
 alias cl="claude"
 alias c0='cd "$(mktemp -d)" && claude'
 alias ncl="nono run --profile claude --allow . -- claude"
