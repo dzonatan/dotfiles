@@ -6,7 +6,7 @@
 // the space already working in that project, else in a new space named after it.
 // No project: Claude starts in a fresh temporary folder, in a new space of its own ("Scratch <id>").
 import { View, div, svg } from "gpui-kit";
-import { h_flex, v_flex, InputState, Input } from "gpui-base";
+import { h_flex, v_flex, InputState, Input, ScrollHandle } from "gpui-base";
 import { bar, field, footer as footerBar, button, groupLabel, empty } from "./panel.js";
 import { settings, theme, spaces, panes, run, closeOverlay, openOverlay, props, home, exec, readTextFile } from "herdr";
 import { projectMarks, fillOf } from "./mark.js";
@@ -67,6 +67,11 @@ export default class Launch extends View {
     this.mcpViewH = 0;
     this.mcpWheel = 0;
     this.mcpRowH = 0; // a server row's measured height: sizes come back zoomed, rows are written unzoomed
+    // Steps 1 and 2 scroll natively; a keyboard move sets `reveal` so the next render scrolls the
+    // highlighted row into view (only then, so wheel scrolling isn't pulled back).
+    this.projScroll = ScrollHandle.new();
+    this.optScroll = ScrollHandle.new();
+    this.reveal = false;
     this.mcpLoading = new Set();
     this.mcpError = "";
     this.mcpNote = "";
@@ -281,6 +286,7 @@ export default class Launch extends View {
     if (p === NONE) return this.openServers(cx);
     this.step = "checkout";
     this.opt = 0;
+    this.reveal = true;
     this.error = "";
     this.load(cx);
     this.listServers(p.path, 60_000, cx);
@@ -290,6 +296,7 @@ export default class Launch extends View {
 
   back(cx) {
     this.error = "";
+    this.reveal = true;
     if (this.step === "servers" && this.from === "checkout") {
       this.step = "checkout";
       this.focusOption();
@@ -456,6 +463,7 @@ export default class Launch extends View {
       header = bar(t, { body: field(Input, this.search).text_color(t.foreground), trail: hintText(`1 / ${steps} · Project`) });
       body = v_flex().flex_1().min_h(0)
         .child(v_flex().id("launch-projects").flex_1().min_h(0).px(6).pt(6).gap(1).overflow_y_scroll()
+          .track_scroll(this.projScroll)
           .children(rows)
           .when(!list.length, (el) => el.child(empty(t, "No matching projects.")))
           .when(list.length && !projects().length, (el) => el.child(empty(t, "No projects yet."))))
@@ -465,6 +473,7 @@ export default class Launch extends View {
           .on_click(() => this.manage())
           .child(h_flex().size(22).flex_none().items_center().justify_center().child(svg("mods/dz-chrome/settings.svg").size(14)))
           .child(div().child("Manage projects…")));
+      if (this.reveal) { this.reveal = false; this.projScroll.scroll_to_item(Math.min(this.at, rows.length - 1)); }
       footer = [[["↑", "↓"], "move"], [["↵"], "next"], [["esc"], "close"]];
       canStart = Boolean(p) && !this.busy;
       primary = "Next";
@@ -473,6 +482,7 @@ export default class Launch extends View {
       const info = this.info[p.path], opts = this.options();
       const ready = Boolean(info && !info.loading && !info.error);
       const optRows = [];
+      let revealRow = -1; // the child to scroll to: the option, its group label when it's first in a group, or the name field
       if (!info || info.loading) optRows.push(div().p(10).text_color(t.dim).child("Reading the project…"));
       else if (info.error) optRows.push(div().p(10).text_color(t.blocked).child(info.error));
       else opts.forEach((o, i) => {
@@ -480,15 +490,18 @@ export default class Launch extends View {
         const pick = (_e, cx) => this.pickOption(i, cx);
         if (o.kind === "current") {
           optRows.push(label("Checkout"));
+          if (on) revealRow = optRows.length - 1;
           optRows.push(row("opt-current", on, radio(on), "Current checkout", info.branch, null, pick));
         } else if (o.kind === "existing") {
           if (i === 2) optRows.push(label("Existing worktrees"));
+          if (on) revealRow = optRows.length - (i === 2 ? 1 : 0);
           const name = this.claudeName(p, o.w);
           optRows.push(row(`opt-wt-${o.w.path}`, on, radio(on), o.w.name,
             `${o.w.branch ?? ""} · ${short(o.w.path)}`, name ? hintText("claude -w") : null, pick));
         } else {
           optRows.push(label("New worktree"));
           optRows.push(row("opt-new", on, radio(on), "New worktree", info.hook ? "made by this project's WorktreeCreate hook" : "under .claude/worktrees", hintText("claude -w"), pick));
+          if (on) revealRow = optRows.length;
           if (on) optRows.push(h_flex().id("opt-new-name").mx(10).ml(42).mt(4).h(32).px(8).items_center().rounded(6).flex_none()
             .border(1).border_color(t.accent).bg(t.background)
             .on_click((_e, cx) => { this.wtName.focus(); cx.notify(); })
@@ -497,7 +510,9 @@ export default class Launch extends View {
         }
       });
       header = head("2 / 3 · Checkout");
-      body = v_flex().id("launch-options").flex_1().min_h(0).px(6).pb(6).gap(1).overflow_y_scroll().children(optRows);
+      body = v_flex().id("launch-options").flex_1().min_h(0).px(6).pb(6).gap(1).overflow_y_scroll()
+        .track_scroll(this.optScroll).children(optRows);
+      if (this.reveal && revealRow >= 0) { this.reveal = false; this.optScroll.scroll_to_item(revealRow); }
       footer = [[["↑", "↓"], "move"], [["↵"], "next"], [["esc"], "back"]];
       canStart = ready && !this.busy;
       primary = "Next";
@@ -609,6 +624,7 @@ export default class Launch extends View {
           if (!move) return;
           const n = list.length;
           cx.stop_propagation();
+          this.reveal = true;
           if (n) this.select((this.at + move + n) % n, cx);
           return;
         }
@@ -634,6 +650,7 @@ export default class Launch extends View {
         if (move && opts.length) {
           cx.stop_propagation();
           this.opt = (this.opt + move + opts.length) % opts.length;
+          this.reveal = true;
           this.error = "";
           this.focusOption();
           cx.notify();
